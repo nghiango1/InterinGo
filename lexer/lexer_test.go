@@ -5,22 +5,12 @@ import (
 	"testing"
 )
 
-func test_operator_1(t *testing.T) {
-	input := `=+(){},;`
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
-		{token.ASSIGN, "="},
-		{token.PLUS, "+"},
-		{token.LPAREN, "("},
-		{token.RPAREN, ")"},
-		{token.LBRACE, "{"},
-		{token.RBRACE, "}"},
-		{token.COMMA, ","},
-		{token.SEMICOLON, ";"},
-		{token.EOF, ""},
-	}
+type expectedReturn struct {
+	expectedType    token.TokenType
+	expectedLiteral string
+}
+
+func test(t *testing.T, input string, tests []expectedReturn) {
 	l := New(input)
 	for i, tt := range tests {
 		tok := l.NextToken()
@@ -35,16 +25,29 @@ func test_operator_1(t *testing.T) {
 	}
 }
 
+func test_operator_1(t *testing.T) {
+	input := `=+(){},;`
+	tests := []expectedReturn{
+		{token.ASSIGN, "="},
+		{token.PLUS, "+"},
+		{token.LPAREN, "("},
+		{token.RPAREN, ")"},
+		{token.LBRACE, "{"},
+		{token.RBRACE, "}"},
+		{token.COMMA, ","},
+		{token.SEMICOLON, ";"},
+		{token.EOF, ""},
+	}
+	test(t, input, tests)
+}
+
 func test_keywords_1(t *testing.T) {
 	input := `let five = 5;
 let ten = 10;
 let add = fn(x, y) {
     x + y;
 };`
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
+	tests := []expectedReturn{
 		{token.LET, "let"},
 		{token.IDENT, "five"},
 		{token.ASSIGN, "="},
@@ -73,18 +76,7 @@ let add = fn(x, y) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	l := New(input)
-	for i, tt := range tests {
-		tok := l.NextToken()
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
-		}
-	}
+	test(t, input, tests)
 }
 
 func test_keywords_2(t *testing.T) {
@@ -93,10 +85,7 @@ func test_keywords_2(t *testing.T) {
 } else {
     return false;
 }`
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
+	tests := []expectedReturn{
 		{token.IF, "if"},
 		{token.LPAREN, "("},
 		{token.INT, "5"},
@@ -116,27 +105,13 @@ func test_keywords_2(t *testing.T) {
 		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
-	l := New(input)
-	for i, tt := range tests {
-		tok := l.NextToken()
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
-		}
-	}
+	test(t, input, tests)
 }
 
 func test_operator_2(t *testing.T) {
 	input := `!-/*5;
 5 < 10 > 5;`
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
+	tests := []expectedReturn{
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
 		{token.SLASH, "/"},
@@ -151,27 +126,13 @@ func test_operator_2(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	l := New(input)
-	for i, tt := range tests {
-		tok := l.NextToken()
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
-		}
-	}
+	test(t, input, tests)
 }
 
 func test_operator_3(t *testing.T) {
 	input := `10 == 10;
 10 != 9;`
-	tests := []struct {
-		expectedType    token.TokenType
-		expectedLiteral string
-	}{
+	tests := []expectedReturn{
 		{token.INT, "10"},
 		{token.EQ, "=="},
 		{token.INT, "10"},
@@ -182,18 +143,7 @@ func test_operator_3(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	l := New(input)
-	for i, tt := range tests {
-		tok := l.NextToken()
-		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
-		}
-		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
-		}
-	}
+	test(t, input, tests)
 }
 
 func TestNextToken(t *testing.T) {
