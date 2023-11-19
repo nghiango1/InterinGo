@@ -10,22 +10,22 @@ type expectedReturn struct {
 	expectedLiteral string
 }
 
-func test(t *testing.T, input string, tests []expectedReturn) {
+func test(t *testing.T, input string, tests []expectedReturn, testsName string) {
 	l := New(input)
 	for i, tt := range tests {
 		tok := l.NextToken()
 		if tok.Type != tt.expectedType {
-			t.Fatalf("tests[%d] - tokentype wrong. expected=%q, got=%q",
-				i, tt.expectedType, tok.Type)
+			t.Fatalf("testsName[%s] - tests[%d] - tokentype wrong. expected=%q, got=%q",
+				testsName, i, tt.expectedType, tok.Type)
 		}
 		if tok.Literal != tt.expectedLiteral {
-			t.Fatalf("tests[%d] - literal wrong. expected=%q, got=%q",
-				i, tt.expectedLiteral, tok.Literal)
+			t.Fatalf("testsName[%s] - tests[%d] - literal wrong. expected=%q, got=%q",
+				testsName, i, tt.expectedLiteral, tok.Literal)
 		}
 	}
 }
 
-func test_operator_1(t *testing.T) {
+func testOperator1(t *testing.T) {
 	input := `=+(){},;`
 	tests := []expectedReturn{
 		{token.ASSIGN, "="},
@@ -38,10 +38,10 @@ func test_operator_1(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	test(t, input, tests)
+	test(t, input, tests, "Operators 1")
 }
 
-func test_keywords_1(t *testing.T) {
+func testKeywords1(t *testing.T) {
 	input := `let five = 5;
 let ten = 10;
 let add = fn(x, y) {
@@ -76,10 +76,10 @@ let add = fn(x, y) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	test(t, input, tests)
+	test(t, input, tests, "Keywords 1")
 }
 
-func test_keywords_2(t *testing.T) {
+func testKeywords2(t *testing.T) {
 	input := `if (5 < 10) {
     return true;
 } else {
@@ -105,10 +105,10 @@ func test_keywords_2(t *testing.T) {
 		{token.RBRACE, "}"},
 		{token.EOF, ""},
 	}
-	test(t, input, tests)
+	test(t, input, tests, "Keywords 2")
 }
 
-func test_operator_2(t *testing.T) {
+func testOperator2(t *testing.T) {
 	input := `!-/*5;
 5 < 10 > 5;`
 	tests := []expectedReturn{
@@ -126,10 +126,10 @@ func test_operator_2(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	test(t, input, tests)
+	test(t, input, tests, "Operator 2")
 }
 
-func test_operator_3(t *testing.T) {
+func testOperator3(t *testing.T) {
 	input := `10 == 10;
 10 != 9;`
 	tests := []expectedReturn{
@@ -143,13 +143,45 @@ func test_operator_3(t *testing.T) {
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
-	test(t, input, tests)
+	test(t, input, tests, "Operator 3")
 }
 
 func TestNextToken(t *testing.T) {
-	test_operator_1(t)
-	test_operator_2(t)
-	test_operator_3(t)
-	test_keywords_1(t)
-	test_keywords_2(t)
+	testOperator1(t)
+	testOperator2(t)
+	testOperator3(t)
+	testKeywords1(t)
+	testKeywords2(t)
+	testBinding1(t)
+}
+
+func testBinding1(t *testing.T) {
+	input := "let x = 5;"
+	input += "\nlet y = 10;"
+	input += "\nlet foobar = add(5, 5);"
+	input += "let barfoo = 5 * 5 / 10 + 18 - add(5, 5) + multiply(124);"
+	tests := []expectedReturn{
+		{token.LET, "let"},
+		{token.IDENT, "x"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENT, "y"},
+		{token.ASSIGN, "="},
+		{token.INT, "10"},
+		{token.SEMICOLON, ";"},
+		{token.LET, "let"},
+		{token.IDENT, "foobar"},
+		{token.ASSIGN, "="},
+		{token.IDENT, "add"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
+		{token.COMMA, ","},
+		{token.INT, "5"},
+		{token.RPAREN, ")"},
+		{token.SEMICOLON, ";"},
+		{token.EOF, ""},
+	}
+	test(t, input, tests, "Binding 1")
 }
