@@ -184,7 +184,12 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		return nil
 	}
 
-	for !p.curTokenIs(token.SEMICOLON) {
+	p.nextToken()
+
+	value := p.parseExpression(LOWEST)
+	stmt.Value = value
+
+	if p.curTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
 
