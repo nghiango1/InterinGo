@@ -33,7 +33,7 @@ const (
 	LBRACE    = "{"
 	RBRACE    = "}"
 	// Keywords
-	FUNCTION = "FUNCTION"
+	FUNCTION = "FN"
 	LET      = "LET"
 	IF       = "IF"
 	ELSE     = "ELSE"

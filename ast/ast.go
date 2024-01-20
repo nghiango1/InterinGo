@@ -173,16 +173,37 @@ func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("if ")
 	out.WriteString(ie.Condition.String())
-	out.WriteString(" { ")
+	out.WriteString(" ")
 	out.WriteString(ie.Consequence.String())
-	out.WriteString(" }")
 	if ie.Alternative != nil {
-		out.WriteString(" else")
-		out.WriteString(" { ")
+		out.WriteString(" else ")
 		out.WriteString(ie.Alternative.String())
-		out.WriteString(" }")
 	}
-	out.WriteString(" ;")
+	out.WriteString(";")
+	return out.String()
+}
+
+type FunctionLiteral struct {
+	Token      token.Token //the "{" token
+	Parameters []*Identifier
+	Body       *BlockStatement
+}
+
+func (fe *FunctionLiteral) expressionNode()      {}
+func (fe *FunctionLiteral) TokenLiteral() string { return fe.Token.Literal }
+func (fe *FunctionLiteral) String() string {
+	var out bytes.Buffer
+	out.WriteString("fn")
+	out.WriteString("(")
+	for i, ident := range fe.Parameters {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(ident.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(fe.Body.String())
+	out.WriteString(";")
 	return out.String()
 }
 
@@ -195,15 +216,11 @@ func (bs *BlockStatement) expressionNode()      {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
-	if len(bs.Statements) == 1 {
-		out.WriteString(bs.Statements[0].String())
-	} else {
-		out.WriteString("{")
+	out.WriteString("{")
 
-		for _, stmt := range bs.Statements {
-			out.WriteString(stmt.String())
-		}
-		out.WriteString("}")
+	for _, stmt := range bs.Statements {
+		out.WriteString(stmt.String())
 	}
+	out.WriteString("}")
 	return out.String()
 }

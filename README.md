@@ -23,3 +23,6 @@ This make thing easier to follow, while making me able to try ahead writing my o
 
 - IfElseExpressionParse, BlockStatement ast node, BlockStatementParse: It just repeat it self, now having all the knowledge from previous session, thing get easier for me to write it before all the readding.
 
+- FunctionLiteral: Just tried it, things look quite simmlar but not really, i kept it as is until it break (the last ',' skip in function parameters parse seem weird but it ok)
+
+
