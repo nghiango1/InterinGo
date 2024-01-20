@@ -25,4 +25,12 @@ This make thing easier to follow, while making me able to try ahead writing my o
 
 - FunctionLiteral: Just tried it, things look quite simmlar but not really, i kept it as is until it break (the last ',' skip in function parameters parse seem weird but it ok)
 
+Here is how REPL output with current code
+```
+$./main
+Hello ylong! This is the Monkey programming language!
+Feel free to type in commands
+>> fn(x,y) { if (x > y) {return x} else {return y} }
+Statement fn(x, y) {if (x > y) {return x} else {return y} ;};
+```
 
