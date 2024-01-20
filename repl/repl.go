@@ -21,15 +21,20 @@ func Start(in io.Reader, out io.Writer) {
 			return
 		}
 		line := scanner.Text()
+		if line == "exit" {
+			return
+		}
 		l := lexer.New(line)
 		parser := parser.New(l)
 		program := parser.ParseProgram()
 		stmts := program.Statements
 		errors := parser.Errors()
 		if len(errors) != 0 {
-			fmt.Errorf("Parser has %d errors", len(errors))
+			err := fmt.Errorf("Parser has %d errors", len(errors))
+			fmt.Println(err.Error())
 			for _, msg := range errors {
-				fmt.Errorf("Parser error: %q", msg)
+				errMsg := fmt.Errorf("Parser error: %q", msg)
+				fmt.Println(errMsg.Error())
 			}
 		} else {
 			for i := 0; i < len(stmts); i++ {
