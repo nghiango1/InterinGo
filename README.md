@@ -6,14 +6,20 @@ A parse and a tokenizer in Interpreter is just a big string parsing
 
 # Personal walkthrough note
 
-## Auto pillot
 
-Chapter 2:
+## Chapter 2:
+
+### Auto pillot:
+
 When reading the book, i have almost no context how the interpreter parser acctually work. While this is a subject in my collegue year, what we mostly done is "running" program parsing work on paper (drawing context tree)
 
 Being dump, while dealling with a lot of testing driven coding as how the book appoarch the problem. I ratther copy most of testing code (and ast oop class) provided as is and focus on the acutual main thing program handling, which is parsing the string into each ast class components.
 
 This make thing easier to follow, while making me able to try ahead writing my own code before looking at solution in the book. Most of the code repeat it self quite a lot, but here is what I have done my self
+
+### Writing ahead:
+
+I did some change, or rather say I did done some part on my own without looking at the code
 
 - `main.repl` update atter `program.Parser` and `ast.Node.String()` start working: With `String()`, instead of just print out token literal, I focus on looking how the current code handle each statement, and print out the expected String version (resemble the input). Not thing impressed, just send the `stmt.String()` instead of loop though all and print the `token`. But here are some noteable thing:
     - With `let x = 1` input, repl return just `let x`: We haven't handle the expression yet, so it left a `//TODO` there, I focus on it right after and delay reading the book any further and fail to do so. Which leave the code sending `;` prefix not found error for like 10 commits until I finnaly give up and read the solution
@@ -36,12 +42,9 @@ This make thing easier to follow, while making me able to try ahead writing my o
     Parser error: "no prefix parse function for ) found"
     ```
 
+> Final touch at the end of chapter 2. I rewrite some of my wrote REPL code with thing similar from the book just because i thing it a bit more pretty and could save me some time prepare for Chapter 3 ahead
+> Still, i do think that, current implement of REPL treat each line as a seperated program isn't a good thing. We will want to keep and re-use our initialized function and variable
 
-Here is how REPL output with current code
-```
-$./main
-Hello ylong! This is the Monkey programming language!
-Feel free to type in commands
->> let x = add(x,3) + 5 * (add(2,4) + 4)
-Statement let x = (add(x, 3) + (5 * (add(2, 4) + 4)))
-```
+## Chapter 3
+
+
