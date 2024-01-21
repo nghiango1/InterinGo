@@ -227,8 +227,7 @@ func (ce *CallExpression) String() string {
 		}
 		out.WriteString(exp.String())
 	}
-	out.WriteString(") ")
-	out.WriteString(";")
+	out.WriteString(")")
 	return out.String()
 }
 

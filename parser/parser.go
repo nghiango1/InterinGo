@@ -29,6 +29,7 @@ var precedences = map[token.TokenType]int{
 	token.MINUS:    SUM,
 	token.SLASH:    PRODUCT,
 	token.ASTERISK: PRODUCT,
+	token.LPAREN:   CALL,
 }
 
 type Parser struct {
@@ -152,17 +153,10 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		leftExp = infix(leftExp)
 	}
 
-	if p.peekTokenIs(token.LPAREN) {
-		p.nextToken() // we know that we are dealling with a call expression now
-		exp, ok := leftExp.(*ast.Identifier)
-		if ok {
-			leftExp = p.parseCallExpression(exp)
-		}
-	}
 	return leftExp
 }
 
-func (p *Parser) parseCallExpression(function ast.Expression) *ast.CallExpression {
+func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{
 		Token: p.curToken,
 	}
@@ -270,6 +264,7 @@ func New(l *lexer.Lexer) *Parser {
 	p.registerInfix(token.NOT_EQ, p.parseInfixExpression)
 	p.registerInfix(token.LT, p.parseInfixExpression)
 	p.registerInfix(token.GT, p.parseInfixExpression)
+	p.registerInfix(token.LPAREN, p.parseCallExpression)
 
 	// Read two token no curToken and peekToken is not null
 	p.nextToken()

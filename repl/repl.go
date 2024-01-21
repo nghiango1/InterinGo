@@ -6,7 +6,7 @@ import (
 	"io"
 	"main/lexer"
 	"main/parser"
-	// "main/token"
+	"strconv"
 )
 
 const PROMPT = ">> "
@@ -24,26 +24,20 @@ func Start(in io.Reader, out io.Writer) {
 			return
 		}
 		l := lexer.New(line)
-		parser := parser.New(l)
-		program := parser.ParseProgram()
-		stmts := program.Statements
-		errors := parser.Errors()
-		if len(errors) != 0 {
-			err := fmt.Errorf("Parser has %d errors", len(errors))
-			fmt.Println(err.Error())
-			for _, msg := range errors {
-				errMsg := fmt.Errorf("Parser error: %q", msg)
-				fmt.Println(errMsg.Error())
-			}
-		} else {
-			for i := 0; i < len(stmts); i++ {
-				fmt.Fprintf(out, "Statement %s\n", stmts[i].String())
-			}
+		p := parser.New(l)
+		program := p.ParseProgram()
+		if len(p.Errors()) != 0 {
+			printParserErrors(out, p.Errors())
+			continue
 		}
-		// for tok = l.NextToken(); tok.Type != token.EOF; tok = l.NextToken() {
-		// 	//fmt.Fprintf(out, "%+v\n", tok)
-		// 	fmt.Fprintf(out, "{token.%v, \"%s\"},\n", tok.Type, tok.Literal)
-		// }
-		// fmt.Fprintf(out, "{token.%v, \"%s\"},\n", tok.Type, tok.Literal)
+
+		io.WriteString(out, program.String()+"\n")
+	}
+}
+
+func printParserErrors(out io.Writer, errors []string) {
+	io.WriteString(out, "Parse got "+strconv.Itoa(len(errors))+" errors:\n")
+	for _, msg := range errors {
+		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
