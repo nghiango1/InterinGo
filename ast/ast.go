@@ -50,7 +50,6 @@ func (ls *LetStatement) String() string {
 	if ls.Value != nil {
 		out.WriteString(ls.Value.String())
 	}
-	out.WriteString(";")
 	return out.String()
 }
 
@@ -100,7 +99,10 @@ func (i *Identifier) String() string {
 
 func (p *Program) String() string {
 	var out bytes.Buffer
-	for _, s := range p.Statements {
+	for i, s := range p.Statements {
+		if i > 0 {
+			out.WriteString("; ")
+		}
 		out.WriteString(s.String())
 	}
 	return out.String()
@@ -207,6 +209,29 @@ func (fe *FunctionLiteral) String() string {
 	return out.String()
 }
 
+type CallExpression struct {
+	Token     token.Token //the "(" token
+	Function  Expression
+	Arguments []Expression
+}
+
+func (ce *CallExpression) expressionNode()      {}
+func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CallExpression) String() string {
+	var out bytes.Buffer
+	out.WriteString(ce.Function.String())
+	out.WriteString("(")
+	for i, exp := range ce.Arguments {
+		if i > 0 {
+			out.WriteString(", ")
+		}
+		out.WriteString(exp.String())
+	}
+	out.WriteString(") ")
+	out.WriteString(";")
+	return out.String()
+}
+
 type BlockStatement struct {
 	Token      token.Token //the "{" token
 	Statements []Statement
@@ -218,7 +243,10 @@ func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString("{")
 
-	for _, stmt := range bs.Statements {
+	for i, stmt := range bs.Statements {
+		if i > 0 {
+			out.WriteString("; ")
+		}
 		out.WriteString(stmt.String())
 	}
 	out.WriteString("}")

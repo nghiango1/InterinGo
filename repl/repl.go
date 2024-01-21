@@ -13,7 +13,6 @@ const PROMPT = ">> "
 
 func Start(in io.Reader, out io.Writer) {
 	scanner := bufio.NewScanner(in)
-	// var tok token.Token
 	for {
 		fmt.Fprint(out, PROMPT)
 		scanned := scanner.Scan()

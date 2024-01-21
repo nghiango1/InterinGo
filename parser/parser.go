@@ -151,10 +151,38 @@ func (p *Parser) parseExpression(precedence int) ast.Expression {
 		p.nextToken()
 		leftExp = infix(leftExp)
 	}
-	return leftExp
 
+	if p.peekTokenIs(token.LPAREN) {
+		p.nextToken() // we know that we are dealling with a call expression now
+		exp, ok := leftExp.(*ast.Identifier)
+		if ok {
+			leftExp = p.parseCallExpression(exp)
+		}
+	}
+	return leftExp
 }
 
+func (p *Parser) parseCallExpression(function ast.Expression) *ast.CallExpression {
+	exp := &ast.CallExpression{
+		Token: p.curToken,
+	}
+
+	exp.Function = function
+
+	for !p.peekTokenIs(token.RPAREN) {
+		p.nextToken() // Skip the '(' and ',' token
+		exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
+		if p.peekTokenIs(token.COMMA) {
+			p.nextToken()
+		}
+	}
+	p.nextToken() // Skip the ')' token
+
+	if p.peekTokenIs(token.SEMICOLON) {
+		p.nextToken()
+	}
+	return exp
+}
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{
 		Token: p.curToken,
@@ -179,21 +207,16 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		Token: p.curToken,
 	}
 
-	p.nextToken()
-
-	for !p.curTokenIs(token.RBRACE) {
+	for !p.peekTokenIs(token.RBRACE) {
+		p.nextToken()
 		curr := p.parseStatement()
 		stmt.Statements = append(stmt.Statements, curr)
 		if p.peekTokenIs(token.SEMICOLON) {
 			p.nextToken()
 		}
-		if p.peekTokenIs(token.RBRACE) {
-			break
-		}
 	}
 
 	p.nextToken()
-
 	return stmt
 }
 
