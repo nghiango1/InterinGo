@@ -16,7 +16,7 @@ type Object interface {
 }
 
 type Integer struct {
-	Value int
+	Value int64
 }
 
 func (i *Integer) Type() ObjectType { return INTEGER_OBJ }

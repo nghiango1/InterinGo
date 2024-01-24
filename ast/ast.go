@@ -181,7 +181,6 @@ func (ie *IfExpression) String() string {
 		out.WriteString(" else ")
 		out.WriteString(ie.Alternative.String())
 	}
-	out.WriteString(";")
 	return out.String()
 }
 

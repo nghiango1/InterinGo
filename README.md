@@ -47,4 +47,14 @@ I did some change, or rather say I did done some part on my own without looking 
 
 ## Chapter 3
 
+```
+(ins)→ ./main
+Hello ylong! This is the Monkey programming language!
+Feel free to type in commands
+>> 55
+55
+>> 4 == 4
+Seem eval function not implemented yet, your statements are:
+(4 == 4)
+```
 

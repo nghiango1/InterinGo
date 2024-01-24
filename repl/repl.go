@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"io"
+	"main/evaluator"
 	"main/lexer"
 	"main/parser"
 	"strconv"
@@ -30,8 +31,14 @@ func Start(in io.Reader, out io.Writer) {
 			printParserErrors(out, p.Errors())
 			continue
 		}
-
-		io.WriteString(out, program.String()+"\n")
+		evaluated := evaluator.Eval(program)
+		if evaluated != nil {
+			io.WriteString(out, evaluated.Inspect())
+			io.WriteString(out, "\n")
+		} else {
+			io.WriteString(out, "Seem eval function not implemented yet, your statements are:\n")
+			io.WriteString(out, program.String()+"\n")
+		}
 	}
 }
 
