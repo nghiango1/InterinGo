@@ -47,6 +47,8 @@ I did some change, or rather say I did done some part on my own without looking 
 
 ## Chapter 3
 
+I don't know much and need to follow the book in most part. Sample REPL output is here
+
 ```
 (ins)→ ./main
 Hello ylong! This is the Monkey programming language!
@@ -54,7 +56,8 @@ Feel free to type in commands
 >> 55
 55
 >> 4 == 4
-Seem eval function not implemented yet, your statements are:
-(4 == 4)
+true
+>> if (5 * 5 + 10 > 34) { 99 } else { 100 }
+99
 ```
 
