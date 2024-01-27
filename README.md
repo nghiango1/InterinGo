@@ -61,3 +61,13 @@ true
 99
 ```
 
+### Auto pillot:
+
+Still, test are meant for some one already know what they need. Looking too deep into test isn't helping that well, I skip and the most of the code.
+
+Eval handling code: While i do try to done them by my self, it is way way different from the book solution and end up getting thing wrong in the most part. It is a normal thing for me to go back and delete all my code then replace by the book solution, thus make this section look identically to the provided code.
+- Program `ast` structure: Program -> Statement**s** -> Each statement type way of Eval handling, is not supprising. I still need to look and follow their way implement IntLiteral first and given with 
+- If then else: I got wrong with `Eval(ie.Consequense)` -> `Eval(ie.Condition)`, it seem crazy to spot it without any debuger for me i think. Maybe it actually better to get more skill in loging and finding error quickeri.
+- Return value: I honestly don't know anything about why it need a struct, and why thing need to be in that exact order. In my best guess, we want to seperating the type of the statement. By casting type to `ReturnValueObject`, we can then know when to stop evaluating `[]Statements` and return the "wrapped" value immediately
+    >  We then wrap the result of this call to Eval in our new object.ReturnValue so we can keep track of it.
+
