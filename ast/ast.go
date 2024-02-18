@@ -204,7 +204,6 @@ func (fe *FunctionLiteral) String() string {
 	}
 	out.WriteString(") ")
 	out.WriteString(fe.Body.String())
-	out.WriteString(";")
 	return out.String()
 }
 
