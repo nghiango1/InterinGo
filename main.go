@@ -3,8 +3,7 @@ package main
 
 import (
 	"fmt"
-	"main/repl"
-	"os"
+	"main/server"
 	"os/user"
 )
 
@@ -13,8 +12,9 @@ func main() {
 	if err != nil {
 		panic(err)
 	}
-	fmt.Printf("Hello %s! This is the Monkey programming language!\n",
+	fmt.Printf("Hello %s! This is the Iteringo programming language!\n",
 		user.Username)
-	fmt.Printf("Feel free to type in commands\n")
-	repl.Start(os.Stdin, os.Stdout)
+	fmt.Printf("Type `help()` in commands for common guide\n")
+	// repl.Start(os.Stdin, os.Stdout)
+	server.Start()
 }
