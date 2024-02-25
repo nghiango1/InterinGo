@@ -13,9 +13,9 @@ To get more famillar with `go` language. Also challenge my knowledge.
 After build and run the program `./main`, you should see this.
 ```
 → ./main
-Hello osadmin! This is the Monkey programming language!
-Feel free to type in commands
->> hello
+Hello <username>! This is the Monkey programming language!
+Type `help()` in commands for common guide
+>> 
 ```
 
 ### The "interprester-in-go" language syntax:
@@ -118,6 +118,8 @@ Go
 
 ### Build
 
+> To make it simplier, the project still contain the build file of templ and tailwindcss
+
 Build the code with
 
 ```sh
@@ -130,4 +132,14 @@ Run the program REPL with
 
 ```sh
 ./main
+```
+
+### Server mode
+
+InterinGo language can be serve as a http server
+
+> Read more on SERVER.md
+
+```sh
+./main -s
 ```
