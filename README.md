@@ -4,7 +4,7 @@
 
 ## Why
 
-To get more famillar with `go` language. Also challenge my knowledge.
+To challenge my knowledge with `go` language and interprester concept.
 
 ## How to use
 

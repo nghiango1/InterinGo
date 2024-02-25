@@ -14,12 +14,12 @@ import (
 var serverMode bool
 
 // Address we listen on.
-var listenAddress string = ":8080"
+var listenAddress string
 
 func init() {
 	const (
 		defaultServerMode    = false
-		defaultListenAddress = "127.0.0.1:8080"
+		defaultListenAddress = "0.0.0.0:8080"
 		serverUsage          = "Start as server mode"
 		listenAdrUsage       = "Listen address"
 	)

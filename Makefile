@@ -30,7 +30,7 @@ tailwind-watch: # Start tailwind in watch mode - looking for change and rebuild,
 templ-watch: # Build/rebuild all `templ` templates files in watch mode
 	templ generate --watch
 
-go-run: build run # Run the code without build step in server mode
+go-run: # Run the code without build step in server mode
 	go run . -s
 
 ### Helper

@@ -2,7 +2,6 @@ package server
 
 import (
 	"context"
-	"fmt"
 	"html/template"
 	"log"
 	"net/http"
@@ -16,12 +15,14 @@ type News struct {
 }
 
 // Handler functions.
-func Home(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Homepage")
+func HomeHandle(w http.ResponseWriter, r *http.Request) {
+	component := Home()
+	component.Render(context.Background(), w)
 }
 
-func Info(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Info page")
+func InfoHandle(w http.ResponseWriter, r *http.Request) {
+	component := Info()
+	component.Render(context.Background(), w)
 }
 
 func HelloHandle(w http.ResponseWriter, r *http.Request) {
@@ -41,10 +42,15 @@ func Start(listenAdrr string) {
 	log.Println("Started listening on", listenAdrr)
 
 	// Registering our handler functions, and creating paths.
-	http.HandleFunc("/", Home)
-	http.HandleFunc("/info", Info)
+	http.HandleFunc("/", HomeHandle)
+	http.HandleFunc("/info", InfoHandle)
 	http.HandleFunc("/hello", HelloHandle)
 	http.HandleFunc("/greet", GreetingHandle)
+
+	// Static assets file like javascript and css
+	staticFileHandler := http.FileServer(http.Dir("./server/assets"))
+	http.Handle("/assets/", http.StripPrefix("/assets/", staticFileHandler))
+
 
 	// Spinning up the server.
 	err := http.ListenAndServe(listenAdrr, nil)

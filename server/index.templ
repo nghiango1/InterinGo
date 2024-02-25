@@ -4,12 +4,68 @@ type Person struct {
 	Name string
 }
 
+templ headerComponent() {
+	<head>
+		<meta charset="UTF-8"/>
+		<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+		<meta http-equiv="X-UA-Compatible" content="ie=edge"/>
+		<title>InterinGo language</title>
+		<link rel="stylesheet" href="/assets/stylesheet.css"/>
+		<link rel="icon" href="./favicon.ico" type="image/x-icon"/>
+	</head>
+}
+
+templ footerComponent() {
+	<li>
+		<ul><a href="/">home</a></ul>
+		<ul><a href="/info">about us</a></ul>
+		<ul><a href="/hello">hello</a></ul>
+		<ul><a href="/greet">greet</a></ul>
+	</li>
+}
+
+templ pageTemplate() {
+	<!DOCTYPE html>
+	<html lang="en">
+		@headerComponent()
+		<body>
+			<main>
+				<h1>Welcome to My Website</h1>
+			</main>
+			<div id="wrapper">
+				{ children... }
+			</div>
+		</body>
+		@footerComponent()
+	</html>
+}
+
+templ Home(){
+	@pageTemplate() {
+		<p>Homepage</p>
+	}
+}
+
+templ Info(){
+	@pageTemplate() {
+		<p>Lorem ipsum dolor sit amet, officia excepteur ex fugiat reprehenderit enim labore culpa sint ad nisi Lorem pariatur mollit ex esse exercitation amet. Nisi anim cupidatat excepteur officia. Reprehenderit nostrud nostrud ipsum Lorem est aliquip amet voluptate voluptate dolor minim nulla est proident. Nostrud officia pariatur ut officia. Sit irure elit esse ea nulla sunt ex occaecat reprehenderit commodo officia dolor Lorem duis laboris cupidatat officia voluptate. Culpa proident adipisicing id nulla nisi laboris ex in Lorem sunt duis officia eiusmod. Aliqua reprehenderit commodo ex non excepteur duis sunt velit enim. Voluptate laboris sint cupidatat ullamco ut ea consectetur et est culpa et culpa duis.</p>
+	}
+}
+
 templ Hello(name string) {
+	@pageTemplate(){
+		<div>Hello, { name }</div>
+	}
+}
+
+templ greetComponent(name string) {
 	<div>Hello, { name }</div>
 }
 
 templ Greeting(person Person) {
-	<div class="rounded-e bg-blue-200 m-4 p-4">
-		@Hello(person.Name)
-	</div>
+	@pageTemplate(){
+		<div class="rounded-e bg-blue-200 m-4 p-4">
+			@greetComponent(person.Name)
+		</div>
+	}
 }
