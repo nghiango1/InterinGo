@@ -1,8 +1,36 @@
-# Server mode
+# `InterinGo` language - Server mode
 
-It better to have the server public InterinGo interpreter so that others can easier access, evaluating the language
+Extending funtionality of the project, where I setup a HTTP Server.
 
-## Prerequire
+Techstack: 
+- `templ` for html template
+- `tailwind.css` for styling
+- `golang` standard library for http-request/server handling
+
+## Why?
+
+It better to have the server public InterinGo interpreter so that others can easier access, evaluating the language i have build.
+
+## How to use
+
+Start the server with default listening on all network interface port 8080 - "0.0.0.0:8080"
+
+```
+go run . -s
+```
+
+or build and run the executable
+
+```
+go build .
+./main -s
+```
+
+## Build the code
+
+All server source file is in `/server/` directory, which need special handle for `templ` files - containing frontend code. This require extra build tool and generating code step. `Makefile` is add to help handle these process
+
+### Prerequire
 
 Install go-lang latest version, currently go 1.22.0 (my go.mod said 1.21.4 so that work too). I use `gvm` tools for install and manage go version, check `/hello/go/install/README.md` if you need help installing `go`
 ```sh
@@ -22,7 +50,9 @@ cp tailwindcss-linux-x64 ~/.local/bin
 export PATH="$HOME/.local/bin:$PATH"
 ```
 
-## Make tools
+### Using `Make` tools
+
+#### Build mode
 
 I setup Makefile to handle CLI operation, use `make build-run` to rebuild and start the server
 - `make` or `make all` or `make help`: Show all option command
@@ -35,7 +65,7 @@ Example
 make
 ```
 
-## Dev mode
+#### Dev mode
 
 Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
 - `make tailwind-watch`: Tailwind watch mode - Auto rebuild when files change
