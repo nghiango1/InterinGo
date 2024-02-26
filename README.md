@@ -46,7 +46,7 @@ let x = 1; let y = 2;
 
 A block statement (syntax of creating a new function)
 ```
-let f = fn add(x,y) {
+let f = fn (x,y) {
    return x + y; 
 }
 ```
