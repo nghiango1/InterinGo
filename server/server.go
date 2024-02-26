@@ -2,8 +2,10 @@ package server
 
 import (
 	"context"
+	"fmt"
 	"html/template"
 	"log"
+	"main/repl"
 	"net/http"
 )
 
@@ -16,26 +18,48 @@ type News struct {
 
 // Handler functions.
 func HomeHandle(w http.ResponseWriter, r *http.Request) {
+	if r.URL.Path != "/" {
+		NotFoundHandler(w, r)
+		return
+	}
+
+	if r.Method == "GET" {
+		fmt.Println(r.Header)
+	}
+
 	component := Home()
 	component.Render(context.Background(), w)
 }
 
-func InfoHandle(w http.ResponseWriter, r *http.Request) {
+func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	component := Info()
 	component.Render(context.Background(), w)
 }
 
-func HelloHandle(w http.ResponseWriter, r *http.Request) {
-	component := Hello("Lenn")
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	component := NotFound()
 	component.Render(context.Background(), w)
 }
 
-func GreetingHandle(w http.ResponseWriter, r *http.Request) {
-	person := Person{
-		Name: "Michel",
+func EvaluateHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method != "POST" {
+		fmt.Fprintf(w, "Not support")
 	}
-	component := Greeting(person)
-	component.Render(context.Background(), w)
+
+	errs := r.ParseForm()
+	if errs != nil {
+		fmt.Fprintf(w, "API error, can't parse form value")
+		fmt.Println("API error, can't parse form value")
+		fmt.Println(r.Form)
+	}
+
+	if r.Form.Has("repl-input") {
+		r.Form.Get("repl-input")
+		repl.Handle(r.Form.Get("repl-input"), w)
+	} else {
+		fmt.Fprintf(w, "API error, need `repl-input` value to be set")
+		fmt.Println("API error, need `repl-input` value to be set")
+	}
 }
 
 func Start(listenAdrr string) {
@@ -43,14 +67,13 @@ func Start(listenAdrr string) {
 
 	// Registering our handler functions, and creating paths.
 	http.HandleFunc("/", HomeHandle)
-	http.HandleFunc("/info", InfoHandle)
-	http.HandleFunc("/hello", HelloHandle)
-	http.HandleFunc("/greet", GreetingHandle)
+	http.HandleFunc("/info", InfoHandler)
+	http.HandleFunc("/404", NotFoundHandler)
+	http.HandleFunc("/api/evaluate", EvaluateHandler)
 
 	// Static assets file like javascript and css
 	staticFileHandler := http.FileServer(http.Dir("./server/assets"))
 	http.Handle("/assets/", http.StripPrefix("/assets/", staticFileHandler))
-
 
 	// Spinning up the server.
 	err := http.ListenAndServe(listenAdrr, nil)

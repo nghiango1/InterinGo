@@ -1,6 +1,7 @@
 package repl
 
 import (
+	"fmt"
 	"io"
 	"log"
 	"main/evaluator"
@@ -18,7 +19,22 @@ func Start(in io.Reader, out io.Writer) {
 	signalCapture(in, out)
 }
 
-func handle(line string, out io.Writer) {
+func Handle(line string, out io.Writer) {
+	switch {
+	case line == "help()":
+		usage(out)
+	case line == "exit()":
+		fmt.Println("exit() only work in REPL CLI session")
+	case line == "":
+	default:
+		codeHandle(line, out)
+	}
+}
+
+func codeHandle(line string, out io.Writer) {
+	if line == "" {
+		return
+	}
 	l := lexer.New(line)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -70,7 +86,7 @@ func filterInput(r rune) (rune, bool) {
 
 func signalCapture(in io.Reader, out io.Writer) {
 	l, err := readline.NewEx(&readline.Config{
-		Prompt:          ">>> ",
+		Prompt:          ">> ",
 		HistoryFile:     "/tmp/readline.tmp",
 		AutoComplete:    completer,
 		InterruptPrompt: "^C",
@@ -99,15 +115,10 @@ func signalCapture(in io.Reader, out io.Writer) {
 		}
 
 		line = strings.TrimSpace(line)
-		switch {
-		case line == "help()":
-			usage(l.Stderr())
-		case line == "exit()":
-			goto exit
-		case line == "":
-		default:
-			handle(line, out)
+		if line == "exit()" {
+			break
+		} else {
+			Handle(line, out)
 		}
 	}
-exit:
 }
