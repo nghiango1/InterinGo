@@ -1,0 +1,10 @@
+// This should throw ERROR "unknown operator: BOOLEAN + BOOLEAN"
+if ( 0 > 1 ) {
+    return 1;
+} else {
+    if ( 2 < 3 ) {
+        true + false;
+        return 3;
+    }
+    return 2;
+}

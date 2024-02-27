@@ -1,26 +1,67 @@
 # interpreter-in-go
 
-"interprester-in-go" is a side project that build a new interpreter language using `go` language. It consist of a working REPL that assemble `python`
+"interprester-in-go" or InterinGo (for short) is a new interpreter language. It can be run in 3 mode
+- REPL mode: Which stand for read-evaluation-print-loop, similar to `python`
+- File mode: Execute code as input from file
+- Server mode: Which have a pretty UI for REPL on a HTTP Server
 
 ## Why
 
-To challenge my knowledge with `go` language and advanced(interpreter) concept.
+To challenge my knowledge with `go` language and advanced (interpreter) concept.
 
 ## How to use
 
-> TODO: Adding a server support for testing the language immediately.
+> Build the program and get `./main` file executable or download Released binary
+> Run `./main -h` to get help on runner flag directly (for TLDR folks)
 
-After build and run the program `./main`, you should see this.
+### REPL mode
+
+Running `./main` executable normaly
+```sh
+./main
+```
+
+And you should have been welcome with this
 ```
 → ./main
-Hello <username>! This is the Monkey programming language!
+Hello <username>! This is the InterinGo programming language!
 Type `help()` in commands for common guide
 >> 
+```
+
+### File mode
+
+> This have the highest piority, so don't expect server, or REPL running 
+
+Running `./main` executable with `-f` flag.
+```sh
+./main -f <file-location>
+```
+
+Unknow what to do yet, use test code in 'test/' directory as your start point. Every file contain comment for expected output in the top to make sure you don't get lost
+```sh
+./main -f test/return-01.iig
+```
+
+
+### Server mode
+
+> As expected, who know what you got if they can't just test it directly on the browser
+
+Running `./main` executable with `-s` flag
+```sh
+./main -s
+```
+
+You can also specify listen address with `-l` flag or it will default to `0.0.0.0:8080`
+```sh
+./main -s -l 127.0.0.1:4000
 ```
 
 ### The "interprester-in-go" language syntax:
 
 #### Keyword
+
 Here is the list of all keyword that already reserved and cannot be used as variable names
 ```
 fn      let      if      else

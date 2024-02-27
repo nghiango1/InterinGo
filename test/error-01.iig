@@ -1,0 +1,7 @@
+// This should throw ERROR "divided by zero"
+if ( 2/0 > 0 ) {
+    true + false;
+    return 1;
+} else {
+    return 2;
+}

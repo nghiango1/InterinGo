@@ -70,23 +70,47 @@ Eval handling code: While i do try to done them by my self, it is way way differ
 - If then else: I got wrong with `Eval(ie.Consequense)` -> `Eval(ie.Condition)`, it seem crazy to spot it without any debuger for me i think. Maybe it actually better to get more skill in loging and finding error quickeri.
 - Return value: I honestly don't know anything about why it need a struct, and why thing need to be in that exact order. In my best guess, we want to seperating the type of the statement. By casting type to `ReturnValueObject`, we can then know when to stop evaluating `[]Statements` and return the "wrapped" value immediately
     >  We then wrap the result of this call to Eval in our new object.ReturnValue so we can keep track of it.
-- Error: The error test with code block object isn't working as intended. I have to change it from 
-    ```
-    if (10 > 1) {
+- Error:
+    - The error test with code block object isn't working as intended. I have to change it from 
+        ```
         if (10 > 1) {
-            return true + false;
+            if (10 > 1) {
+                return true + false;
+            }
+            return 1;
         }
-        return 1;
-    }
-    ```
-    to 
-    ```
-    if (10 > 1) {
+        ```
+        to 
+        ```
         if (10 > 1) {
-            true + false;
-            return 10;
+            if (10 > 1) {
+                true + false;
+                return 10;
+            }
+            return 1;
         }
-        return 1;
-    }
-    ```
-    to generate right error value
+        ```
+        to generate right error value.
+    - We not handle divide by zero error yet, so I implementing it too
+        ```go
+        // function evalIntergerInfix
+        ...
+            case "/":
+                if rightVal == 0 {
+                    return newError("divide by zero: %d %s %d", leftVal, operator, rightVal)
+                }
+                return &object.Integer{Value: leftVal / rightVal}
+        ```
+        It also seem that, we can't really pass our Error to AST parent node when Evaluation, making it impossible to handle Nested expression, eg `2/0 > 3`, which let the Expression evaluation kept running. We can try to handle everytime we call Eval without directly return it (or rewrite Eval function to handle it directly, this is not ideal as it lead to even more rewrite), effectively prevent Error object being used as a Value parameter in other evaluation process.
+        ```go
+        case *ast.PrefixExpression:
+            right := Eval(node.Right)
+            // Check if Error the then return
+            if right != nil && right.Type() == object.ERROR_OBJ {
+                return right
+            }
+            // Else, keep evaluating
+            return evalPrefixExpression(node.Operator, right)
+        ```
+- File mode: Currently, REPL not support multi-line input. Instead of handle that directly, a file input should work just fine for both testing and using the language. I added varius flag for the `main.go` to make it a better CLI program
+    - Comment: With file input available, commenting is another concept that needed to be handle

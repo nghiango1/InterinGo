@@ -35,10 +35,19 @@ func Eval(node ast.Node) object.Object {
 		return evalIntegerLiteral(node)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right)
+		if right != nil && right.Type() == object.ERROR_OBJ {
+			return right
+		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
 		right := Eval(node.Right)
+		if right != nil && right.Type() == object.ERROR_OBJ {
+			return right
+		}
 		left := Eval(node.Left)
+		if left != nil && left.Type() == object.ERROR_OBJ {
+			return left
+		}
 		return evalInfixExpression(node.Operator, left, right)
 	case *ast.BlockStatement:
 		return evalBlockStatement(node)
@@ -69,7 +78,7 @@ func evalBlockStatement(block *ast.BlockStatement) object.Object {
 	for _, statement := range block.Statements {
 		result = Eval(statement)
 		if result != nil {
-			rt := result.Type() 
+			rt := result.Type()
 			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
 				return result
 			}
@@ -134,6 +143,9 @@ func evalIntegerInfixExpression(operator string, left object.Object, right objec
 	case "*":
 		return &object.Integer{Value: leftVal * rightVal}
 	case "/":
+		if rightVal == 0 {
+			return newError("divide by zero: %d %s %d", leftVal, operator, rightVal)
+		}
 		return &object.Integer{Value: leftVal / rightVal}
 	case "==":
 		return nativeBoolToBooleanObject(leftVal == rightVal)
@@ -176,6 +188,10 @@ func evalInfixExpression(operator string, left object.Object, right object.Objec
 
 func evalIfStatement(ie *ast.IfExpression) object.Object {
 	condition := Eval(ie.Condition)
+	errObj, ok := condition.(*object.Error)
+	if ok {
+		return errObj
+	}
 	if isTruthy(condition) {
 		return Eval(ie.Consequence)
 	} else if ie.Alternative != nil {

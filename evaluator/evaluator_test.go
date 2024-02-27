@@ -216,11 +216,20 @@ func TestErrorHandling(t *testing.T) {
 			"if (10 > 1) { true + false; }",
 			"unknown operator: BOOLEAN + BOOLEAN",
 		},
+		{
+			"2/0",
+			"divide by zero: 2 / 0",
+		},
+		{
+			"if (2/0 > 0) { 1 } else { 2 }",
+			"divide by zero: 2 / 0",
+		},
 	}
 	for _, tt := range tests {
 		evaluated := testEval(tt.input)
 		errObj, ok := evaluated.(*object.Error)
 		if !ok {
+			t.Errorf("%v\n", tt.input)
 			t.Errorf("no error object returned. got=%T(%+v)",
 				evaluated, evaluated)
 			continue

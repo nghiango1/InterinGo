@@ -41,6 +41,13 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
+func (l *Lexer) skipCurrentLine() {
+	// Read until end of line or stop when reach EOF
+	for l.ch != '\n' && l.ch != 0 {
+		l.readChar()
+	}
+}
+
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	l.skipWhitespace()
@@ -72,7 +79,12 @@ func (l *Lexer) NextToken() token.Token {
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
 	case '/':
-		tok = newToken(token.SLASH, l.ch)
+		if l.peakChar() == '/' {
+			l.skipCurrentLine()
+			return l.NextToken()
+		} else {
+			tok = newToken(token.SLASH, l.ch)
+		}
 	case '>':
 		tok = newToken(token.GT, l.ch)
 	case '<':

@@ -1,8 +1,9 @@
+// This return 10
 if (10 > 1) {
     if (10 > 1) {
-      return 10;
+        return 3;
+        let x = 1 + 2;
+        return x;
     }
     return 1;
-    }
-  }
 }
