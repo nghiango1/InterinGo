@@ -6,7 +6,7 @@ type Person struct {
 
 templ headerComponent() {
 	<header
-		class="text-blue-500 p-4 mb-4 rounded-b-lg flex flex-row gap-4 sm:mx-8 min-w-80 md:max-w- border-b-2 border-blue-200 overflow-hidden"
+		class="text-blue-500 p-4 mb-4 rounded-b-lg flex flex-row gap-4 sm:mx-8 min-w-80 border-b-2 border-blue-200 overflow-hidden"
 	>
 		<h1 class="font-bold flex-grow min-w-fit">
 			<a href="/">Welcome to InterinGo language</a>
@@ -51,7 +51,7 @@ templ footerComponent() {
 }
 
 // HTML barebone page template
-templ pageTemplate() {
+templ pageLayout() {
 	<!DOCTYPE html>
 	<html lang="en">
 		<head>
@@ -66,7 +66,7 @@ templ pageTemplate() {
 		</head>
 		<body class="h-full w-full min-w-80 scrollbar">
 			@headerComponent()
-			<main class="p-4 flex flex-col gap-4 max-w-3xl sm:mx-8 md:mx-auto">
+			<main class="p-4 flex flex-col gap-4 max-w-3xl sm:mx-8 md:mx-auto xl:max-w-full xl:mx-8 ">
 				{ children... }
 			</main>
 			@footerComponent()
@@ -78,20 +78,29 @@ templ pageTemplate() {
 // from the server
 templ outputComponent() {
 	<div class="rounded-t-lg border-blue-500 border-2 overflow-hidden">
-		<div class="bg-blue-200 flex p-1 border-b-2 border-blue-500">
-			<h2 class="block flex-1">Command-promt window </h2>
-			<div class="block">
-				<input id="wrap" class="peer" type="checkbox" name="wrap" oninput="updateWrap()"/>
-				<label for="wrap" class="peer-checked:font-bold">Wrap</label>
-			</div>
-		</div>
 		<input id="hiddenwrap" class="hidden peer/wrap" type="checkbox" name="wrap"/>
+		<input id="hiddenhide" class="hidden peer/hide" type="checkbox" name="hide"/>
+		<div class="bg-blue-200 flex gap-2 p-1 border-b-2 border-blue-500">
+			<h2 class="block m-auto flex-1 whitespace-nowrap overflow-clip">Command-promt window </h2>
+			<input id="wrap" class="peer/wrap hidden m-auto" type="checkbox" name="wrap" oninput="updateWrap()"/>
+			<label
+				for="wrap"
+				class="flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200"
+			>
+				<img alt="Wrap" class="h-4 w-4 m-auto" src="/assets/wraptext.svg"/>
+				Wrap
+			</label>
+			<input id="hide" class="peer/hide hidden m-auto" type="checkbox" name="hide" oninput="updateHide()"/>
+			<label for="hide" class="flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200">
+				<b class="block m-auto">_</b> Hide
+			</label>
+		</div>
 		<code
 			id="repl-output"
-			class="outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar"
+			class="outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar"
 			hx-on:htmx:after-swap="scrollBottom()"
 		>
-			Let start with help() command { "\n"}
+			Let start with help() command { "\n" }
 		</code>
 	</div>
 }
@@ -102,16 +111,16 @@ templ outputComponent() {
 // which then being evaluated and update REPLOutputComponent
 // TODO: Using a better UI component with REACT?
 templ inputComponent() {
-	<p>Promt next command:</p>
 	<form
-		class="flex flex-row gap-4 outline-blue-200 rounded-lg h-fit"
+		class="flex flex-row gap-4 outline-blue-200 h-fit"
 		hx-post="/api/evaluate"
 		hx-target="#repl-output"
 		hx-swap="beforeend"
 		hx-on:htmx:config-request="addCommand()"
 	>
+		<p class="hidden sm:block sm:my-auto">Custom command:</p>
 		<input
-			class="flex-1 font-mono focus:outline-none border-b border-gray-500 focus:border-b-2 focus:border-blue-500"
+			class="flex-1 font-mono my-auto focus:outline-none border-b border-gray-500 focus:border-b-2 focus:border-blue-500 bg-transparent"
 			type="text"
 			name="repl-input"
 			aria-autocomplete="both"
@@ -124,41 +133,104 @@ templ inputComponent() {
 			spellcheck="false"
 			placeholder="help()"
 		/>
-		<button class="block rounded-lg bg-blue-500 text-white p-2" id="repl-send" type="Summit" click="addCommand()">
+		<button
+			class="block my-auto rounded-lg bg-blue-500 text-white p-2"
+			id="repl-send"
+			type="Summit"
+			click="addCommand()"
+		>
 			Run
 		</button>
 	</form>
 }
 
 templ evaluateComponent() {
-	@outputComponent()
-	@inputComponent()
+	<div
+		class="sticky top-4 flex flex-col gap-1 before:-z-10 before:rounded-b-lg before:blur-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-4 before:bg-white/30 before:object-none"
+	>
+		@outputComponent()
+		@inputComponent()
+	</div>
+}
+
+templ exampleCodeComponent(name string, code string) {
+	<div class="flex flex-col">
+		<div class="flex flex-row">
+			<p class="block my-auto flex-1">Snippet - <code>{ name }</code></p>
+			<button class="block my-auto rounded-lg text-blue underline p-4" name={ name } onClick="copyCode(this.name);">
+				Copy and Run
+			</button>
+		</div>
+		<pre id={ name } class="p-2 bg-gray-300 border-gray-600 rounded-lg overflow-auto">{ code }</pre>
+	</div>
 }
 
 // Fragement - A fragment can be use for HTMX swap - which isn't need fullpage reload
+templ exampleFragment() {
+	<h1>InterinGo </h1>
+	<p>
+		To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command
+		promt
+	</p>
+	@exampleCodeComponent("Comparation", "1 > 2")
+	<p>Now let dive in to the language </p>
+	<h2>Literal value </h2>
+	<p>
+		In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result
+		return by all possible Evaluation process of the intepreter. They are:
+	</p>
+	<ul>
+		<li>Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li>
+		<li>Integer: The numbers which uses 64-bit integers</li>
+		<li>
+			Null: Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values
+		</li>
+	</ul>
+	<h3>Example </h3>
+	@exampleCodeComponent("Boolean", "true")
+	@exampleCodeComponent("Interger", "510")
+	<p>
+		Currently there is no directed way to create a <code>NULL</code> object, here is a specific example that we can get
+		it
+	</p>
+	@exampleCodeComponent("Null", "if (1 < 0) { 1 }")
+	<h2>Calculaton </h2>
+	@exampleCodeComponent("Complex calculation", "4 * (4 / 2) * (3 + 2) + 1")
+	<h2>Comparation </h2>
+	@exampleCodeComponent("Comparation with calculation", "1 * 3 < 2")
+	<h2>Controlflow </h2>
+	@exampleCodeComponent("Control flow", "if (1 > 2) { return 10 } else { return 3 }")
+}
+
 templ HomeFragment() {
-	@evaluateComponent()
+	<div class="flex flex-col gap-4 xl:flex-row xl:gap-8">
+		<div class="block xl:w-5/12 sticky top-4 ">
+			@evaluateComponent()
+		</div>
+		<div class="flex-1 flex flex-col gap-4">
+			@exampleFragment()
+		</div>
+	</div>
 }
 
 templ InfoFragment() {
 	<p>This website was made for testing InterinGo language</p>
 }
 
-// Page - Full page
 templ Home() {
-	@pageTemplate() {
+	@pageLayout() {
 		@HomeFragment()
 	}
 }
 
 templ Info() {
-	@pageTemplate() {
+	@pageLayout() {
 		@InfoFragment()
 	}
 }
 
 templ NotFound() {
-	@pageTemplate() {
+	@pageLayout() {
 		<div>404 NOT FOUND PAGE</div>
 	}
 }

@@ -19,12 +19,9 @@ type News struct {
 // Handler functions.
 func HomeHandle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
+		w.WriteHeader(404)
 		NotFoundHandler(w, r)
 		return
-	}
-
-	if r.Method == "GET" {
-		fmt.Println(r.Header)
 	}
 
 	component := Home()

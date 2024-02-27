@@ -25,13 +25,13 @@ func Handle(line string, out io.Writer) {
 	case line == "help()":
 		usage(out)
 	case line == "exit()":
-		fmt.Println("exit() only work in REPL CLI session")
+		fmt.Println(out, "exit() only work in REPL CLI session")
 	case line == "toggleVerbose()":
 		share.VerboseMode = !share.VerboseMode
 		if share.VerboseMode {
-			fmt.Println("Verbose mode enable")
+			fmt.Println(out, "Verbose mode enable")
 		} else {
-			fmt.Println("Verbose mode disable")
+			fmt.Println(out, "Verbose mode disable")
 		}
 	case line == "":
 	default:

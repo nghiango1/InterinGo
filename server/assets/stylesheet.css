@@ -564,8 +564,25 @@ video {
   background: #c0a0b9;
 }
 
+.sticky {
+  position: sticky;
+}
+
+.top-4 {
+  top: 1rem;
+}
+
 .m-8 {
   margin: 2rem;
+}
+
+.m-auto {
+  margin: auto;
+}
+
+.my-auto {
+  margin-top: auto;
+  margin-bottom: auto;
 }
 
 .mb-4 {
@@ -584,6 +601,10 @@ video {
   display: none;
 }
 
+.h-4 {
+  height: 1rem;
+}
+
 .h-56 {
   height: 14rem;
 }
@@ -599,6 +620,10 @@ video {
 
 .max-h-80 {
   max-height: 20rem;
+}
+
+.w-4 {
+  width: 1rem;
 }
 
 .w-full {
@@ -642,6 +667,14 @@ video {
   flex-direction: column;
 }
 
+.gap-1 {
+  gap: 0.25rem;
+}
+
+.gap-2 {
+  gap: 0.5rem;
+}
+
 .gap-4 {
   gap: 1rem;
 }
@@ -652,6 +685,14 @@ video {
 
 .overflow-hidden {
   overflow: hidden;
+}
+
+.overflow-clip {
+  overflow: clip;
+}
+
+.whitespace-nowrap {
+  white-space: nowrap;
 }
 
 .whitespace-pre {
@@ -707,6 +748,11 @@ video {
   border-color: rgb(107 114 128 / var(--tw-border-opacity));
 }
 
+.border-gray-600 {
+  --tw-border-opacity: 1;
+  border-color: rgb(75 85 99 / var(--tw-border-opacity));
+}
+
 .border-t-blue-200 {
   --tw-border-opacity: 1;
   border-top-color: rgb(191 219 254 / var(--tw-border-opacity));
@@ -720,6 +766,20 @@ video {
 .bg-blue-500 {
   --tw-bg-opacity: 1;
   background-color: rgb(59 130 246 / var(--tw-bg-opacity));
+}
+
+.bg-gray-300 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(209 213 219 / var(--tw-bg-opacity));
+}
+
+.bg-transparent {
+  background-color: transparent;
+}
+
+.object-none {
+  -o-object-fit: none;
+     object-fit: none;
 }
 
 .p-1 {
@@ -773,6 +833,56 @@ video {
   pos: l.position;
 }
 
+.before\:absolute::before {
+  content: var(--tw-content);
+  position: absolute;
+}
+
+.before\:-inset-4::before {
+  content: var(--tw-content);
+  inset: -1rem;
+}
+
+.before\:-top-4::before {
+  content: var(--tw-content);
+  top: -1rem;
+}
+
+.before\:-z-10::before {
+  content: var(--tw-content);
+  z-index: -10;
+}
+
+.before\:rounded-b-lg::before {
+  content: var(--tw-content);
+  border-bottom-right-radius: 0.5rem;
+  border-bottom-left-radius: 0.5rem;
+}
+
+.before\:bg-white\/30::before {
+  content: var(--tw-content);
+  background-color: rgb(255 255 255 / 0.3);
+}
+
+.before\:object-none::before {
+  content: var(--tw-content);
+  -o-object-fit: none;
+     object-fit: none;
+}
+
+.before\:blur-lg::before {
+  content: var(--tw-content);
+  --tw-blur: blur(16px);
+  filter: var(--tw-blur) var(--tw-brightness) var(--tw-contrast) var(--tw-grayscale) var(--tw-hue-rotate) var(--tw-invert) var(--tw-saturate) var(--tw-sepia) var(--tw-drop-shadow);
+}
+
+.before\:backdrop-blur-lg::before {
+  content: var(--tw-content);
+  --tw-backdrop-blur: blur(16px);
+  -webkit-backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+          backdrop-filter: var(--tw-backdrop-blur) var(--tw-backdrop-brightness) var(--tw-backdrop-contrast) var(--tw-backdrop-grayscale) var(--tw-backdrop-hue-rotate) var(--tw-backdrop-invert) var(--tw-backdrop-opacity) var(--tw-backdrop-saturate) var(--tw-backdrop-sepia);
+}
+
 .focus\:border-b-2:focus {
   border-bottom-width: 2px;
 }
@@ -787,11 +897,24 @@ video {
   outline-offset: 2px;
 }
 
+.peer\/hide:checked ~ .peer-checked\/hide\:hidden {
+  display: none;
+}
+
 .peer\/wrap:checked ~ .peer-checked\/wrap\:whitespace-pre-wrap {
   white-space: pre-wrap;
 }
 
-.peer:checked ~ .peer-checked\:font-bold {
+.peer:checked ~ .peer-checked\:bg-gray-200 {
+  --tw-bg-opacity: 1;
+  background-color: rgb(229 231 235 / var(--tw-bg-opacity));
+}
+
+.peer\/hide:checked ~ .peer-checked\/hide\:font-bold {
+  font-weight: 700;
+}
+
+.peer\/wrap:checked ~ .peer-checked\/wrap\:font-bold {
   font-weight: 700;
 }
 
@@ -799,6 +922,11 @@ video {
   .sm\:mx-8 {
     margin-left: 2rem;
     margin-right: 2rem;
+  }
+
+  .sm\:my-auto {
+    margin-top: auto;
+    margin-bottom: auto;
   }
 
   .sm\:ml-auto {
@@ -855,5 +983,28 @@ video {
   .md\:mx-auto {
     margin-left: auto;
     margin-right: auto;
+  }
+}
+
+@media (min-width: 1280px) {
+  .xl\:mx-8 {
+    margin-left: 2rem;
+    margin-right: 2rem;
+  }
+
+  .xl\:w-5\/12 {
+    width: 41.666667%;
+  }
+
+  .xl\:max-w-full {
+    max-width: 100%;
+  }
+
+  .xl\:flex-row {
+    flex-direction: row;
+  }
+
+  .xl\:gap-8 {
+    gap: 2rem;
   }
 }
