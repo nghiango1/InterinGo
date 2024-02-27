@@ -4,6 +4,7 @@
 - REPL mode: Which stand for read-evaluation-print-loop, similar to `python`
 - File mode: Execute code as input from file
 - Server mode: Which have a pretty UI for REPL on a HTTP Server
+- Verbose mode: Tell more infomation about Lexer, Parse, Evaluation process
 
 ## Why
 
@@ -58,9 +59,21 @@ You can also specify listen address with `-l` flag or it will default to `0.0.0.
 ./main -s -l 127.0.0.1:4000
 ```
 
-### The "interprester-in-go" language syntax:
+### Verbose mode
 
-#### Keyword
+> Canbe used with any mode
+
+Start with the `-v` flag
+```sh
+./main -v
+```
+
+You can also running `toggleVerbose()`command in InterinGo REPL to enable/disable it on the fly
+
+
+## The "interprester-in-go" language syntax:
+
+### Keyword
 
 Here is the list of all keyword that already reserved and cannot be used as variable names
 ```
@@ -70,7 +83,7 @@ return  true     false
 
 "interpreter-in-go" is a case-sensitive language, meanning that `fn` and `FN` is a different names. making `FN` can be use as a new name to assign a variable
 
-#### Statement
+### Statement
 
 Single line statement can end with `;` or not
 ```
@@ -92,7 +105,7 @@ let f = fn (x,y) {
 }
 ```
 
-#### Value, Variable, Type initiation and assignment
+### Value, Variable, Type initiation and assignment
 
 "interpreter-in-go" is a dynamicly type language (which mean it not have type)
 
@@ -126,7 +139,7 @@ Function assign used
 let f = add(x,y) { return x + y }
 ```
 
-#### Logic flow control
+### Logic flow control
 
 "interpreter-in-go" support if then else control flow.
 ```

@@ -2,17 +2,24 @@ package lexer
 
 import (
 	"main/token"
+	"main/share"
 )
 
 type Lexer struct {
 	input        string
-	position     int  // current position in input (points to current char)
-	readPosition int  // current reading position in input (after current char)
-	ch           byte // current char under examination
+	position     int                     // current position in input (points to current char)
+	readPosition int                     // current reading position in input (after current char)
+	ch           byte                    // current char under examination
+	SkipedChar   int                     // skiped white-space - for Verbose mode
+	SkipedLine   int                     // skiped comment line - for Verbose mode
+	TokenCount   map[token.TokenType]int // count all token - for Verbose mode
 }
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
+	if share.VerboseMode {
+		l.TokenCount = make(map[token.TokenType]int)
+	}
 	l.readChar()
 	return l
 }
@@ -36,12 +43,20 @@ func (l *Lexer) readChar() {
 }
 
 func (l *Lexer) skipWhitespace() {
+	if share.VerboseMode {
+		l.SkipedChar += 1
+	}
+
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
 		l.readChar()
 	}
 }
 
 func (l *Lexer) skipCurrentLine() {
+	if share.VerboseMode {
+		l.SkipedLine += 1
+	}
+
 	// Read until end of line or stop when reach EOF
 	for l.ch != '\n' && l.ch != 0 {
 		l.readChar()
@@ -81,6 +96,10 @@ func (l *Lexer) NextToken() token.Token {
 	case '/':
 		if l.peakChar() == '/' {
 			l.skipCurrentLine()
+
+			if share.VerboseMode {
+				l.TokenCount[tok.Type] += 1
+			}
 			return l.NextToken()
 		} else {
 			tok = newToken(token.SLASH, l.ch)
@@ -106,16 +125,28 @@ func (l *Lexer) NextToken() token.Token {
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
+
+			if share.VerboseMode {
+				l.TokenCount[tok.Type] += 1
+			}
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readDigit()
 			tok.Type = token.INT
+
+			if share.VerboseMode {
+				l.TokenCount[tok.Type] += 1
+			}
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
 	l.readChar()
+
+	if share.VerboseMode {
+		l.TokenCount[tok.Type] += 1
+	}
 	return tok
 }
 

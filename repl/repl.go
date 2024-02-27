@@ -4,10 +4,11 @@ import (
 	"fmt"
 	"io"
 	"log"
+	"main/ast"
 	"main/evaluator"
 	"main/lexer"
 	"main/parser"
-	"strconv"
+	"main/share"
 	"strings"
 
 	"github.com/chzyer/readline"
@@ -25,12 +26,34 @@ func Handle(line string, out io.Writer) {
 		usage(out)
 	case line == "exit()":
 		fmt.Println("exit() only work in REPL CLI session")
+	case line == "toggleVerbose()":
+		share.VerboseMode = !share.VerboseMode
+		if share.VerboseMode {
+			fmt.Println("Verbose mode enable")
+		} else {
+			fmt.Println("Verbose mode disable")
+		}
 	case line == "":
 	default:
 		codeHandle(line, out)
 	}
 }
 
+func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Program, out io.Writer) {
+	lexerVerbose := fmt.Sprintf("Lexer information:\n\tSkip whitespace = %d\n\tSkip comment line = %d\n\tToken found:\n", l.SkipedChar, l.SkipedLine)
+	io.WriteString(out, lexerVerbose)
+
+	for k, v := range l.TokenCount {
+		io.WriteString(out, fmt.Sprintf("\t\t%v: %d\n", k, v))
+	}
+
+	// TO DO: Print parser infomation, Print full AST tree presentation
+	parseVerbose := fmt.Sprintf("Parse infomation:\n\tProgram statement parsed:\n")
+	io.WriteString(out, parseVerbose)
+	for _, v := range program.Statements {
+		io.WriteString(out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
+	}
+}
 func codeHandle(line string, out io.Writer) {
 	if line == "" {
 		return
@@ -38,34 +61,41 @@ func codeHandle(line string, out io.Writer) {
 	l := lexer.New(line)
 	p := parser.New(l)
 	program := p.ParseProgram()
+
+	if share.VerboseMode {
+		printVerboseInfomation(l,p,program, out)
+	}
+
 	if len(p.Errors()) != 0 {
 		errorsHandler(p.Errors(), out)
 		return
 	}
+
+	if share.VerboseMode {
+		io.WriteString(out, "Evaluation result:\n\n")
+	}
+
 	evaluated := evaluator.Eval(program)
 	if evaluated != nil {
 		io.WriteString(out, evaluated.Inspect())
 		io.WriteString(out, "\n")
 	} else {
-		errs := []string{EVAL_UNDEFINE, "Your statements are: ", program.String()}
-		errorsHandler(errs, out)
+		io.WriteString(out, "Evaluating function for these statements is curently not implemented yet\n")
 	}
 }
 
 func errorsHandler(errors []string, out io.Writer) {
-	io.WriteString(out, "Parse got "+strconv.Itoa(len(errors))+" errors:\n")
+	io.WriteString(out, "Errors when parsing:\n")
 	for _, msg := range errors {
 		io.WriteString(out, "\t"+msg+"\n")
 	}
 }
 
 func usage(w io.Writer) {
-	io.WriteString(w, "Language keywords:\n")
-	io.WriteString(w, "\tlet\n")
-	io.WriteString(w, "\tif\n")
 	io.WriteString(w, "Built-in commands:\n")
-	io.WriteString(w, "exit()\n")
-	io.WriteString(w, "help()\n")
+	io.WriteString(w, "- toggleVerbose(): Toggle verbose mode - print more infomation about Lexer, Parse and Evaluator\n")
+	io.WriteString(w, "- help(): Print this help\n")
+	io.WriteString(w, "- exit(): End this REPL session\n")
 }
 
 var completer = readline.NewPrefixCompleter(
@@ -73,6 +103,7 @@ var completer = readline.NewPrefixCompleter(
 	readline.PcItem("if ("),
 	readline.PcItem("exit()"),
 	readline.PcItem("help()"),
+	readline.PcItem("toggleVerbose()"),
 )
 
 func filterInput(r rune) (rune, bool) {
