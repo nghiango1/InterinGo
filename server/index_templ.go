@@ -27,7 +27,7 @@ func headerComponent() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"text-blue-500 p-4 mb-4 rounded-b-lg flex flex-row gap-4 sm:mx-8 min-w-80 border-b-2 border-blue-200 overflow-hidden\"><h1 class=\"font-bold flex-grow min-w-fit\"><a href=\"/\">Welcome to InterinGo language</a></h1><a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/blob/main/go/interpreter/README.md\">Docs</a> <a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/tree/main/go/interpreter\">Source code</a></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"prose max-w-none dark:prose-invert text-blue-500 p-4 mb-4 rounded-b-lg flex flex-row gap-4 sm:mx-8 min-w-80 border-b-2 border-blue-200 overflow-hidden\"><a class=\"sfont-bold flex-grow min-w-fit m:text-blue-500 sm:underline\" href=\"/\">Welcome to InterinGo language</a> <a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/blob/main/go/interpreter/README.md\">Docs</a> <a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/tree/main/go/interpreter\">Source code</a></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,7 +75,7 @@ func footerComponent() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"m-8 pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about us</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"prose max-w-none dark:prose-invert m-8 pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about us</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +108,7 @@ func pageLayout() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>InterinGo language</title><link rel=\"stylesheet\" href=\"/assets/stylesheet.css\"><link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\"><script src=\"/assets/htmx.min.js\"></script><script src=\"/assets/custom.js\"></script></head><body class=\"h-full w-full min-w-80 scrollbar\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>InterinGo language</title><link rel=\"stylesheet\" href=\"/assets/stylesheet.css\"><link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\"><script src=\"/assets/htmx.min.js\"></script><script src=\"/assets/custom.js\"></script></head><body class=\"h-full w-full min-w-80 scrollbar dark:bg-[#050510]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,20 +158,20 @@ func outputComponent() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"bg-blue-200 flex gap-2 p-1 border-b-2 border-blue-500\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap hidden m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\"><img alt=\"Wrap\" class=\"h-4 w-4 m-auto\" src=\"/assets/wraptext.svg\"> Wrap</label> <input id=\"hide\" class=\"peer/hide hidden m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide()\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\"><b class=\"block m-auto\">_</b> Hide</label></div><code id=\"repl-output\" class=\"outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 102, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 106, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</code></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</pre><pre id=\"repl-result\" class=\"hidden peer-checked/hide:block px-2 max-h-6 overflow-auto\" hx-on:htmx:after-swap=\"copyEvalResult();scrollBottom();\"></pre></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -200,7 +200,7 @@ func inputComponent() templ.Component {
 			templ_7745c5c3_Var7 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex flex-row gap-4 outline-blue-200 h-fit\" hx-post=\"/api/evaluate\" hx-target=\"#repl-output\" hx-swap=\"beforeend\" hx-on:htmx:config-request=\"addCommand()\"><p class=\"hidden sm:block sm:my-auto\">Custom command:</p><input class=\"flex-1 font-mono my-auto focus:outline-none border-b border-gray-500 focus:border-b-2 focus:border-blue-500 bg-transparent\" type=\"text\" name=\"repl-input\" aria-autocomplete=\"both\" aria-labelledby=\"docsearch-label\" id=\"repl-input\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"off\" enterkeyhint=\"go\" spellcheck=\"false\" placeholder=\"help()\"> <button class=\"block my-auto rounded-lg bg-blue-500 text-white p-2\" id=\"repl-send\" type=\"Summit\" click=\"addCommand()\">Run</button></form>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex flex-row gap-4 outline-blue-200 dark:outline-white h-fit\" hx-post=\"/api/evaluate\" hx-target=\"#repl-result\" hx-swap=\"innerHTML\" hx-on:htmx:config-request=\"addCommand()\"><p class=\"hidden sm:block sm:my-auto\">Custom command:</p><input class=\"flex-1 font-mono my-auto focus:outline-none border-b border-gray-500 bg-transparent pl-2\" type=\"text\" name=\"repl-input\" aria-autocomplete=\"both\" aria-labelledby=\"docsearch-label\" id=\"repl-input\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"off\" enterkeyhint=\"go\" spellcheck=\"false\" placeholder=\"help()\"> <button class=\"block my-auto rounded-lg bg-blue-200 border-2 active:bg-blue-200 activate:dark:bg-blue-900 dark:bg-[#090d1a] p-1\" id=\"repl-send\" type=\"Summit\" click=\"addCommand()\">Run</button></form>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -224,7 +224,7 @@ func evaluateComponent() templ.Component {
 			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"sticky top-4 flex flex-col gap-1 before:-z-10 before:rounded-b-lg before:blur-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-4 before:bg-white/30 before:object-none\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"sticky top-4 flex flex-col gap-1 after:absolute after:-top-2 after:-inset-2 after:bg-white/30 after:dark:bg-[#050510]/30 after:object-none after:blur-sm after:-z-10 before:-z-10 after:rounded-b-lg before:rounded-b-lg before:backdrop-blur-sm before:absolute before:-top-4 before:-inset-4 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none dark:text-[#d1d5db]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -267,13 +267,13 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 158, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 167, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</code></p><button class=\"block my-auto rounded-lg text-blue underline p-4\" name=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</code></p><button class=\"block my-auto rounded-lg underline\" name=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -281,7 +281,7 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" onClick=\"copyCode(this.name);\">Copy and Run</button></div><pre id=\"")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" onClick=\"clearEvalResult(); copyCode(this.name);\">Copy and Run</button></div><pre id=\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -289,14 +289,14 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\" class=\"p-2 bg-gray-300 border-gray-600 rounded-lg overflow-auto\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 163, Col: 90}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 176, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -314,7 +314,7 @@ func exampleCodeComponent(name string, code string) templ.Component {
 }
 
 // Fragement - A fragment can be use for HTMX swap - which isn't need fullpage reload
-func exampleFragment() templ.Component {
+func exampleArticalFragment() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -327,7 +327,7 @@ func exampleFragment() templ.Component {
 			templ_7745c5c3_Var12 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h1>InterinGo </h1><p>To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command promt</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose max-w-none dark:prose-invert\"><h1>InterinGo </h1><p>To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command promt. Click on Click and run to copy the code into Command promt and have REPL run the code. The input box will reflect the code being used, while the command promt will show the evaluation result.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -335,7 +335,7 @@ func exampleFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Now let dive in to the language </p><h2>Literal value </h2><p>In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result return by all possible Evaluation process of the intepreter. They are:</p><ul><li>Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li><li>Integer: The numbers which uses 64-bit integers</li><li>Null: Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values</li></ul><h3>Example </h3>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-promt can be annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still show evaluation result in minimized state (Wrap is wrap text, eh... wanna use that?). Now let dive in to the language.</p><h2>Literal value </h2><p>In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result return by all possible Evaluation process of the intepreter. They are:</p><ul><li>Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li><li>Integer: The numbers which uses 64-bit integers</li><li>Null: Hate it or wanted it, InterinGo have null, a special object representing nothing. Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values</li></ul><h3>Example </h3>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -347,7 +347,7 @@ func exampleFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Currently there is no directed way to create a <code>NULL</code> object, here is a specific example that we can get it</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<q>Currently there is no directed way to create a <code>NULL</code> object, here is a specific example that we can get it</q>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -379,6 +379,10 @@ func exampleFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</article>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
 		if !templ_7745c5c3_IsBuffer {
 			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
 		}
@@ -399,7 +403,7 @@ func HomeFragment() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4 xl:flex-row xl:gap-8\"><div class=\"block xl:w-5/12 sticky top-4 \">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4 xl:flex-row xl:gap-8\"><div class=\"block xl:w-5/12 sticky top-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -407,11 +411,11 @@ func HomeFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex-1 flex flex-col gap-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"flex-1\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = exampleFragment().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = exampleArticalFragment().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -439,7 +443,7 @@ func InfoFragment() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>This website was made for testing InterinGo language</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose m-auto\"><p>This website was made for testing InterinGo language</p></article>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -547,7 +551,7 @@ func NotFound() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div>404 NOT FOUND PAGE</div>")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose m-auto\"><div>404 NOT FOUND PAGE</div></article>")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}

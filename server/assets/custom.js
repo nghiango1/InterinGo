@@ -15,6 +15,14 @@ function copyCode(id) {
     document.getElementById('repl-send').click()
 }
 
+function clearEvalResult(id) {
+    document.getElementById('repl-result').innerText = ""
+}
+
+function copyEvalResult(id) {
+    document.getElementById('repl-output').append(document.getElementById('repl-result').innerText);
+}
+
 function scrollBottom() {
     let replOutput = document.getElementById('repl-output')
     replOutput.scrollTop = replOutput.scrollHeight

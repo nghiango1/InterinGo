@@ -25,13 +25,13 @@ func Handle(line string, out io.Writer) {
 	case line == "help()":
 		usage(out)
 	case line == "exit()":
-		fmt.Println(out, "exit() only work in REPL CLI session")
+		io.WriteString(out, "exit() only work in REPL CLI session")
 	case line == "toggleVerbose()":
 		share.VerboseMode = !share.VerboseMode
 		if share.VerboseMode {
-			fmt.Println(out, "Verbose mode enable")
+			io.WriteString(out, "Verbose mode enable")
 		} else {
-			fmt.Println(out, "Verbose mode disable")
+			io.WriteString(out, "Verbose mode disable")
 		}
 	case line == "":
 	default:
@@ -54,6 +54,7 @@ func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Progr
 		io.WriteString(out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
 	}
 }
+
 func codeHandle(line string, out io.Writer) {
 	if line == "" {
 		return
@@ -63,7 +64,7 @@ func codeHandle(line string, out io.Writer) {
 	program := p.ParseProgram()
 
 	if share.VerboseMode {
-		printVerboseInfomation(l,p,program, out)
+		printVerboseInfomation(l, p, program, out)
 	}
 
 	if len(p.Errors()) != 0 {
@@ -80,6 +81,9 @@ func codeHandle(line string, out io.Writer) {
 		io.WriteString(out, evaluated.Inspect())
 		io.WriteString(out, "\n")
 	} else {
+		if share.VerboseMode {
+			io.WriteString(out, "\t")
+		}
 		io.WriteString(out, "Evaluating function for these statements is curently not implemented yet\n")
 	}
 }

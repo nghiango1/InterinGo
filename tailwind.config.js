@@ -4,6 +4,7 @@ module.exports = {
     content: [ "./**/*.html", "./**/*.templ", "./**/*.go", ],
     theme: { extend: {}, },
     plugins: [
+        require('@tailwindcss/typography'),
         plugin(function({ addComponents }) {
             addComponents({
                   '.scrollbar::-webkit-scrollbar' : {
