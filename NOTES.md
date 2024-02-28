@@ -114,3 +114,5 @@ Eval handling code: While i do try to done them by my self, it is way way differ
         ```
 - File mode: Currently, REPL not support multi-line input. Instead of handle that directly, a file input should work just fine for both testing and using the language. I added varius flag for the `main.go` to make it a better CLI program
     - Comment: With file input available, commenting is another concept that needed to be handle
+- Server mode: Not related to the book at all, but there is some change I have to made so REPL work well on the web
+    - Print: All possible print-out function will using `io.Writer` as interface, no more stdout

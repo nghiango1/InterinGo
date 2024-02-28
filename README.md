@@ -4,11 +4,22 @@
 - REPL mode: Which stand for read-evaluation-print-loop, similar to `python`
 - File mode: Execute code as input from file
 - Server mode: Which have a pretty UI for REPL on a HTTP Server
-- Verbose mode: Tell more infomation about Lexer, Parse, Evaluation process
 
 ## Why
 
-To challenge my knowledge with `go` language and advanced (interpreter) concept.
+To challenge my knowledge with `go` language and advanced (interpreter) concept. I also set up a http server to public InterinGo interpreter. You can access evaluating the language right now via link in the repo [Github description](https://github.com/nghiango1/hello).
+
+## Techstack: 
+
+Front-end
+- `templ` for html template
+- `tailwind.css` for styling
+- `htmx`for server REPL API access
+- `javascript` for some dynamic UI rendering
+
+Back-end:
+- `golang` standard library for http-request/server handling
+- `readline` for CLI
 
 ## How to use
 
@@ -59,16 +70,20 @@ You can also specify listen address with `-l` flag or it will default to `0.0.0.
 ./main -s -l 127.0.0.1:4000
 ```
 
-### Verbose mode
+### Verbose output
 
-> Canbe used with any mode
+Tell more infomation about Lexer, Parse, Evaluation process via REPL output
 
 Start with the `-v` flag
 ```sh
 ./main -v
 ```
 
-You can also running `toggleVerbose()`command in InterinGo REPL to enable/disable it on the fly
+Or using `toggleVerbose()`command in InterinGo REPL to enable/disable it 
+```sh
+./main
+>> toggleVerbose()
+```
 
 
 ## The "interprester-in-go" language syntax:
@@ -148,8 +163,7 @@ let y = 2
 if ( x >= y ) { let x = 1 } else { let y = 2 }
 ```
 
-
-## Build
+## Build - REPL
 
 ### Prerequisite
 
@@ -170,9 +184,9 @@ Go
     gvm use go1.22.0 --default 
     ```
 
-### Build
+### Build 
 
-> To make it simplier, the project still contain the build file of templ and tailwindcss
+> To make build process simplier who, the project still contain the build file of templ and tailwindcss. Read more on how to build the front-end in `SERVER.md` file
 
 Build the code with
 
@@ -180,20 +194,53 @@ Build the code with
 go build .
 ```
 
-### Run
+## Build - Server front-end
 
-Run the program REPL with
+All server source file is in `/server/` directory, which need special handle for `templ` files - containing frontend code. This require extra build tool and generating code step. `Makefile` is add to help handle these process
 
+### Prerequire
+
+Install go-lang latest version, currently go 1.22.0 
 ```sh
-./main
+gvm install go1.22.0 -B
+gvm use go1.22.0 -default
 ```
 
-### Server mode
-
-InterinGo language can be serve as a http server
-
-> Read more on SERVER.md
-
+Install `templ` tools, learn more in [templ.guide](https://templ.guide/)
 ```sh
-./main -s
+go install github.com/a-h/templ/cmd/templ@latest
 ```
+
+Download latest `tailwind` CLI standalone tool from their [github](https://github.com/tailwindlabs/tailwindcss/releases/) and put it in to `PATH`. This should be add in `.profile` file
+```sh
+wget https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/tailwindcss-linux-x64
+cp tailwindcss-linux-x64 ~/.local/bin
+export PATH="$HOME/.local/bin:$PATH"
+```
+
+Install cmake
+```sh
+apt-get -y install make
+```
+
+### Using `Make` tools
+
+#### Build mode
+
+I setup Makefile to handle CLI operation, use `make build-run` to rebuild and start the server
+- `make` or `make all` or `make help`: Show all option command
+- `make build`: Build/Rebuild `templ` template files and generating tailwindcss stylesheet
+- `make run`: Run built the server
+- `make build-run`: Do both
+
+Example
+```sh
+make
+```
+
+#### Dev mode
+
+Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
+- `make tailwind-watch`: Tailwind watch mode - Auto rebuild when files change
+- `make templ-watch`: Templ watch mode - Auto rebuild when files change
+- `go run . -s` or `make go-run`: Run the server without build
