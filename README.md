@@ -194,6 +194,14 @@ Build the code with
 go build .
 ```
 
+### Test
+
+Test all module with
+
+```sh
+go test ./...
+```
+
 ## Build - Server front-end
 
 All server source file is in `/server/` directory, which need special handle for `templ` files - containing frontend code. This require extra build tool and generating code step. `Makefile` is add to help handle these process

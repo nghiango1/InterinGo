@@ -87,11 +87,6 @@ func codeHandle(line string, out io.Writer, env *object.Environment) {
 	if evaluated != nil {
 		io.WriteString(out, evaluated.Inspect())
 		io.WriteString(out, "\n")
-	} else {
-		if share.VerboseMode {
-			io.WriteString(out, "\t")
-		}
-		io.WriteString(out, "Evaluating function for these statements is curently not implemented yet\n")
 	}
 }
 

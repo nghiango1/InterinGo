@@ -116,3 +116,4 @@ Eval handling code: While i do try to done them by my self, it is way way differ
     - Comment: With file input available, commenting is another concept that needed to be handle
 - Server mode: Not related to the book at all, but there is some change I have to made so REPL work well on the web
     - Print: All possible print-out function will using `io.Writer` as interface, no more stdout
+- Environment: I use a local packet variable to store `env`, this way it being use in both Server mode and CLI mode

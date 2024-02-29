@@ -65,7 +65,11 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfExpression:
 		return evalIfStatement(node, env)
 	case *ast.LetStatement:
-		return evalLetStatement(node, env)
+		val := Eval(node.Value, env)
+		if isError(val) {
+			return val
+		}
+		env.Set(node.Name.Value, val)
 	case *ast.ReturnStatement:
 		return evalReturnStatement(node, env)
 	}
@@ -235,15 +239,6 @@ func isTruthy(obj object.Object) bool {
 	default:
 		return true
 	}
-}
-
-func evalLetStatement(ls *ast.LetStatement, env *object.Environment) object.Object {
-	val := Eval(ls.Value, env)
-	if isError(val) {
-		return val
-	}
-	env.Set(ls.Name.Value, val)
-	return &object.ReturnValue{Value: val}
 }
 
 func evalReturnStatement(rs *ast.ReturnStatement, env *object.Environment) object.Object {
