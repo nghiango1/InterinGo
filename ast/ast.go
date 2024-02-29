@@ -238,7 +238,7 @@ func (bs *BlockStatement) expressionNode()      {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
-	out.WriteString("{")
+	out.WriteString("{ ")
 
 	for i, stmt := range bs.Statements {
 		if i > 0 {
@@ -246,6 +246,6 @@ func (bs *BlockStatement) String() string {
 		}
 		out.WriteString(stmt.String())
 	}
-	out.WriteString("}")
+	out.WriteString(" }")
 	return out.String()
 }
