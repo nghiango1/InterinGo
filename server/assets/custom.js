@@ -10,6 +10,14 @@ function updateHide() {
     document.getElementById('hiddenhide').checked = document.getElementById('hide').checked
 }
 
+function toggleStick() {
+    document.getElementById('stick').checked = !document.getElementById('stick').checked 
+}
+
+function updateStick() {
+    document.getElementById('hiddenstick').checked = document.getElementById('stick').checked
+}
+
 function copyCode(id) {
     document.getElementById('repl-input').value = document.getElementById(id).innerText
     document.getElementById('repl-send').click()

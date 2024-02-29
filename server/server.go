@@ -7,7 +7,26 @@ import (
 	"log"
 	"main/repl"
 	"net/http"
+	"os"
+
+	"github.com/gomarkdown/markdown"
+	"github.com/gomarkdown/markdown/html"
+	"github.com/gomarkdown/markdown/parser"
 )
+
+func mdToHTML(md []byte) []byte {
+	// create markdown parser with extensions
+	extensions := parser.CommonExtensions | parser.AutoHeadingIDs | parser.NoEmptyLineBeforeBlock
+	p := parser.NewWithExtensions(extensions)
+	doc := p.Parse(md)
+
+	// create HTML renderer with extensions
+	htmlFlags := html.CommonFlags | html.HrefTargetBlank
+	opts := html.RendererOptions{Flags: htmlFlags}
+	renderer := html.NewRenderer(opts)
+
+	return markdown.Render(doc, renderer)
+}
 
 var tmplt *template.Template
 
@@ -29,7 +48,11 @@ func HomeHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
-	component := Info()
+	component := Info("<p>This is REPL for InterinGo language<p>")
+	info, err := os.ReadFile("server/assets/resume.md")
+	if err == nil {
+		component = Info(string(mdToHTML(info)))
+	}
 	component.Render(context.Background(), w)
 }
 

@@ -7,6 +7,7 @@ import (
 	"main/ast"
 	"main/evaluator"
 	"main/lexer"
+	"main/object"
 	"main/parser"
 	"main/share"
 	"strings"
@@ -16,11 +17,17 @@ import (
 
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
+var env *object.Environment = nil
+
 func Start(in io.Reader, out io.Writer) {
 	signalCapture(in, out)
 }
 
 func Handle(line string, out io.Writer) {
+	if env == nil {
+		env = object.NewEnvironment()
+	}
+
 	switch {
 	case line == "help()":
 		usage(out)
@@ -35,7 +42,7 @@ func Handle(line string, out io.Writer) {
 		}
 	case line == "":
 	default:
-		codeHandle(line, out)
+		codeHandle(line, out, env)
 	}
 }
 
@@ -55,7 +62,7 @@ func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Progr
 	}
 }
 
-func codeHandle(line string, out io.Writer) {
+func codeHandle(line string, out io.Writer, env *object.Environment) {
 	if line == "" {
 		return
 	}
@@ -76,7 +83,7 @@ func codeHandle(line string, out io.Writer) {
 		io.WriteString(out, "Evaluation result:\n\n")
 	}
 
-	evaluated := evaluator.Eval(program)
+	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil {
 		io.WriteString(out, evaluated.Inspect())
 		io.WriteString(out, "\n")

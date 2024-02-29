@@ -38,7 +38,7 @@ func headerComponent() templ.Component {
 	})
 }
 
-func infoComponent() templ.Component {
+func shortinfoComponent() templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -51,7 +51,7 @@ func infoComponent() templ.Component {
 			templ_7745c5c3_Var2 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"sm:flex sm:items-center\"><img class=\"rounded-full hidden sm:block sm:w-28 sm:h-28\" src=\"https://avatars.githubusercontent.com/u/31164703?s=400&amp;u=19b089be1581b00a69f9b0890ec97e8d5e86f83f&amp;v=4\" alt=\"@nghiango1\"><div class=\"max-h-80 sm:p-4\"><h2 class=\"font-bold\">Nghia Ngo</h2><p class=\"text-gray-700 max-w-48\">Actually have 10 year of codding experience</p><a class=\"text-blue-500 underline\" href=\"https://github.com/nghiango1\">Github</a> <a class=\"text-blue-500 underline\" href=\"https://www.linkedin.com/in/nghia-ngo-duc\">Linkedin</a></div></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"sm:flex sm:items-center\"><img class=\"rounded-full hidden sm:block sm:w-28 sm:h-28\" src=\"https://avatars.githubusercontent.com/u/31164703?s=400&amp;u=19b089be1581b00a69f9b0890ec97e8d5e86f83f&amp;v=4\" alt=\"@nghiango1\"><div class=\"max-h-80 sm:px-4\"><h2 class=\"font-bold mb-0\">Nghia Ngo</h2><p class=\"max-w-48\">Actually have 10 year of codding experience</p><a class=\"text-blue-500 underline\" href=\"https://github.com/nghiango1\">Github</a> <a class=\"text-blue-500 underline\" href=\"https://www.linkedin.com/in/nghia-ngo-duc\">Linkedin</a> <a class=\"text-blue-500 underline\" href=\"/info\">Resume</a></div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,11 +75,11 @@ func footerComponent() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"prose max-w-none dark:prose-invert m-8 pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about us</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"prose max-w-none dark:prose-invert m-8 pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = infoComponent().Render(ctx, templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = shortinfoComponent().Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -108,7 +108,7 @@ func pageLayout() templ.Component {
 			templ_7745c5c3_Var4 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>InterinGo language</title><link rel=\"stylesheet\" href=\"/assets/stylesheet.css\"><link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\"><script src=\"/assets/htmx.min.js\"></script><script src=\"/assets/custom.js\"></script></head><body class=\"h-full w-full min-w-80 scrollbar dark:bg-[#050510]\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<!doctype html><html lang=\"en\"><head><meta charset=\"UTF-8\"><meta name=\"viewport\" content=\"width=device-width, initial-scale=1.0\"><meta http-equiv=\"X-UA-Compatible\" content=\"ie=edge\"><title>InterinGo language</title><link rel=\"stylesheet\" href=\"/assets/stylesheet.css\"><link rel=\"icon\" href=\"./favicon.ico\" type=\"image/x-icon\"><script src=\"/assets/htmx.min.js\"></script><script src=\"/assets/custom.js\"></script></head><body class=\"min-w-80 scrollbar dark:bg-[#050510]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -158,14 +158,14 @@ func outputComponent() templ.Component {
 			templ_7745c5c3_Var5 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"stick\" class=\"peer/stick m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateStick();\" checked=\"true\"> <label for=\"stick\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/stick:font-bold peer-checked:bg-gray-200\">Stick</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"resize-y outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var6 string
 		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 106, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 121, Col: 39}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
 		if templ_7745c5c3_Err != nil {
@@ -267,7 +267,7 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		var templ_7745c5c3_Var10 string
 		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 167, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 182, Col: 57}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
 		if templ_7745c5c3_Err != nil {
@@ -296,7 +296,7 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		var templ_7745c5c3_Var11 string
 		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 176, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 191, Col: 25}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
@@ -355,7 +355,7 @@ func exampleArticalFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Calculaton </h2>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Need more</h2>Of course, there isn't all of what InterinGo can do, but this home page is just for showing InterinGo REPL for the world, let have some readding in <a href=\"/docs\">document</a> to learning more about it")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -363,19 +363,15 @@ func exampleArticalFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Comparation </h2>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = exampleCodeComponent("Comparation with calculation", "1 * 3 < 2").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Controlflow </h2>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = exampleCodeComponent("Control flow", "if (1 > 2) { return 10 } else { return 3 }").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = exampleCodeComponent("Variable", "let x = 2 * 2 * 2; return x;").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = exampleCodeComponent("Error", "2/0").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -403,7 +399,7 @@ func HomeFragment() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4 xl:flex-row xl:gap-8\"><div class=\"block xl:w-5/12 sticky top-4\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4 xl:flex-row xl:gap-8\"><input type=\"checkbox\" id=\"hiddenstick\" class=\"hidden peer/hiddenstick\" checked=\"true\"><div class=\"block xl:w-5/12 peer-checked/hiddenstick:sticky peer-checked/hiddenstick:top-4\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -430,7 +426,7 @@ func HomeFragment() templ.Component {
 	})
 }
 
-func InfoFragment() templ.Component {
+func InfoFragment(info string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -443,7 +439,15 @@ func InfoFragment() templ.Component {
 			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose m-auto\"><p>This website was made for testing InterinGo language</p></article>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose-invert m-auto\">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ.Raw(info).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</article>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -493,7 +497,7 @@ func Home() templ.Component {
 	})
 }
 
-func Info() templ.Component {
+func Info(info string) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -512,7 +516,7 @@ func Info() templ.Component {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = InfoFragment().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Err = InfoFragment(info).Render(ctx, templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
