@@ -33,13 +33,27 @@ templ-watch: # Build/rebuild all `templ` templates files in watch mode
 go-run: # Run the code without build step in server mode
 	go run . -s
 
+### REPL Helper
+
+repl-test: # Test all REPL project module
+	go test ./...
+
+repl-build: # Same as make go-build
+	go build .
+
+repl-run: # Run repl with-out build step
+	go run .
+
+repl-build-run: # Build the code then run executable file
+	go build .
+	./main
+
 ### Helper
 
-help: # Show available targets
+help: # Show this help
 	@cat Makefile | \
 		grep -E '^[^.:[:space:]]+:|[#]##' | \
 		sed -E 's/:[^#]*#([^:]+)$$/: #:\1/' | \
-		sed -E 's/([^.:[:space:]]+):([^#]*#(.+))?.*/  make \1\3/' | \
-		sed -E 's/[#][#]# *(.+)/\n    (\1)\n/' | \
-		sed 's/$$/:/' | \
-		column -ts:
+		sed -E 's/([^.:[:space:]]+):([^#]*#(.+))?.*/    make \1\3/' | \
+		sed -E 's/[#][#]# *(.+)/# \1/' | \
+		column -ts: -L -W2
