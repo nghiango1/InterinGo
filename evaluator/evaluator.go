@@ -44,6 +44,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalIntegerLiteral(node)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
+	case *ast.CallExpression:
+		return evalCallExpression(node, env)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
 		if isError(right) {
@@ -65,9 +67,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 	case *ast.IfExpression:
 		return evalIfStatement(node, env)
 	case *ast.FunctionLiteral:
-		params := node.Parameters
-		body := node.Body
-		return &object.Function{Parameters: params, Body: body, Env: env}
+		return evalFunctionLiteral(node, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
 		if isError(val) {
@@ -129,6 +129,61 @@ func evalIdentifier(node ast.Node, env *object.Environment) object.Object {
 		return newError("identifier not found: %s", name)
 	}
 	return value
+}
+
+func evalFunctionLiteral(fl *ast.FunctionLiteral, env *object.Environment) *object.Function{
+	params := fl.Parameters
+	body := fl.Body
+	return &object.Function{Parameters: params, Body: body, Env: env}
+}
+
+func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.Environment) object.Object {
+	numOfFuncParam := len(fo.Parameters)
+	numOfArgs := len(args)
+	if numOfArgs != numOfFuncParam {
+		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
+	}
+
+	for i := 0; i < numOfFuncParam; i++ {
+		argValue := Eval(args[i], env)
+		if isError(argValue) {
+			return argValue
+		}
+		env.Set(fo.Parameters[i].Value, argValue)
+	}
+
+	return Eval(fo.Body, env)
+}
+
+func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
+	callExpression, _ := node.(*ast.CallExpression)
+
+	functionLiteral, ok := callExpression.Function.(*ast.FunctionLiteral)
+
+	if !ok {
+		functionIdentifier, ok := callExpression.Function.(*ast.Identifier)
+		if !ok {
+			return newError("%T is not an callable", callExpression.Function)
+		}
+
+		functionName := functionIdentifier.Value
+
+		function, ok := env.Get(functionName)
+		if !ok {
+			return newError("indentifier not found: %s", functionIdentifier.Value)
+		}
+
+		functionObject, ok := function.(*object.Function)
+		if !ok {
+			return newError("%T is not callable", function)
+		}
+
+		return evalFunctionObject(functionObject, callExpression.Arguments, env)
+	}
+
+	functionObject := evalFunctionLiteral(functionLiteral, env)
+
+	return evalFunctionObject(functionObject, callExpression.Arguments, env)
 }
 
 func evalMinusOperatorExpression(right object.Object) object.Object {

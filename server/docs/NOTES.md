@@ -171,8 +171,32 @@ It just not related to implementing Interpreter it self. There is just nothing t
 
 I do need to change so REPL work well on the web like all print function using `io.Writer` interface
 
-#### More thing along the way
+#### Environment
 
-- Environment: I use a local packet variable to store `env`, this way it being use in both Server mode and CLI mode
+I use a local packet variable to store `env`, this way it being use in both Server mode and CLI mode
 
-- Function object: This is quite weird, implementing object.Object.Inspect() vs ast.Node.String() seem do the same thing. Anyway, current implementation pass global environment into Function it self, which mean there is currently no local scope. This could be change quite easily by introducing another variable in Function Object struct, but for closure to work (or multi nested function local variable), every env function have to be available, which we also need a parrent function in our function object. Also, we not have different token to binding GLOBAL/LOCAL variable just yet. As this could be a lot of work, so it just better avoiding these problem for this moment, and only have global variable available in InterinGo language.
+#### Function object and Function call evaluation
+
+My current implementation pass global environment into Function it self, which mean there is currently no local scope.
+
+While this could be change quite easily by introducing another variable in Function Object struct, but for closure to work (or multi nested function local variable), every env function have to be available, which we also need a parrent function in our function object.
+
+Also, we not have different token to binding GLOBAL/LOCAL variable just yet. As this could be a lot of work, so it just better avoiding these problem for this moment, and only have global variable available in InterinGo language.
+
+Because of this, Arg that passed into a function now directly change the indentifier as a global variable. Causing this code return `15` instead.
+
+```iig
+let add = fn(x,y) {
+    return x + y;
+}
+add(5 + 5, add(5, 5))
+```
+
+We can do some calcuation here:
+- First `add` call set `x = 10`
+- Second `add` call set `x = 5` and `y = 5`, overiding `x` value and return 10
+- Finally, we have `5 + 10 = 15`
+
+#### Final line
+
+This is quite weird, implementing object.Object.Inspect() vs ast.Node.String() seem do the same thing.
