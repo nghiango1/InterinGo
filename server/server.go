@@ -30,6 +30,8 @@ func mdToHTML(md []byte) []byte {
 
 var tmplt *template.Template
 
+var docsPath = "server/docs/"
+
 type News struct {
 	Headline string
 	Body     string
@@ -38,7 +40,7 @@ type News struct {
 // Handler functions.
 func HomeHandle(w http.ResponseWriter, r *http.Request) {
 	if r.URL.Path != "/" {
-		w.WriteHeader(404)
+		w.WriteHeader(200)
 		NotFoundHandler(w, r)
 		return
 	}
@@ -48,10 +50,20 @@ func HomeHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
-	component := Info("<p>This is REPL for InterinGo language<p>")
-	info, err := os.ReadFile("server/assets/resume.md")
+	component := Info("<p>This is Documentations for InterinGo language<p>")
+	info, err := os.ReadFile("server/docs/resume.md")
 	if err == nil {
 		component = Info(string(mdToHTML(info)))
+	}
+	component.Render(context.Background(), w)
+}
+
+func DocsHandler(w http.ResponseWriter, r *http.Request) {
+	component := Docs("<p>This is REPL for InterinGo language<p>")
+
+	docs, err := os.ReadFile(docsPath+"NOTES.md")
+	if err == nil {
+		component = Docs(string(mdToHTML(docs)))
 	}
 	component.Render(context.Background(), w)
 }
@@ -87,6 +99,7 @@ func Start(listenAdrr string) {
 
 	// Registering our handler functions, and creating paths.
 	http.HandleFunc("/", HomeHandle)
+	http.HandleFunc("/docs", DocsHandler)
 	http.HandleFunc("/info", InfoHandler)
 	http.HandleFunc("/404", NotFoundHandler)
 	http.HandleFunc("/api/evaluate", EvaluateHandler)

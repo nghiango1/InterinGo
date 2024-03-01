@@ -11,10 +11,7 @@ templ headerComponent() {
 		<a class="sfont-bold flex-grow min-w-fit m:text-blue-500 sm:underline" href="/">
 			Welcome to InterinGo language
 		</a>
-		<a
-			class="hidden sm:block sm:text-blue-500 sm:underline flex-shrink"
-			href="https://github.com/nghiango1/hello/blob/main/go/interpreter/README.md"
-		>Docs</a>
+		<a class="hidden sm:block sm:text-blue-500 sm:underline flex-shrink" href="/docs">Docs</a>
 		<a
 			class="hidden sm:block sm:text-blue-500 sm:underline flex-shrink"
 			href="https://github.com/nghiango1/hello/tree/main/go/interpreter"
@@ -121,11 +118,11 @@ templ outputComponent() {
 		>
 			Let start with help() command { "\n" }
 		</pre>
- 		<pre
- 			id="repl-result"
- 			class="hidden peer-checked/hide:block px-2 max-h-6 overflow-auto"
- 			hx-on:htmx:after-swap="copyEvalResult();scrollBottom();"
- 		></pre>
+		<pre
+			id="repl-result"
+			class="hidden peer-checked/hide:block px-2 max-h-6 overflow-auto"
+			hx-on:htmx:after-swap="copyEvalResult();scrollBottom();"
+		></pre>
 	</div>
 }
 
@@ -251,6 +248,12 @@ templ HomeFragment() {
 	</div>
 }
 
+templ DocsFragment(docs string) {
+	<article class="prose dark:prose-invert m-auto 2xl:prose-xl xl:prose-lg max-w-full">
+		@templ.Raw(docs)
+	</article>
+}
+
 templ InfoFragment(info string) {
 	<article class="prose dark:prose-invert m-auto">
 		@templ.Raw(info)
@@ -263,6 +266,12 @@ templ Home() {
 	}
 }
 
+templ Docs(docs string) {
+	@pageLayout() {
+		@DocsFragment(docs)
+	}
+}
+
 templ Info(info string) {
 	@pageLayout() {
 		@InfoFragment(info)
@@ -271,7 +280,7 @@ templ Info(info string) {
 
 templ NotFound() {
 	@pageLayout() {
-		<article class="prose dark:prose m-auto">
+		<article class="prose dark:prose-invert m-auto">
 			<div>404 NOT FOUND PAGE</div>
 		</article>
 	}

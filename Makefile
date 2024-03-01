@@ -1,6 +1,6 @@
 TAILWIND_CLI := tailwindcss-linux-x64
 
-.PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run
+.PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run clean server-clean repl-clean
 
  all: help
 
@@ -20,7 +20,7 @@ go-build: # Build go binary file
 	go build .
 
 run: # Run the build file in server mode
-	./main -s
+	./interingo -s
 
 ### Development helper
 
@@ -46,9 +46,18 @@ repl-run: # Run repl with-out build step
 
 repl-build-run: # Build the code then run executable file
 	go build .
-	./main
+	./interingo
+
+repl-clean: # Remove repl build file
+	rm -f interingo
 
 ### Helper
+
+server-clean: # Remove all frontend build file
+	rm -f server/index_templ.go
+	rm -f server/assets/stylesheet.css
+
+clean: server-clean repl-clean # Remove all build file
 
 help: # Show this help
 	@cat Makefile | \

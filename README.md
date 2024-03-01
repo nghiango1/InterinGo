@@ -23,19 +23,19 @@ Back-end:
 
 ## How to use
 
-> Build the program and get `./main` file executable or download Released binary
-> Run `./main -h` to get help on runner flag directly (for TLDR folks)
+> Build the program and get `./interingo` file executable or download Released binary
+> Run `./interingo -h` to get help on runner flag directly (for TLDR folks)
 
 ### REPL mode
 
-Running `./main` executable normaly
+Running `./interingo` executable normaly
 ```sh
-./main
+./interingo
 ```
 
 And you should have been welcome with this
 ```
-→ ./main
+→ ./interingo
 Hello <username>! This is the InterinGo programming language!
 Type `help()` in commands for common guide
 >> 
@@ -45,14 +45,14 @@ Type `help()` in commands for common guide
 
 > This have the highest piority, so don't expect server, or REPL running 
 
-Running `./main` executable with `-f` flag.
+Running `./interingo` executable with `-f` flag.
 ```sh
-./main -f <file-location>
+./interingo -f <file-location>
 ```
 
 Unknow what to do yet, use test code in 'test/' directory as your start point. Every file contain comment for expected output in the top to make sure you don't get lost
 ```sh
-./main -f test/return-01.iig
+./interingo -f test/return-01.iig
 ```
 
 
@@ -60,14 +60,14 @@ Unknow what to do yet, use test code in 'test/' directory as your start point. E
 
 > As expected, who know what you got if they can't just test it directly on the browser
 
-Running `./main` executable with `-s` flag
+Running `./interingo` executable with `-s` flag
 ```sh
-./main -s
+./interingo -s
 ```
 
 You can also specify listen address with `-l` flag or it will default to `0.0.0.0:8080`
 ```sh
-./main -s -l 127.0.0.1:4000
+./interingo -s -l 127.0.0.1:4000
 ```
 
 ### Verbose output
@@ -76,12 +76,12 @@ Tell more infomation about Lexer, Parse, Evaluation process via REPL output
 
 Start with the `-v` flag
 ```sh
-./main -v
+./interingo -v
 ```
 
 Or using `toggleVerbose()`command in InterinGo REPL to enable/disable it 
 ```sh
-./main
+./interingo
 >> toggleVerbose()
 ```
 

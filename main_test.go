@@ -1,4 +1,4 @@
-package interingo
+package main
 
 import (
 	"bytes"
