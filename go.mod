@@ -1,4 +1,4 @@
-module main
+module interingo
 
 go 1.21.4
 

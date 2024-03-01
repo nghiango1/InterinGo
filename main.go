@@ -1,12 +1,11 @@
-// main.go
-package main
+package interingo
 
 import (
 	"flag"
 	"fmt"
-	"main/repl"
-	"main/server"
-	"main/share"
+	"interingo/repl"
+	"interingo/server"
+	"interingo/share"
 	"os"
 	"os/user"
 )

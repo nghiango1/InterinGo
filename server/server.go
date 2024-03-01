@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"html/template"
 	"log"
-	"main/repl"
+	"interingo/repl"
 	"net/http"
 	"os"
 

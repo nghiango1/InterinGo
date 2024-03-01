@@ -1,6 +1,6 @@
 All InterinGo source file can be use for testing. Which end with-in `.iig` file extension
 
-# Fast finish evaluation
+# Correctly stop evaluation
 
 ## Error handling `error-*.iig`
 
@@ -14,3 +14,7 @@ A purposedly error code that use to the how InterinGo REPL handle and showing er
 A return statement mean we can stop the Evaluation and directly return the value as result
 - `return-01.igg`: There is a return statement so the rest of the statement isn't being Evaluated any more
 
+## Function
+
+A function return a `return` value can by tricky. We may stop main flow of our Evaluation
+- `function-01.igg`: There is a function which return a `return` value, we try to get over that function call and do the rest of the code instruction

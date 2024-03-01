@@ -197,6 +197,22 @@ We can do some calcuation here:
 
 So, we want a seperated arg in function call store from our global env variable. Turn out to change this behavior is just about ~5 line of code, some minor change and all above overhead is just plain wrong, I just need to implement a better env structure.
 
+Also, after keep reading, I known that:
+- My `evalCallExpression` implementation, which try to handle `ast.FunctionLiteral.Function` base on two case: is it a `ast.Identifier` or a `ast.FunctionLiteral`? Just use `Eval` and we have `object.Function` in return. Eh, way smaller and nicer.
+- Return value can cause chain reaction and stop main Evaluation flow immedietly, which isn't cover by test. So I add this:
+    ```iig
+    let add = fn(x, y) {
+        return x + y
+    }
+    add(2, 4);
+    let x = 2;
+    return x;
+    ```
+    This should return 2
+
+
 #### Final line
 
 implementing object.Object.Inspect() vs ast.Node.String() almost done the same thing for object,Function and ast.FunctionLiteral
+
+Nested map structure as environment is too expensive. I do thing back on how C using stack for handle memory after this, could it be replicate in InterinGo?

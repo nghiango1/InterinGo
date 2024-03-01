@@ -2,7 +2,7 @@ package ast
 
 import (
 	"bytes"
-	"main/token"
+	"interingo/token"
 )
 
 type Node interface {

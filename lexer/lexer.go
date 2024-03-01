@@ -1,8 +1,8 @@
 package lexer
 
 import (
-	"main/token"
-	"main/share"
+	"interingo/token"
+	"interingo/share"
 )
 
 type Lexer struct {

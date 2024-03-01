@@ -2,8 +2,8 @@ package evaluator
 
 import (
 	"fmt"
-	"main/ast"
-	"main/object"
+	"interingo/ast"
+	"interingo/object"
 )
 
 var (
@@ -153,36 +153,26 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.
 		encloseEnv.Set(fo.Parameters[i].Value, argValue)
 	}
 
-	return Eval(fo.Body, encloseEnv)
+	result := Eval(fo.Body, encloseEnv)
+	if resultValue, ok := result.(*object.ReturnValue); ok {
+		return resultValue.Value
+	}
+	return result
 }
 
 func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 	callExpression, _ := node.(*ast.CallExpression)
 
-	functionLiteral, ok := callExpression.Function.(*ast.FunctionLiteral)
+	result := Eval(callExpression.Function, env)
 
-	if !ok {
-		functionIdentifier, ok := callExpression.Function.(*ast.Identifier)
-		if !ok {
-			return newError("%T is not an callable", callExpression.Function)
-		}
-
-		functionName := functionIdentifier.Value
-
-		function, ok := env.Get(functionName)
-		if !ok {
-			return newError("indentifier not found: %s", functionIdentifier.Value)
-		}
-
-		functionObject, ok := function.(*object.Function)
-		if !ok {
-			return newError("%T is not callable", function)
-		}
-
-		return evalFunctionObject(functionObject, callExpression.Arguments, env)
+	if isError(result) {
+		return result
 	}
 
-	functionObject := evalFunctionLiteral(functionLiteral, env)
+	functionObject, ok := result.(*object.Function)
+	if !ok {
+		return newError("%s is not callable", result.Type())
+	}
 
 	return evalFunctionObject(functionObject, callExpression.Arguments, env)
 }

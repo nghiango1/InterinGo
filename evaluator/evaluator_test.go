@@ -1,9 +1,9 @@
 package evaluator
 
 import (
-	"main/lexer"
-	"main/object"
-	"main/parser"
+	"interingo/lexer"
+	"interingo/object"
+	"interingo/parser"
 	"testing"
 )
 
@@ -288,14 +288,17 @@ func TestFunctionApplication(t *testing.T) {
 		input    string
 		expected int64
 	}{
+		{"let identity = fn(x) { return x; }; identity(identity(5));", 5},
 		{"let identity = fn(x) { x; }; identity(5);", 5},
 		{"let identity = fn(x) { return x; }; identity(5);", 5},
 		{"let double = fn(x) { x * 2; }; double(5);", 10},
 		{"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
 		{"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
 		{"fn(x) { x; }(5)", 5},
+		{"return 5;", 5},
 	}
 	for _, tt := range tests {
-		testIntegerObject(t, testEval(tt.input), tt.expected)
+		result := testEval(tt.input)
+		testIntegerObject(t, result, tt.expected)
 	}
 }

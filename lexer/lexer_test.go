@@ -1,7 +1,7 @@
 package lexer
 
 import (
-	"main/token"
+	"interingo/token"
 	"testing"
 )
 
