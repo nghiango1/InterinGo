@@ -144,15 +144,16 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.
 		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
 	}
 
+	encloseEnv := object.NewEnclosedEnvironment(env)
 	for i := 0; i < numOfFuncParam; i++ {
-		argValue := Eval(args[i], env)
+		argValue := Eval(args[i], encloseEnv)
 		if isError(argValue) {
 			return argValue
 		}
-		env.Set(fo.Parameters[i].Value, argValue)
+		encloseEnv.Set(fo.Parameters[i].Value, argValue)
 	}
 
-	return Eval(fo.Body, env)
+	return Eval(fo.Body, encloseEnv)
 }
 
 func evalCallExpression(node ast.Node, env *object.Environment) object.Object {

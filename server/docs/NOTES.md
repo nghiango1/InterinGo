@@ -178,10 +178,8 @@ I use a local packet variable to store `env`, this way it being use in both Serv
 #### Function object and Function call evaluation
 
 My current implementation pass global environment into Function it self, which mean there is currently no local scope.
-
-While this could be change quite easily by introducing another variable in Function Object struct, but for closure to work (or multi nested function local variable), every env function have to be available, which we also need a parrent function in our function object.
-
-Also, we not have different token to binding GLOBAL/LOCAL variable just yet. As this could be a lot of work, so it just better avoiding these problem for this moment, and only have global variable available in InterinGo language.
+- While this could be change quite easily by introducing another variable in Function Object struct, but for closure to work (or multi nested function local variable), every env function have to be available, which we also need a parrent function in our function object.
+- Also, we not have different token to binding GLOBAL/LOCAL variable just yet. As this could be a lot of work, so it just better avoiding these problem for this moment, and only have global variable available in InterinGo language.
 
 Because of this, Arg that passed into a function now directly change the indentifier as a global variable. Causing this code return `15` instead.
 
@@ -197,6 +195,8 @@ We can do some calcuation here:
 - Second `add` call set `x = 5` and `y = 5`, overiding `x` value and return 10
 - Finally, we have `5 + 10 = 15`
 
+So, we want a seperated arg in function call store from our global env variable. Turn out to change this behavior is just about ~5 line of code, some minor change and all above overhead is just plain wrong, I just need to implement a better env structure.
+
 #### Final line
 
-This is quite weird, implementing object.Object.Inspect() vs ast.Node.String() seem do the same thing.
+implementing object.Object.Inspect() vs ast.Node.String() almost done the same thing for object,Function and ast.FunctionLiteral
