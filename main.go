@@ -10,28 +10,33 @@ import (
 	"os/user"
 )
 
-// Run mode - Server flag
+// Runtime
 var verboseMode bool
 
-// Run mode - Server flag
+// Server mode flag
 var serverMode bool
 
-// Address we listen on.
+// Use in Server mode flag
+var hotloadMode bool
+
+// Address we listen on - Use in Server mode flag
 var listenAddress string
 
-// Address we listen on.
+// Input file directory - Use in File mode flag
 var fileLocation string
 
 func init() {
 	const (
 		defaultServerMode    = false
-		defaultVerboseMode    = false
+		defaultVerboseMode   = false
+		defaultHotloadMode   = false
 		defaultListenAddress = "0.0.0.0:8080"
 		defaultFileLocation  = ""
 		serverUsage          = "Start as server mode"
-		verboseUsage          = "Start as verbose mode, InterinGo will print a lot more infomation for Lexer, Parse and Evaluation product"
+		verboseUsage         = "Start as verbose mode, InterinGo will print a lot more infomation for Lexer, Parse and Evaluation product"
 		listenAdrUsage       = "Listen address"
-		fileLocationUsage       = "Using a file as input to parse, default as \"\" which mean not using file input"
+		hotloadUsage		 = "Using with server mode, allow using os.ReadFile to populate md docs pages in runtime"
+		fileLocationUsage    = "Using a file as input to parse, default as \"\" which mean not using file input"
 	)
 
 	flag.BoolVar(&serverMode, "server", defaultServerMode, serverUsage)
@@ -42,6 +47,13 @@ func init() {
 	flag.StringVar(&fileLocation, "f", defaultFileLocation, fileLocationUsage+" (shorthand)")
 	flag.BoolVar(&verboseMode, "verbose", defaultVerboseMode, verboseUsage)
 	flag.BoolVar(&verboseMode, "v", defaultVerboseMode, verboseUsage+" (shorthand)")
+	flag.BoolVar(&hotloadMode, "hotload", defaultHotloadMode, hotloadUsage)
+	flag.BoolVar(&hotloadMode, "h", defaultHotloadMode, hotloadUsage+" (shorthand)")
+
+	flag.Parse()
+	share.VerboseMode = verboseMode
+	share.HotLoad = hotloadMode
+	server.Init()
 }
 
 func main() {
@@ -50,11 +62,9 @@ func main() {
 		panic(err)
 	}
 
-	flag.Parse()
 
 	if verboseMode {
 		fmt.Println("Verbose mode enable")
-		share.VerboseMode = verboseMode
 	}
 
 	if fileLocation != "" {
@@ -71,6 +81,10 @@ func main() {
 		user.Username)
 
 	if serverMode {
+		if hotloadMode {
+			fmt.Println("Hotload mode enable - Pages can now populated in runtimes - Look out for readfile error")
+		}
+
 		server.Start(listenAddress)
 		return
 	}

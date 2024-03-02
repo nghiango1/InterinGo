@@ -248,8 +248,20 @@ templ HomeFragment() {
 	</div>
 }
 
-templ DocsFragment(docs string) {
-	<article class="prose dark:prose-invert m-auto 2xl:prose-xl xl:prose-lg max-w-full">
+templ LinkedComponent(path string,linked *Linked) {
+	<ul class="prose dark:prose-invert m-auto">
+		for key := range linked.nestedLink {
+			@LinkedComponent(path+"/"+key, linked.nestedLink[key])
+		}
+		for _, item := range linked.docs {
+			<li><a href={ templ.URL(path + "/" + item) }>{ item }</a></li>
+		}
+	</ul>
+}
+
+templ DocsFragment(docs string, linked *Linked) {
+	@LinkedComponent("", linked)
+	<article class="prose dark:prose-invert m-auto xl:prose-lg max-w-full">
 		@templ.Raw(docs)
 	</article>
 }
@@ -266,9 +278,9 @@ templ Home() {
 	}
 }
 
-templ Docs(docs string) {
+templ Docs(docs string, linked *Linked) {
 	@pageLayout() {
-		@DocsFragment(docs)
+		@DocsFragment(docs, linked)
 	}
 }
 

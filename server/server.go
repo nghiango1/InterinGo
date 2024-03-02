@@ -4,15 +4,96 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"log"
 	"interingo/repl"
+	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
 )
+
+// Populating and cache all md pages in docs
+var mdPages map[string]string
+
+type Linked struct {
+	docs       []string
+	nestedLink map[string]*Linked
+}
+
+func (lk *Linked) add(fullpath string, filename string) {
+	splited := strings.Split(fullpath, "/")
+	splited = splited[0 : len(splited)-1]
+	var curr *Linked = lk
+	for _, steppath := range splited {
+		next, ok := curr.nestedLink[steppath]
+		if !ok {
+			curr.nestedLink[steppath] = &Linked{
+				nestedLink: make(map[string]*Linked),
+			}
+			curr = curr.nestedLink[steppath]
+		} else {
+			curr = next
+		}
+	}
+	curr.docs = append(curr.docs, filename)
+}
+
+var allDocs *Linked
+
+var docsPath = "server/docs/"
+
+func Init() {
+	fmt.Println("server init")
+	mdPages = make(map[string]string)
+	allDocs = &Linked{
+		nestedLink: make(map[string]*Linked),
+	}
+	err := filepath.Walk(docsPath, populatedPage)
+	if err != nil {
+		fmt.Printf("Read docs path error\n")
+	}
+}
+
+func isMDextension(fileInfo os.FileInfo) bool {
+	splitedName := strings.Split(fileInfo.Name(), ".")
+	return len(splitedName) > 1 && splitedName[len(splitedName)-1] == "md"
+}
+
+func populatedPage(path string, file os.FileInfo, err error) error {
+	if file.IsDir() {
+		return nil
+	}
+
+	if !isMDextension(file) {
+		return nil
+	}
+
+	docs, err := os.ReadFile(path)
+	if err != nil {
+		return nil
+	}
+
+	mdPages["/"+path] = string(mdToHTML(docs))
+	allDocs.add(path, file.Name())
+	fmt.Printf("Init poplated page %s\n", path)
+
+	return nil
+}
+
+func getPage(fileName string) (string, bool) {
+	pageContent, ok := mdPages[fileName]
+
+	if !ok {
+		fmt.Println("Can't find entry\n", fileName)
+		return "", false
+	}
+
+	return pageContent, true
+}
 
 func mdToHTML(md []byte) []byte {
 	// create markdown parser with extensions
@@ -29,8 +110,6 @@ func mdToHTML(md []byte) []byte {
 }
 
 var tmplt *template.Template
-
-var docsPath = "server/docs/"
 
 type News struct {
 	Headline string
@@ -50,20 +129,20 @@ func HomeHandle(w http.ResponseWriter, r *http.Request) {
 }
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
-	component := Info("<p>This is Documentations for InterinGo language<p>")
-	info, err := os.ReadFile("server/docs/resume.md")
-	if err == nil {
-		component = Info(string(mdToHTML(info)))
+	component := Info("<p>This is infomation about Authors of InterinGo language<p>")
+	info, ok := getPage("server/docs/resume.md")
+	if !ok {
+		component = Info(string(info))
 	}
 	component.Render(context.Background(), w)
 }
 
 func DocsHandler(w http.ResponseWriter, r *http.Request) {
-	component := Docs("<p>This is REPL for InterinGo language<p>")
+	component := Docs("<p>This is documentations of InterinGo language<p>", allDocs)
 
-	docs, err := os.ReadFile(docsPath+"NOTES.md")
-	if err == nil {
-		component = Docs(string(mdToHTML(docs)))
+	docs, ok := getPage(r.URL.Path)
+	if ok {
+		component = Docs(string(docs), allDocs)
 	}
 	component.Render(context.Background(), w)
 }
@@ -94,12 +173,22 @@ func EvaluateHandler(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func populateHandle(path string, linked *Linked) {
+	for k := range linked.nestedLink {
+		populateHandle(path+"/"+k, linked.nestedLink[k])
+	}
+	for _, file := range linked.docs {
+		http.HandleFunc(path+"/"+file, DocsHandler)
+	}
+}
+
 func Start(listenAdrr string) {
 	log.Println("Started listening on", listenAdrr)
 
 	// Registering our handler functions, and creating paths.
 	http.HandleFunc("/", HomeHandle)
 	http.HandleFunc("/docs", DocsHandler)
+	populateHandle("", allDocs)
 	http.HandleFunc("/info", InfoHandler)
 	http.HandleFunc("/404", NotFoundHandler)
 	http.HandleFunc("/api/evaluate", EvaluateHandler)
