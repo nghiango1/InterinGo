@@ -146,7 +146,7 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.
 
 	encloseEnv := object.NewEnclosedEnvironment(env)
 	for i := 0; i < numOfFuncParam; i++ {
-		argValue := Eval(args[i], encloseEnv)
+		argValue := Eval(args[i], env)
 		if isError(argValue) {
 			return argValue
 		}
