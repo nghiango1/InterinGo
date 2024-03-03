@@ -4,6 +4,9 @@ module.exports = {
   content: [ "./**/*.html", "./**/*.templ", "./**/*.go", ],
   theme: {
     extend: {
+      gridTemplateColumns: {
+        'docs': '19rem 1fr',
+      },
       typography: {
         DEFAULT: {
           css: {
@@ -26,6 +29,24 @@ module.exports = {
   },
   plugins: [
     require('@tailwindcss/typography'),
+    plugin(function({ addUtilities, addComponents, e, prefix, config }) {
+      const newUtilities = {
+        '.horizontal-tb': {
+          writingMode: 'horizontal-tb',
+        },
+        '.vertical-rl': {
+          writingMode: 'vertical-rl',
+          '-webkit-writing-mode': 'vertical-rl',
+          '-ms-writing-mode': 'vertical-rl',
+        },
+        '.vertical-lr': {
+          writingMode: 'vertical-lr',
+          '-webkit-writing-mode': 'vertical-lr',
+          '-ms-writing-mode': 'vertical-lr',
+        }
+      }
+      addUtilities(newUtilities)
+    }),
     plugin(function({ addComponents }) {
       addComponents({
         '.scrollbar::-webkit-scrollbar' : {

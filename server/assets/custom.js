@@ -10,6 +10,10 @@ function updateHide() {
     document.getElementById('hiddenhide').checked = document.getElementById('hide').checked
 }
 
+function linkedHide() {
+    document.getElementById('linked').checked = !document.getElementById('linked').checked
+}
+
 function toggleStick() {
     document.getElementById('stick').checked = !document.getElementById('stick').checked 
 }

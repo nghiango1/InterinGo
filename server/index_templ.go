@@ -27,7 +27,7 @@ func headerComponent() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"prose max-w-none dark:prose-invert text-blue-500 p-4 mb-4 rounded-b-lg flex flex-row gap-4 sm:mx-8 min-w-80 border-b-2 border-blue-200 overflow-hidden\"><a class=\"sfont-bold flex-grow min-w-fit m:text-blue-500 sm:underline\" href=\"/\">Welcome to InterinGo language</a> <a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"/docs\">Docs</a> <a class=\"hidden sm:block sm:text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/tree/main/go/interpreter\">Source code</a></header>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<header class=\"prose max-w-none text-xl dark:prose-invert text-blue-500 pb-4 my-4 px-4 sm:px-0 sm:mx-4 flex flex-row gap-4 min-w-80 border-b-2 border-blue-200 overflow-hidden\"><a class=\"hidden sm:block font-bold flex-grow min-w-fit m:text-blue-500 sm:underline\" href=\"/\">Welcome to InterinGo language</a> <a class=\"sm:hidden flex-grow min-w-fit overflow-hidden text-blue-500 sm:underline\" href=\"/\">Home</a> <a class=\"text-blue-500 sm:underline flex-shrink\" href=\"/docs\">Docs</a> <a class=\"text-blue-500 sm:underline flex-shrink\" href=\"https://github.com/nghiango1/hello/tree/main/go/interpreter\">Source</a></header>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -75,7 +75,7 @@ func footerComponent() templ.Component {
 			templ_7745c5c3_Var3 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"prose max-w-none dark:prose-invert m-8 pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<footer class=\"prose max-w-none dark:prose-invert pt-2 sm:pt-8 flex flex-col sm:flex-row-reverse gap-4 border-t-blue-200 border-t-2\"><div class=\"flex flex-col sm:text-right sm:ml-auto\"><h2 class=\"font-bold\">Menu</h2><a class=\"text-blue-500 underline\" href=\"/\">home</a> <a class=\"text-blue-500 underline\" href=\"/info\">about</a> <a class=\"text-blue-500 underline\" href=\"/404\">404</a></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -116,23 +116,43 @@ func pageLayout() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main class=\"p-4 flex flex-col gap-4 max-w-3xl sm:mx-8 md:mx-auto xl:max-w-full xl:mx-8 \">")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		templ_7745c5c3_Err = templ_7745c5c3_Var4.Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = footerComponent().Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</body></html>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func mainwraper() templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var5 == nil {
+			templ_7745c5c3_Var5 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<main class=\"p-4 flex flex-col gap-4 max-w-3xl sm:mx-8 md:mx-auto xl:max-w-full xl:mx-8 \">")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = templ_7745c5c3_Var5.Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -153,21 +173,21 @@ func outputComponent() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var5 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var5 == nil {
-			templ_7745c5c3_Var5 = templ.NopComponent
+		templ_7745c5c3_Var6 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var6 == nil {
+			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"stick\" class=\"peer/stick m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateStick();\" checked=\"true\"> <label for=\"stick\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/stick:font-bold peer-checked:bg-gray-200\">Stick</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"resize-y outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var6 string
-		templ_7745c5c3_Var6, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
+		var templ_7745c5c3_Var7 string
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs("\n")
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 118, Col: 39}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 124, Col: 39}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var6))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -195,9 +215,9 @@ func inputComponent() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var7 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var7 == nil {
-			templ_7745c5c3_Var7 = templ.NopComponent
+		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var8 == nil {
+			templ_7745c5c3_Var8 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<form class=\"flex flex-row gap-4 outline-blue-200 dark:outline-white h-fit\" hx-post=\"/api/evaluate\" hx-target=\"#repl-result\" hx-swap=\"innerHTML\" hx-on:htmx:config-request=\"addCommand()\"><p class=\"hidden sm:block sm:my-auto\">Custom command:</p><input class=\"flex-1 font-mono my-auto focus:outline-none border-b border-gray-500 bg-transparent pl-2\" type=\"text\" name=\"repl-input\" aria-autocomplete=\"both\" aria-labelledby=\"docsearch-label\" id=\"repl-input\" autocomplete=\"off\" autocorrect=\"off\" autocapitalize=\"off\" enterkeyhint=\"go\" spellcheck=\"false\" placeholder=\"help()\"> <button class=\"block my-auto rounded-lg bg-blue-200 border-2 active:bg-blue-200 activate:dark:bg-blue-900 dark:bg-[#090d1a] p-1\" id=\"repl-send\" type=\"Summit\" click=\"addCommand()\">Run</button></form>")
@@ -219,9 +239,9 @@ func evaluateComponent() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var8 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var8 == nil {
-			templ_7745c5c3_Var8 = templ.NopComponent
+		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var9 == nil {
+			templ_7745c5c3_Var9 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"sticky top-4 flex flex-col gap-1 after:absolute after:-top-2 after:-inset-2 after:bg-white/30 after:dark:bg-[#050510]/30 after:object-none after:blur-sm after:-z-10 before:-z-10 after:rounded-b-lg before:rounded-b-lg before:backdrop-blur-sm before:absolute before:-top-4 before:-inset-4 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none dark:text-[#d1d5db]\">")
@@ -255,21 +275,21 @@ func exampleCodeComponent(name string, code string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var9 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var9 == nil {
-			templ_7745c5c3_Var9 = templ.NopComponent
+		templ_7745c5c3_Var10 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var10 == nil {
+			templ_7745c5c3_Var10 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col\"><div class=\"flex flex-row\"><p class=\"block my-auto flex-1\">Snippet - <code>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var10 string
-		templ_7745c5c3_Var10, templ_7745c5c3_Err = templ.JoinStringErrs(name)
+		var templ_7745c5c3_Var11 string
+		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(name)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 179, Col: 57}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 185, Col: 57}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var10))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -293,12 +313,12 @@ func exampleCodeComponent(name string, code string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		var templ_7745c5c3_Var11 string
-		templ_7745c5c3_Var11, templ_7745c5c3_Err = templ.JoinStringErrs(code)
+		var templ_7745c5c3_Var12 string
+		templ_7745c5c3_Var12, templ_7745c5c3_Err = templ.JoinStringErrs(code)
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 188, Col: 25}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 194, Col: 25}
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var11))
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var12))
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -322,9 +342,9 @@ func exampleArticalFragment() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var12 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var12 == nil {
-			templ_7745c5c3_Var12 = templ.NopComponent
+		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var13 == nil {
+			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose max-w-none dark:prose-invert\"><h1>InterinGo </h1><p>To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command promt. Click on Click and run to copy the code into Command promt and have REPL run the code. The input box will reflect the code being used, while the command promt will show the evaluation result.</p>")
@@ -394,9 +414,9 @@ func HomeFragment() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var13 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var13 == nil {
-			templ_7745c5c3_Var13 = templ.NopComponent
+		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var14 == nil {
+			templ_7745c5c3_Var14 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-col gap-4 xl:flex-row xl:gap-8\"><input type=\"checkbox\" id=\"hiddenstick\" class=\"hidden peer/hiddenstick\" checked=\"true\"><div class=\"block xl:w-5/12 peer-checked/hiddenstick:sticky peer-checked/hiddenstick:top-4\">")
@@ -426,7 +446,7 @@ func HomeFragment() templ.Component {
 	})
 }
 
-func LinkedComponent(path string, linked *Linked) templ.Component {
+func renderLinked(path string, key string, linked *Linked) templ.Component {
 	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 		if !templ_7745c5c3_IsBuffer {
@@ -434,50 +454,115 @@ func LinkedComponent(path string, linked *Linked) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var14 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var14 == nil {
-			templ_7745c5c3_Var14 = templ.NopComponent
+		templ_7745c5c3_Var15 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var15 == nil {
+			templ_7745c5c3_Var15 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ul class=\"prose dark:prose-invert m-auto\">")
+		if len(linked.docs) == 0 {
+			for key := range linked.nestedLink {
+				templ_7745c5c3_Err = renderLinked(path+"/"+key, key, linked.nestedLink[key]).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+		} else {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ol class=\"block list-disc\">")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+			if key == "docs" {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row items-end my-4\"><h1 class=\"flex-1 block font-bold text-xl dark:text-white\">Documentation</h1><button class=\"block md:hidden\" onclick=\"linkedHide()\">Hide menu</button></div>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			} else {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2 class=\"font-bold my-4\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var16 string
+				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(key)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 271, Col: 36}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</h2>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			for _, item := range linked.docs {
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li class=\"block pl-4 py-2 hover:font-bold hover:border-blue-500 focus:font-bold border-l-2 focus:border-blue-500 border-gray-200\"><a href=\"")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var17 templ.SafeURL = templ.URL(path + "/" + item)
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var17)))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				var templ_7745c5c3_Var18 string
+				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(item)
+				if templ_7745c5c3_Err != nil {
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 277, Col: 52}
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			for key := range linked.nestedLink {
+				templ_7745c5c3_Err = renderLinked(path+"/"+key, key, linked.nestedLink[key]).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+			}
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ol>")
+			if templ_7745c5c3_Err != nil {
+				return templ_7745c5c3_Err
+			}
+		}
+		if !templ_7745c5c3_IsBuffer {
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteTo(templ_7745c5c3_W)
+		}
+		return templ_7745c5c3_Err
+	})
+}
+
+func LinkedComponent(linked *Linked) templ.Component {
+	return templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+		if !templ_7745c5c3_IsBuffer {
+			templ_7745c5c3_Buffer = templ.GetBuffer()
+			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+		}
+		ctx = templ.InitializeContext(ctx)
+		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var19 == nil {
+			templ_7745c5c3_Var19 = templ.NopComponent
+		}
+		ctx = templ.ClearChildren(ctx)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"linked\" class=\"hidden peer m-auto\" type=\"checkbox\" name=\"checked\"> <label for=\"linked\" class=\"block md:hidden peer-checked:hidden focus:font-bold sticky top-16 p-1 rounded-r-lg bg-gray-200 dark:bg-gray-500 focus:bg-blue-500 active:bg-blue-500 dark:text-white vertical-lr\">Show menu</label><div class=\"hidden px-4 w-[19rem] peer-checked:block md:block sticky top-4 dark:text-white before:-z-10 before:rounded-b-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-0 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		for key := range linked.nestedLink {
-			templ_7745c5c3_Err = LinkedComponent(path+"/"+key, linked.nestedLink[key]).Render(ctx, templ_7745c5c3_Buffer)
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
+		templ_7745c5c3_Err = renderLinked("", "Contents", linked).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
 		}
-		for _, item := range linked.docs {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<li><a href=\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var15 templ.SafeURL = templ.URL(path + "/" + item)
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(string(templ_7745c5c3_Var15)))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("\">")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			var templ_7745c5c3_Var16 string
-			templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(item)
-			if templ_7745c5c3_Err != nil {
-				return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 256, Col: 54}
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</a></li>")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</ul>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -496,16 +581,20 @@ func DocsFragment(docs string, linked *Linked) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var17 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var17 == nil {
-			templ_7745c5c3_Var17 = templ.NopComponent
+		templ_7745c5c3_Var20 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var20 == nil {
+			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = LinkedComponent("", linked).Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid md:grid-cols-docs grid-cols-1 px-8\"><div class=\"fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose-invert m-auto xl:prose-lg max-w-full\">")
+		templ_7745c5c3_Err = LinkedComponent(linked).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"overflow-auto\"><article class=\"prose dark:prose-invert w-full max-w-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -514,6 +603,14 @@ func DocsFragment(docs string, linked *Linked) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</article>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = footerComponent().Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div></div>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -532,9 +629,9 @@ func InfoFragment(info string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var18 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var18 == nil {
-			templ_7745c5c3_Var18 = templ.NopComponent
+		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var21 == nil {
+			templ_7745c5c3_Var21 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose-invert m-auto\">")
@@ -564,18 +661,41 @@ func Home() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var19 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var19 == nil {
-			templ_7745c5c3_Var19 = templ.NopComponent
+		templ_7745c5c3_Var22 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var22 == nil {
+			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var20 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var23 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = HomeFragment().Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Var24 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+				if !templ_7745c5c3_IsBuffer {
+					templ_7745c5c3_Buffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+				}
+				templ_7745c5c3_Err = HomeFragment().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = footerComponent().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if !templ_7745c5c3_IsBuffer {
+					_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
+				}
+				return templ_7745c5c3_Err
+			})
+			templ_7745c5c3_Err = mainwraper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -584,7 +704,7 @@ func Home() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var20), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var23), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -603,12 +723,12 @@ func Docs(docs string, linked *Linked) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var21 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var21 == nil {
-			templ_7745c5c3_Var21 = templ.NopComponent
+		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var25 == nil {
+			templ_7745c5c3_Var25 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var22 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var26 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
@@ -623,7 +743,7 @@ func Docs(docs string, linked *Linked) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var22), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var26), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -642,18 +762,41 @@ func Info(info string) templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var23 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var23 == nil {
-			templ_7745c5c3_Var23 = templ.NopComponent
+		templ_7745c5c3_Var27 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var27 == nil {
+			templ_7745c5c3_Var27 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var24 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var28 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			templ_7745c5c3_Err = InfoFragment(info).Render(ctx, templ_7745c5c3_Buffer)
+			templ_7745c5c3_Var29 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+				if !templ_7745c5c3_IsBuffer {
+					templ_7745c5c3_Buffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+				}
+				templ_7745c5c3_Err = InfoFragment(info).Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(" ")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = footerComponent().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if !templ_7745c5c3_IsBuffer {
+					_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
+				}
+				return templ_7745c5c3_Err
+			})
+			templ_7745c5c3_Err = mainwraper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var29), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -662,7 +805,7 @@ func Info(info string) templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var24), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var28), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -681,18 +824,37 @@ func NotFound() templ.Component {
 			defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 		}
 		ctx = templ.InitializeContext(ctx)
-		templ_7745c5c3_Var25 := templ.GetChildren(ctx)
-		if templ_7745c5c3_Var25 == nil {
-			templ_7745c5c3_Var25 = templ.NopComponent
+		templ_7745c5c3_Var30 := templ.GetChildren(ctx)
+		if templ_7745c5c3_Var30 == nil {
+			templ_7745c5c3_Var30 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Var26 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+		templ_7745c5c3_Var31 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
 			templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
 			if !templ_7745c5c3_IsBuffer {
 				templ_7745c5c3_Buffer = templ.GetBuffer()
 				defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
 			}
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose-invert m-auto\"><div>404 NOT FOUND PAGE</div></article>")
+			templ_7745c5c3_Var32 := templ.ComponentFunc(func(ctx context.Context, templ_7745c5c3_W io.Writer) (templ_7745c5c3_Err error) {
+				templ_7745c5c3_Buffer, templ_7745c5c3_IsBuffer := templ_7745c5c3_W.(*bytes.Buffer)
+				if !templ_7745c5c3_IsBuffer {
+					templ_7745c5c3_Buffer = templ.GetBuffer()
+					defer templ.ReleaseBuffer(templ_7745c5c3_Buffer)
+				}
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose dark:prose-invert m-auto\"><div>404 NOT FOUND PAGE</div></article>")
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				templ_7745c5c3_Err = footerComponent().Render(ctx, templ_7745c5c3_Buffer)
+				if templ_7745c5c3_Err != nil {
+					return templ_7745c5c3_Err
+				}
+				if !templ_7745c5c3_IsBuffer {
+					_, templ_7745c5c3_Err = io.Copy(templ_7745c5c3_W, templ_7745c5c3_Buffer)
+				}
+				return templ_7745c5c3_Err
+			})
+			templ_7745c5c3_Err = mainwraper().Render(templ.WithChildren(ctx, templ_7745c5c3_Var32), templ_7745c5c3_Buffer)
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
@@ -701,7 +863,7 @@ func NotFound() templ.Component {
 			}
 			return templ_7745c5c3_Err
 		})
-		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var26), templ_7745c5c3_Buffer)
+		templ_7745c5c3_Err = pageLayout().Render(templ.WithChildren(ctx, templ_7745c5c3_Var31), templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
