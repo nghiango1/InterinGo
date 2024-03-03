@@ -134,9 +134,9 @@ func HomeHandle(w http.ResponseWriter, r *http.Request) {
 
 func InfoHandler(w http.ResponseWriter, r *http.Request) {
 	component := Info("<p>This is infomation about Authors of InterinGo language<p>")
-	info, ok := getPage("server/docs/resume.md")
-	if !ok {
-		component = Info(string(info))
+	info, err := os.ReadFile("server/assets/resume.md")
+	if err == nil {
+		component = Info(string(mdToHTML(info)))
 	}
 	component.Render(context.Background(), w)
 }
