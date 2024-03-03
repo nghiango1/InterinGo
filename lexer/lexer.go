@@ -43,11 +43,10 @@ func (l *Lexer) readChar() {
 }
 
 func (l *Lexer) skipWhitespace() {
-	if share.VerboseMode {
-		l.SkipedChar += 1
-	}
-
 	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+		if share.VerboseMode {
+			l.SkipedChar += 1
+		}
 		l.readChar()
 	}
 }

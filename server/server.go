@@ -49,10 +49,14 @@ var docsPath = "server/docs/"
 func Init() {
 	fmt.Println("server init")
 	mdPages = make(map[string]string)
+	content, err := os.ReadFile("README.md")
+	if err == nil {
+		mdPages["/docs"] = string(mdToHTML(content))	
+	}
 	allDocs = &Linked{
 		nestedLink: make(map[string]*Linked),
 	}
-	err := filepath.Walk(docsPath, populatedPage)
+	err = filepath.Walk(docsPath, populatedPage)
 	if err != nil {
 		fmt.Printf("Read docs path error\n")
 	}

@@ -32,13 +32,14 @@ func Handle(line string, out io.Writer) {
 	case line == "help()":
 		usage(out)
 	case line == "exit()":
-		io.WriteString(out, "exit() only work in REPL CLI session")
+		io.WriteString(out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
+		env = object.NewEnvironment()
 	case line == "toggleVerbose()":
 		share.VerboseMode = !share.VerboseMode
 		if share.VerboseMode {
-			io.WriteString(out, "Verbose mode enable")
+			io.WriteString(out, "Verbose mode enable\n")
 		} else {
-			io.WriteString(out, "Verbose mode disable")
+			io.WriteString(out, "Verbose mode disable\n")
 		}
 	case line == "":
 	default:

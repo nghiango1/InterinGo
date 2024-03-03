@@ -178,7 +178,7 @@ func outputComponent() templ.Component {
 			templ_7745c5c3_Var6 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-promt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap()\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"stick\" class=\"peer/stick m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateStick();\" checked=\"true\"> <label for=\"stick\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/stick:font-bold peer-checked:bg-gray-200\">Stick</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"resize-y outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"rounded-t-lg border-blue-500 dark:border-white border-2 overflow-hidden\"><input id=\"hiddenwrap\" class=\"hidden peer/wrap\" type=\"checkbox\" name=\"wrap\"> <input id=\"hiddenhide\" class=\"hidden peer/hide\" type=\"checkbox\" name=\"hide\"><div class=\"flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2\"><h2 class=\"block m-auto flex-1 whitespace-nowrap overflow-clip\">Command-prompt window </h2><input id=\"wrap\" class=\"peer/wrap m-auto\" type=\"checkbox\" name=\"wrap\" oninput=\"updateWrap(); scrollBottom();\"> <label for=\"wrap\" class=\"flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200\">Wrap</label> <input id=\"stick\" class=\"peer/stick m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateStick();\" checked=\"true\"> <label for=\"stick\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/stick:font-bold peer-checked:bg-gray-200\">Stick</label> <input id=\"hide\" class=\"peer/hide m-auto\" type=\"checkbox\" name=\"hide\" oninput=\"updateHide(); scrollBottom();\"> <label for=\"hide\" class=\"flex flex-row gap-2 m-auto rounded-lg peer-checked/hide:font-bold peer-checked:bg-gray-200\">Hide</label></div><pre id=\"repl-output\" class=\"resize-y outline-blue-200 p-2 rounded-lg h-56 whitespace-pre peer-checked/hide:hidden peer-checked/wrap:whitespace-pre-wrap flex overflow-auto scrollbar\" hx-on:htmx:after-swap=\"scrollBottom()\">Let start with help() command ")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -347,7 +347,7 @@ func exampleArticalFragment() templ.Component {
 			templ_7745c5c3_Var13 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose max-w-none dark:prose-invert\"><h1>InterinGo </h1><p>To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command promt. Click on Click and run to copy the code into Command promt and have REPL run the code. The input box will reflect the code being used, while the command promt will show the evaluation result.</p>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<article class=\"prose max-w-none dark:prose-invert\"><h1>InterinGo </h1><p>\"interprester-in-go\" or InterinGo (for short) is a new interpreter language by <a href=\"https://www.linkedin.com/in/nghia-ngo-duc\">me</a> to chalenge my self with more advanged topics. The command-prompt window is the directed way to interact with InterinGo REPL, which have been broughted to web so you can try it now without the need to download any binary.</p><p>To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL command prompt. Click on Click and run to copy the code into Command prompt and have REPL run the code. The input box will reflect the code being used, while the command prompt will show the evaluation result.</p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -355,27 +355,7 @@ func exampleArticalFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-promt can be annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still show evaluation result in minimized state (Wrap is wrap text, eh... wanna use that?). Now let dive in to the language.</p><h2>Literal value </h2><p>In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result return by all possible Evaluation process of the intepreter. They are:</p><ul><li>Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li><li>Integer: The numbers which uses 64-bit integers</li><li>Null: Hate it or wanted it, InterinGo have null, a special object representing nothing. Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values</li></ul><h3>Example </h3>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = exampleCodeComponent("Boolean", "true").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = exampleCodeComponent("Interger", "510").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<q>Currently there is no directed way to create a <code>NULL</code> object, here is a specific example that we can get it</q>")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		templ_7745c5c3_Err = exampleCodeComponent("Null", "if (1 < 0) { 1 }").Render(ctx, templ_7745c5c3_Buffer)
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<h2>Need more</h2>Of course, there isn't all of what InterinGo can do, but this home page is just for showing InterinGo REPL for the world, let have some readding in <a href=\"/docs\">document</a> to learning more about it")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-prompt can be annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still show evaluation result in minimized state (or uncheck sticky box eh... wanna use that?).</p><h2>Examples</h2><p>Of course, these examples isn't all of what InterinGo can do, but this home page is just for showing InterinGo REPL to the world, let have some readding in <a href=\"/docs\">document</a> to learning more about it. The online online REPL won't be there thought, so let head on and downloading REPL build file <a href=\"https://github.com/nghiango1/hello/releases\">here </a></p>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -391,7 +371,27 @@ func exampleArticalFragment() templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = exampleCodeComponent("Error", "2/0").Render(ctx, templ_7745c5c3_Buffer)
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<q>Also, current REPL session is shared with only one backend, so we can reuse our variables even the page is reload. With above code, we currently have <code>x = 8</code></q>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = exampleCodeComponent("Function", `let add = fn (x,y) { x + y }; return add(4,x);`).Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>Error throwing is here too</p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = exampleCodeComponent("Error", "let x = 2/0").Render(ctx, templ_7745c5c3_Buffer)
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<p>In-case use didn't see the input box placeholder just yet, try this too</p>")
+		if templ_7745c5c3_Err != nil {
+			return templ_7745c5c3_Err
+		}
+		templ_7745c5c3_Err = exampleCodeComponent("Built-in command", "help()").Render(ctx, templ_7745c5c3_Buffer)
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -467,12 +467,12 @@ func renderLinked(path string, key string, linked *Linked) templ.Component {
 				}
 			}
 		} else {
-			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ol class=\"block list-disc\">")
+			_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<ol class=\"block list-disc \">")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 			if key == "docs" {
-				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row items-end my-4\"><h1 class=\"flex-1 block font-bold text-xl dark:text-white\">Documentation</h1><button class=\"block md:hidden\" onclick=\"linkedHide()\">Hide menu</button></div>")
+				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"flex flex-row items-end py-4\"><h1 class=\"flex-1 block font-bold text-xl dark:text-white\">Documentation</h1><button class=\"block md:hidden\" onclick=\"linkedHide()\">Hide menu</button></div>")
 				if templ_7745c5c3_Err != nil {
 					return templ_7745c5c3_Err
 				}
@@ -484,7 +484,7 @@ func renderLinked(path string, key string, linked *Linked) templ.Component {
 				var templ_7745c5c3_Var16 string
 				templ_7745c5c3_Var16, templ_7745c5c3_Err = templ.JoinStringErrs(key)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 271, Col: 36}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 270, Col: 36}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var16))
 				if templ_7745c5c3_Err != nil {
@@ -512,7 +512,7 @@ func renderLinked(path string, key string, linked *Linked) templ.Component {
 				var templ_7745c5c3_Var18 string
 				templ_7745c5c3_Var18, templ_7745c5c3_Err = templ.JoinStringErrs(item)
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 277, Col: 52}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `server/index.templ`, Line: 276, Col: 52}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var18))
 				if templ_7745c5c3_Err != nil {
@@ -554,7 +554,7 @@ func LinkedComponent(linked *Linked) templ.Component {
 			templ_7745c5c3_Var19 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"linked\" class=\"hidden peer m-auto\" type=\"checkbox\" name=\"checked\"> <label for=\"linked\" class=\"block md:hidden peer-checked:hidden focus:font-bold sticky top-16 p-1 rounded-r-lg bg-gray-200 dark:bg-gray-500 focus:bg-blue-500 active:bg-blue-500 dark:text-white vertical-lr\">Show menu</label><div class=\"hidden px-4 w-[19rem] peer-checked:block md:block sticky top-4 dark:text-white before:-z-10 before:rounded-b-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-0 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<input id=\"linked\" class=\"hidden peer m-auto\" type=\"checkbox\" name=\"checked\"> <label for=\"linked\" class=\"block md:hidden peer-checked:hidden focus:font-bold sticky top-16 p-1 rounded-r-lg bg-gray-200 dark:bg-gray-500 focus:bg-blue-500 active:bg-blue-500 dark:text-white vertical-lr\">Show menu</label><div class=\"h-full hidden px-4 w-[19rem] peer-checked:block md:block sticky top-4 dark:text-white before:-z-10 before:rounded-b-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-0 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -586,7 +586,7 @@ func DocsFragment(docs string, linked *Linked) templ.Component {
 			templ_7745c5c3_Var20 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid md:grid-cols-docs grid-cols-1 px-8\"><div class=\"fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<div class=\"grid md:grid-cols-docs grid-cols-1 px-8 \"><div class=\"fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -594,7 +594,7 @@ func DocsFragment(docs string, linked *Linked) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"overflow-auto\"><article class=\"prose dark:prose-invert w-full max-w-none\">")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("</div><div class=\"overflow-auto\"><article class=\"prose dark:prose-invert w-full max-w-none mb-6\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

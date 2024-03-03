@@ -87,8 +87,8 @@ templ outputComponent() {
 		<input id="hiddenwrap" class="hidden peer/wrap" type="checkbox" name="wrap"/>
 		<input id="hiddenhide" class="hidden peer/hide" type="checkbox" name="hide"/>
 		<div class="flex gap-2 p-1 bg-blue-200 dark:bg-[#090d1a] border-b-2">
-			<h2 class="block m-auto flex-1 whitespace-nowrap overflow-clip">Command-promt window </h2>
-			<input id="wrap" class="peer/wrap m-auto" type="checkbox" name="wrap" oninput="updateWrap()"/>
+			<h2 class="block m-auto flex-1 whitespace-nowrap overflow-clip">Command-prompt window </h2>
+			<input id="wrap" class="peer/wrap m-auto" type="checkbox" name="wrap" oninput="updateWrap(); scrollBottom();"/>
 			<label
 				for="wrap"
 				class="flex flex-row gap-2 object-none m-auto rounded-lg peer-checked/wrap:font-bold peer-checked:bg-gray-200"
@@ -201,44 +201,43 @@ templ exampleArticalFragment() {
 	<article class="prose max-w-none dark:prose-invert">
 		<h1>InterinGo </h1>
 		<p>
+			"interprester-in-go" or InterinGo (for short) is a new interpreter language by <a
+	href="https://www.linkedin.com/in/nghia-ngo-duc"
+>me</a> to chalenge my self with more advanged topics. The
+			command-prompt window is the directed way to interact with InterinGo REPL, which have been broughted to web so
+			you can try it now without the need to download any binary.
+		</p>
+		<p>
 			To make sure you not get lost with how to use the language, here is a sample craft code to try out in REPL
-			command promt. Click on Click and run to copy the code into Command promt and have REPL run the code. The input
-			box will reflect the code being used, while the command promt will show the evaluation result.
+			command prompt. Click on Click and run to copy the code into Command prompt and have REPL run the code. The
+			input box will reflect the code being used, while the command prompt will show the evaluation result.
 		</p>
 		@exampleCodeComponent("Comparation", "1 > 2")
 		<p>
-			As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-promt can be annoy
-			in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still show evaluation result
-			in minimized state (Wrap is wrap text, eh... wanna use that?). Now let dive in to the language.
+			As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-prompt can be
+			annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still show evaluation
+			result in minimized state (or uncheck sticky box eh... wanna use that?).
 		</p>
-		<h2>Literal value </h2>
+		<h2>Examples</h2>
 		<p>
-			In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result
-			return by all possible Evaluation process of the intepreter. They are:
+			Of course, these examples isn't all of what InterinGo can do, but this home page is just for showing InterinGo
+			REPL to the world, let have some readding in <a href="/docs">document</a> to learning more about it. The online
+			online REPL won't be there thought, so let head on and downloading REPL build file <a
+	href="https://github.com/nghiango1/hello/releases"
+>here </a>
 		</p>
-		<ul>
-			<li>Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li>
-			<li>Integer: The numbers which uses 64-bit integers</li>
-			<li>
-				Null: Hate it or wanted it, InterinGo have null, a special object representing nothing. Both
-				<code>null</code> and <code>false</code> make a condition false; so they can be call false values
-			</li>
-		</ul>
-		<h3>Example </h3>
-		@exampleCodeComponent("Boolean", "true")
-		@exampleCodeComponent("Interger", "510")
-		<q>
-			Currently there is no directed way to create a <code>NULL</code> object, here is a specific example that we can
-			get it
-		</q>
-		@exampleCodeComponent("Null", "if (1 < 0) { 1 }")
-		<h2>Need more</h2>
-		Of course, there isn't all of what InterinGo can do, but this home page is just for showing InterinGo REPL for
-		the world, let have some readding in <a href="/docs">document</a> to learning more about it
 		@exampleCodeComponent("Complex calculation", "4 * (4 / 2) * (3 + 2) + 1")
 		@exampleCodeComponent("Control flow", "if (1 > 2) { return 10 } else { return 3 }")
 		@exampleCodeComponent("Variable", "let x = 2 * 2 * 2; return x;")
-		@exampleCodeComponent("Error", "2/0")
+		<q>
+			Also, current REPL session is shared with only one backend, so we can reuse our variables even the page is
+			reload. With above code, we currently have <code>x = 8</code>
+		</q>
+		@exampleCodeComponent("Function", `let add = fn (x,y) { x + y }; return add(4,x);`)
+		<p>Error throwing is here too</p>
+		@exampleCodeComponent("Error", "let x = 2/0")
+		<p>In-case use didn't see the input box placeholder just yet, try this too</p>
+		@exampleCodeComponent("Built-in command", "help()")
 	</article>
 }
 
@@ -260,9 +259,9 @@ templ renderLinked(path string, key string, linked *Linked) {
 			@renderLinked(path+"/"+key, key, linked.nestedLink[key])
 		}
 	} else {
-		<ol class="block list-disc">
+		<ol class="block list-disc ">
 			if key == "docs" {
-				<div class="flex flex-row items-end my-4">
+				<div class="flex flex-row items-end py-4">
 					<h1 class="flex-1 block font-bold text-xl dark:text-white">Documentation</h1>
 					<button class="block md:hidden" onclick="linkedHide()">
 						Hide menu
@@ -294,19 +293,19 @@ templ LinkedComponent(linked *Linked) {
 		Show menu
 	</label>
 	<div
-		class="hidden px-4 w-[19rem] peer-checked:block md:block sticky top-4 dark:text-white before:-z-10 before:rounded-b-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-0 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none"
+		class="h-full hidden px-4 w-[19rem] peer-checked:block md:block sticky top-4 dark:text-white before:-z-10 before:rounded-b-lg before:backdrop-blur-lg before:absolute before:-top-4 before:-inset-0 before:bg-white/30 before:dark:bg-[#050510]/30 before:object-none"
 	>
 		@renderLinked("", "Contents", linked)
 	</div>
 }
 
 templ DocsFragment(docs string, linked *Linked) {
-	<div class="grid md:grid-cols-docs grid-cols-1 px-8">
+	<div class="grid md:grid-cols-docs grid-cols-1 px-8 ">
 		<div class="fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto">
 			@LinkedComponent(linked)
 		</div>
 		<div class="overflow-auto">
-			<article class="prose dark:prose-invert w-full max-w-none">
+			<article class="prose dark:prose-invert w-full max-w-none mb-6">
 				@templ.Raw(docs)
 			</article>
 			@footerComponent()

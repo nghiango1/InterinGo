@@ -53,7 +53,9 @@ func init() {
 	flag.Parse()
 	share.VerboseMode = verboseMode
 	share.HotLoad = hotloadMode
-	server.Init()
+	if serverMode {
+		server.Init()
+	}
 }
 
 func main() {
