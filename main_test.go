@@ -23,6 +23,12 @@ func isIigFile(fullName string) (string, bool) {
 	return fileName, true
 }
 
+// Hack so that testing flag can be init first
+var _ = func() bool {
+	testing.Init()
+	return true
+}()
+
 // This evaluating all `test/*.iig` file and compare it with the desier
 // `test/result/*.out` file content
 func TestMain(t *testing.T) {
@@ -35,8 +41,8 @@ func TestMain(t *testing.T) {
 		t.Errorf("Test directory read error, is it available, error code: %v\n", err)
 	}
 
-	buf := new(bytes.Buffer)
 	for _, v := range files {
+		buf := new(bytes.Buffer)
 		if v.IsDir() {
 			continue
 		}

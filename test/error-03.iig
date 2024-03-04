@@ -1,0 +1,3 @@
+// This should not throw parse ERROR
+// Instead, we assuming the Block statement have empty stmt []
+let x = if ( 0 > 1 ) {

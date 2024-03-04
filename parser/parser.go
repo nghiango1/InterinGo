@@ -197,21 +197,20 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		return nil
 	}
 
-	stmt := &ast.BlockStatement{
+	block := &ast.BlockStatement{
 		Token: p.curToken,
 	}
 
-	for !p.peekTokenIs(token.RBRACE) {
-		p.nextToken()
+	p.nextToken()
+	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
 		curr := p.parseStatement()
-		stmt.Statements = append(stmt.Statements, curr)
-		if p.peekTokenIs(token.SEMICOLON) {
-			p.nextToken()
+		if curr != nil {
+			block.Statements = append(block.Statements, curr)
 		}
+		p.nextToken()
 	}
 
-	p.nextToken()
-	return stmt
+	return block
 }
 
 func (p *Parser) parseLetStatement() *ast.LetStatement {
@@ -279,7 +278,7 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 		return nil
 	}
 
-	for !p.peekTokenIs(token.RPAREN) {
+	for !p.peekTokenIs(token.RPAREN) && !p.peekTokenIs(token.EOF) {
 		p.nextToken()
 		ident := p.parseIdentifier().(*ast.Identifier)
 		function.Parameters = append(function.Parameters, ident)
