@@ -51,7 +51,7 @@ func Init() {
 	mdPages = make(map[string]string)
 	content, err := os.ReadFile("README.md")
 	if err == nil {
-		mdPages["/docs"] = string(mdToHTML(content))	
+		mdPages["/docs"] = string(mdToHTML(content))
 	}
 	allDocs = &Linked{
 		nestedLink: make(map[string]*Linked),
