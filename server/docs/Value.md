@@ -10,11 +10,11 @@ return by all possible Evaluation process of the intepreter. They are:
 ## Example 
 
 Boolean
-```
+```iig
 true
 ```
 Interger
-```
+```iig
 510
 ```
 
@@ -22,6 +22,6 @@ Interger
 get it
 
 Null
-```
+```iig
 if (1 < 0) { 1 }
 ```

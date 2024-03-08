@@ -47,7 +47,7 @@ Just tried it, things look quite simmlar but not really, i kept it as is until i
 
 Now, even my `;` or `\n` (newline) at end of statement isn't a hard force thing, so parse allow something like this:
 
-```
+```iig
 let x = 1 let y = 2
 x
 y
@@ -63,8 +63,8 @@ let x = add(x,3) + 5 * (add(2,4) + 4)
 ```
 
 At that time, REPL output thing like this
-```
->> let x = add(x,3) + 5 * (add(2,4) + 4)
+```sh
+> let x = add(x,3) + 5 * (add(2,4) + 4)
 Parser has 3 errors
 Parser error: "no prefix parse function for + found"
 Parser error: "Expected next token to be ), got + instead"
@@ -200,6 +200,7 @@ So, we want a seperated arg in function call store from our global env variable.
 Also, after keep reading, I known that:
 - My `evalCallExpression` implementation, which try to handle `ast.FunctionLiteral.Function` base on two case: is it a `ast.Identifier` or a `ast.FunctionLiteral`? Just use `Eval` and we have `object.Function` in return. Eh, way smaller and nicer.
 - Return value can cause chain reaction and stop main Evaluation flow immedietly, which isn't cover by test. So I add this:
+
     ```iig
     let add = fn(x, y) {
         return x + y
@@ -208,6 +209,7 @@ Also, after keep reading, I known that:
     let x = 2;
     return x;
     ```
+
     This should return 2
 
 
