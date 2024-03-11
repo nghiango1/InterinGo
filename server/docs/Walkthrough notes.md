@@ -212,6 +212,28 @@ Also, after keep reading, I known that:
 
     This should return 2
 
+#### High ordered function (closure) support
+
+My implement on eval function call have wrong environment value. That instead update that function object environment, i update my current (what ever scope that the function call was evoke) environment. Causing `ERROR: undefined identifier <variable_name>`. Cost me a while to debug and identify the problem
+
+```diff
+-func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.Environment) object.Object {
++func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Object {
+    numOfFuncParam := len(fo.Parameters)
+    numOfArgs := len(args)
+    if numOfArgs != numOfFuncParam {
+        return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
+    }
+ 
+-   encloseEnv := object.NewEnclosedEnvironment(env)
++   encloseEnv := object.NewEnclosedEnvironment(fo.Env)
+    for i := 0; i < numOfFuncParam; i++ {
+-       argValue := Eval(args[i], env)
++       argValue := Eval(args[i], fo.Env)
+        if isError(argValue) {
+            return argValue
+        }
+```
 
 #### Final line
 

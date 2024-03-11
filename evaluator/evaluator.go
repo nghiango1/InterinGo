@@ -137,16 +137,16 @@ func evalFunctionLiteral(fl *ast.FunctionLiteral, env *object.Environment) *obje
 	return &object.Function{Parameters: params, Body: body, Env: env}
 }
 
-func evalFunctionObject(fo *object.Function, args []ast.Expression, env *object.Environment) object.Object {
+func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Object {
 	numOfFuncParam := len(fo.Parameters)
 	numOfArgs := len(args)
 	if numOfArgs != numOfFuncParam {
 		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
 	}
 
-	encloseEnv := object.NewEnclosedEnvironment(env)
+	encloseEnv := object.NewEnclosedEnvironment(fo.Env)
 	for i := 0; i < numOfFuncParam; i++ {
-		argValue := Eval(args[i], env)
+		argValue := Eval(args[i], fo.Env)
 		if isError(argValue) {
 			return argValue
 		}
@@ -174,7 +174,7 @@ func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 		return newError("%s is not callable", result.Type())
 	}
 
-	return evalFunctionObject(functionObject, callExpression.Arguments, env)
+	return evalFunctionObject(functionObject, callExpression.Arguments)
 }
 
 func evalMinusOperatorExpression(right object.Object) object.Object {
