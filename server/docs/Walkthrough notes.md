@@ -240,3 +240,7 @@ My implement on eval function call have wrong environment value. That instead up
 implementing object.Object.Inspect() vs ast.Node.String() almost done the same thing for object,Function and ast.FunctionLiteral
 
 Nested map structure as environment is too expensive. I do thing back on how C using stack for handle memory after this, could it be replicate in InterinGo?
+
+## Language extending - Tool chain
+
+- Syntax highlighting with Rule or Tree-sitter?
