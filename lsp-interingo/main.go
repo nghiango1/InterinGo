@@ -22,7 +22,7 @@ func main() {
 	handler = protocol.Handler{
 		Initialize:             initialize,
 		Shutdown:               shutdown,
-        TextDocumentCompletion: handlers.TextDocumentCompletion,
+		TextDocumentCompletion: handlers.TextDocumentCompletion,
 	}
 
 	server := server.NewServer(&handler, lsName, true)
@@ -49,4 +49,3 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, 
 func shutdown(context *glsp.Context) error {
 	return nil
 }
-
