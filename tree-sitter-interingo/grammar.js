@@ -1,4 +1,3 @@
-
 // const (
 // 	_ int = iota
 // 	LOWEST
@@ -22,6 +21,10 @@
 // 	token.ASTERISK: PRODUCT,
 // 	token.LPAREN:   CALL,
 // }
+
+const
+  newline = '\n',
+  terminator = choice(newline, ';', '\0');
 
 const precedences_value = {
   LOWEST: 0,
@@ -57,10 +60,7 @@ module.exports = grammar({
   rules: {
     // TODO: add the actual grammar rules
     source_file: $ => repeat(
-      choice(
-        $._statement,
-        $.commentline
-      )
+      $._statement
     ),
 
     commentline: $ => seq(
@@ -74,14 +74,14 @@ module.exports = grammar({
         $.return_statement,
         $.expression_statement
       ),
-      choice('\n', ';', '\0')
+      optional(terminator)
     ),
 
     let_statement: $ => seq(
       'let',
-      $.identifier,
+      field('name', $.identifier),
       '=',
-      $.expression
+      field('value', $.expression)
     ),
 
     return_statement: $ => seq(
@@ -94,32 +94,42 @@ module.exports = grammar({
     ),
 
     expression: $ => choice(
-      prec(1, $.prefix_expression),
-      prec(0, $.infix_expression),
+      $.infix_expression,
+      $.prefix_expression
     ),
 
     prefix_expression: $ => choice(
-      prec(precedences_value.LOWEST,$.identifier),
-      prec(precedences_value.LOWEST,$.interger_literal),
-      prec(precedences_value.LOWEST,$.boolean),
+      prec(precedences_value.PRIORITY, $.if_expression),
+      prec(precedences_value.PRIORITY, $.function_literal),
+      prec(precedences_value.PRIORITY, seq('(', $.expression, ')')),
+      prec(precedences_value.LOWEST, $.identifier),
+      prec(precedences_value.LOWEST, $.interger_literal),
+      prec(precedences_value.LOWEST, $.boolean),
       prec(precedences_value.PREFIX, seq('-', $.expression)),
       prec(precedences_value.PREFIX, seq('!', $.expression)),
-      prec(precedences_value.PRIORITY, seq('(', $.expression, ')')),
-      prec(precedences_value.PRIORITY, $.if_expression),
-      prec(precedences_value.PRIORITY, $.function_literal)
     ),
 
-    infix_expression: $ => (
-      prec(precedences.PLUS , seq($.expression,'+',$.expression)),
-      prec(precedences.MINUS, seq($.expression,'-',$.expression)),
-      prec(precedences.SLASH, seq($.expression,'/',$.expression)),
-      prec(precedences.ASTERISK, seq($.expression,'*',$.expression)),
-      prec(precedences.EQ, seq($.expression,'==',$.expression)),
-      prec(precedences.NOT_EQ, seq($.expression,'!=',$.expression)),
-      prec(precedences.GT, seq($.expression,'>',$.expression)),
-      prec(precedences.LT, seq($.expression,'<',$.expression)),
-      prec(precedences.LPAREN, $.call_expression)
-    ),
+    infix_expression: $ => {
+      const helper = function AddingFieldNameToInfixExpression(l, o, r) {
+        return seq(
+          field('left', l),
+          field('operator', o),
+          field('right', r)
+        )
+      }
+
+      return choice(
+        prec.left(precedences.PLUS, helper($.expression, '+', $.expression)),
+        prec.left(precedences.MINUS, helper($.expression, '-', $.expression)),
+        prec.left(precedences.SLASH, helper($.expression, '/', $.expression)),
+        prec.left(precedences.ASTERISK, helper($.expression, '*', $.expression)),
+        prec.left(precedences.EQ, helper($.expression, '==', $.expression)),
+        prec.left(precedences.NOT_EQ, helper($.expression, '!=', $.expression)),
+        prec.left(precedences.GT, helper($.expression, '>', $.expression)),
+        prec.left(precedences.LT, helper($.expression, '<', $.expression)),
+        prec.left(precedences.LPAREN, $.call_expression)
+      )
+    },
 
     identifier: $ => /[a-zA-Z]+/,
 
@@ -133,54 +143,46 @@ module.exports = grammar({
     if_expression: $ => seq(
       'if',
       '(',
-      $.expression,
+      field('condition', $.expression),
       ')',
-      $.code_block,
-      choice(
+      field('consequence', $.code_block),
+      optional(
         seq(
           'else',
-          $.code_block
+          field('alternative', $.code_block)
         ),
-        '\0'
       )
     ),
 
-    call_expression: $ => seq(
-      $.identifier,
-      $.argument_list,
-    ),
+    call_expression: $ => prec(precedences_value.CALL, seq(
+      field('name', $.identifier),
+      field('args', $.argument_list)
+    )),
 
     argument_list: $ => seq(
       '(',
-      repeat(
-        $.expression,
-      ),
+      seq($.expression, repeat(seq(',', $.expression))),
       ')'
     ),
 
     param_list: $ => seq(
       '(',
-      repeat(
-        $.identifier,
-      ),
+      seq($.identifier, repeat(seq(',', $.identifier))),
       ')'
     ),
 
     code_block: $ => seq(
       '{',
       repeat(
-        choice(
-          $._statement,
-          $.commentline
-        )
+        $._statement,
       ),
       '}'
     ),
 
     function_literal: $ => seq(
       'fn',
-      $.param_list,
-      $.code_block,
+      field('param', $.param_list),
+      field('body', $.code_block),
     ),
   }
 });
