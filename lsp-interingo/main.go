@@ -11,7 +11,7 @@ import (
 	_ "github.com/tliron/commonlog/simple"
 )
 
-const lsName = "Emoji Autocomplete Language Server"
+const lsName = "Interingo Language Server"
 
 var version string = "0.0.1"
 var handler protocol.Handler
@@ -23,6 +23,7 @@ func main() {
 		Initialize:             initialize,
 		Shutdown:               shutdown,
 		TextDocumentCompletion: handlers.TextDocumentCompletion,
+		TextDocumentFormatting: handlers.HandleDocumentFormatting,
 	}
 
 	server := server.NewServer(&handler, lsName, true)

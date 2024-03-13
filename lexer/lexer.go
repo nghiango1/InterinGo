@@ -1,13 +1,15 @@
 package lexer
 
 import (
-	"interingo/token"
 	"interingo/share"
+	"interingo/token"
 )
 
 type Lexer struct {
 	input        string
 	position     int                     // current position in input (points to current char)
+	Line         int                     // current position in input (line - 0 index)
+	Character    int                     // current position in input (position in line - 0 index)
 	readPosition int                     // current reading position in input (after current char)
 	ch           byte                    // current char under examination
 	SkipedChar   int                     // skiped white-space - for Verbose mode
@@ -40,6 +42,12 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition += 1
+	if l.ch == '\n' {
+		l.Line += 1
+		l.Character = 0
+	} else {
+		l.Character += 1
+	}
 }
 
 func (l *Lexer) skipWhitespace() {
@@ -51,15 +59,18 @@ func (l *Lexer) skipWhitespace() {
 	}
 }
 
-func (l *Lexer) skipCurrentLine() {
+func (l *Lexer) skipCurrentLine() string {
 	if share.VerboseMode {
 		l.SkipedLine += 1
 	}
 
+	pos := l.position
 	// Read until end of line or stop when reach EOF
 	for l.ch != '\n' && l.ch != 0 {
 		l.readChar()
 	}
+
+	return l.input[pos:l.position]
 }
 
 func (l *Lexer) NextToken() token.Token {
@@ -94,12 +105,11 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.ASTERISK, l.ch)
 	case '/':
 		if l.peakChar() == '/' {
-			l.skipCurrentLine()
+			tok.Type = token.COMMENT
+			literal := l.skipCurrentLine()
+			tok.Literal = literal
 
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
-			return l.NextToken()
+			return tok
 		} else {
 			tok = newToken(token.SLASH, l.ch)
 		}

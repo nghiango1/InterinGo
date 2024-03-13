@@ -73,7 +73,10 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
-
+	for p.curToken.Type == token.COMMENT && p.curToken.Type != token.EOF {
+		p.curToken = p.peekToken
+		p.peekToken = p.l.NextToken()
+	}
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
