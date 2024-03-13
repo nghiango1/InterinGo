@@ -2,10 +2,12 @@
 Cargo.lock
 target/
 
-# Node artifacts
+# Build directory
 build/
 src/
 bindings/
+
+# Node artifacts
 prebuilds/
 node_modules/
 *.tgz

@@ -131,7 +131,7 @@ module.exports = grammar({
       )
     },
 
-    identifier: $ => /[a-zA-Z]+/,
+    identifier: $ => /[a-zA-Z_]+/,
 
     interger_literal: $ => /\d+/,
 
