@@ -13,6 +13,8 @@
   "scripts": {
     "build": "tree-sitter generate",
     "test": "tree-sitter test",
+    "parse": "tree-sitter parse ../test/function-02.iig",
+    "highlight": "tree-sitter highlight ../test/function-02.iig",
     "install": "node-gyp-build",
     "prebuildify": "prebuildify --napi --strip"
   },
@@ -47,7 +49,8 @@
       "file-types": [
         "iig"
       ],
-      "injection-regex": "^(iig)$"
+      "injection-regex": "^(iig)$",
+      "highlights": "queries/highlights.scm"
     }
   ]
 }

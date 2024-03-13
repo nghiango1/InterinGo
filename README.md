@@ -9,7 +9,7 @@
 
 To challenge my knowledge with `go` language and advanced (interpreter) concept. I also set up a http server to public InterinGo interpreter. You can access evaluating the language right now via link in the repo [Github description](https://github.com/nghiango1/hello).
 
-## Techstack: 
+## Techstack:
 
 Front-end
 - `templ` for html template
@@ -40,12 +40,12 @@ And you should have been welcome with this
 $ ./interingo
 Hello <username>! This is the InterinGo programming language!
 Type `help()` in commands for common guide
->> 
+>>
 ```
 
 ### File mode
 
-> This have the highest piority, so don't expect server, or REPL running 
+> This have the highest piority, so don't expect server, or REPL running
 
 Running `./interingo` executable with `-f` flag.
 
@@ -86,7 +86,7 @@ Start with the `-v` flag
 $ ./interingo -v
 ```
 
-Or using `toggleVerbose()`command in InterinGo REPL to enable/disable it 
+Or using `toggleVerbose()`command in InterinGo REPL to enable/disable it
 
 ```sh
 $ ./interingo
@@ -122,13 +122,13 @@ Double statement in one line can be seperated by a semicolon `;` for ensuring th
 let x = 1; let y = 2;
 ```
 
-> In-case there is no semicolon, it parse left to right and try to match statement inorder until error occurs 
+> In-case there is no semicolon, it parse left to right and try to match statement inorder until error occurs
 
 A block statement (syntax of creating a new function)
 
 ```iig
 let f = fn (x,y) {
-   return x + y; 
+   return x + y;
 }
 ```
 
@@ -136,7 +136,7 @@ let f = fn (x,y) {
 
 "interpreter-in-go" is a dynamicly type language (which mean it not have type)
 
-Variable can be initialized and assign with this syntax. 
+Variable can be initialized and assign with this syntax.
 
 ```iig
 let x = 1
@@ -173,7 +173,7 @@ let b = !(x >= y)
 let c = add(3, 4)
 ```
 
-Function assign used 
+Function assign used
 
 ```iig
 let f = add(x,y) { return x + y }
@@ -208,10 +208,10 @@ Go
 
     ```sh
     gvm install go1.22.0 -B
-    gvm use go1.22.0 --default 
+    gvm use go1.22.0 --default
     ```
 
-### Build 
+### Build
 
 > To make build process simplier who, the project still contain the build file of templ and tailwindcss. Read more on how to build the front-end in `SERVER.md` file
 
@@ -235,7 +235,7 @@ All server source file is in `/server/` directory, which need special handle for
 
 ### Prerequire
 
-Install go-lang latest version, currently go 1.22.0 
+Install go-lang latest version, currently go 1.22.0
 
 ```sh
 gvm install go1.22.0 -B

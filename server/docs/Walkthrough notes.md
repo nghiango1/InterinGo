@@ -1,4 +1,3 @@
-
 # Personal walkthrough note
 
 A parse and a tokenizer in Interpreter is just a big string parsing
@@ -11,7 +10,7 @@ A parse and a tokenizer in Interpreter is just a big string parsing
 
 When reading the book, i have almost no context how the interpreter parser acctually work. While this is a subject in my collegue year, what we mostly done is "running" program parsing work on paper (drawing context tree)
 
-Being dump, while dealling with a lot of testing driven coding as how the book appoarch the problem. I choose to copy most of testing code (and some ast oop class) provided as is and focus on the actual problem handling, which is parsing the string into each ast class components. This make thing easier to follow, while making me able to try ahead writing my own code before looking at solution in the book. 
+Being dump, while dealling with a lot of testing driven coding as how the book appoarch the problem. I choose to copy most of testing code (and some ast oop class) provided as is and focus on the actual problem handling, which is parsing the string into each ast class components. This make thing easier to follow, while making me able to try ahead writing my own code before looking at solution in the book.
 
 ### Self aware and Writing ahead:
 
@@ -82,7 +81,7 @@ Still, here is thing that i want to address later:
     > I found out about Readline package, used it, now the final REPL is greate
 - No bit operation `>>, <<, ^, &`, no great/less and equal `>=, <=` and some other thing implemented yet. I let this go for now, as It is not a new thing.
 
-## Evaluation parsed program 
+## Evaluation parsed program
 
 ### Auto pillot
 
@@ -94,7 +93,7 @@ Again, I don't know much and need to follow the book in most part. Sample REPL o
 
 I try to done them by my self and end up getting things wrong in the most part with error throwing every where. Okay, let just go back and delete all my code and replace by the book solution.
 
-Program `ast` structure: Program -> Statement**s** -> Each statement type need a different way of Eval handling, (supprising observation?). I still need to look and follow solution implement  
+Program `ast` structure: Program -> Statement**s** -> Each statement type need a different way of Eval handling, (supprising observation?). I still need to look and follow solution implement
 
 #### Evaluation If then else
 
@@ -122,7 +121,7 @@ if (10 > 1) {
     return 1;
 }
 ```
-to 
+to
 ```iig
 if (10 > 1) {
     if (10 > 1) {
@@ -224,7 +223,7 @@ My implement on eval function call have wrong environment value. That instead up
     if numOfArgs != numOfFuncParam {
         return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
     }
- 
+
 -   encloseEnv := object.NewEnclosedEnvironment(env)
 +   encloseEnv := object.NewEnclosedEnvironment(fo.Env)
     for i := 0; i < numOfFuncParam; i++ {
@@ -243,4 +242,4 @@ Nested map structure as environment is too expensive. I do thing back on how C u
 
 ## Language extending - Tool chain
 
-- Syntax highlighting with Rule or Tree-sitter?
+- Syntax highlighting with Rule or Tree-sitter? Done it, source is here 'tree-sitter-interingo/', following README.md to setup guide to use it

@@ -54,7 +54,7 @@ module.exports = grammar({
 
   extras: $ => [
     /\s|\\\r?\n/,
-    $.commentline,
+    $.comment_line,
   ],
 
   rules: {
@@ -63,7 +63,7 @@ module.exports = grammar({
       $._statement
     ),
 
-    commentline: $ => seq(
+    comment_line: $ => seq(
       '//',
       /(\\+(.|\r?\n)|[^\\\n])*/
     ),
