@@ -4,36 +4,64 @@ import (
 	"errors"
 	"fmt"
 	"interingo-lsp/mappers"
+	"interingo-lsp/store"
 	"interingo/lexer"
 	"interingo/parser"
-	"net/url"
-	"os"
 
 	_ "github.com/tliron/commonlog/simple"
 	"github.com/tliron/glsp"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFormattingParams) ([]protocol.TextEdit, error) {
+func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
+	ef := store.Wrap(&params.TextDocument)
+	store.GetStore().Add(ef)
+	return nil
+}
+
+func HandleTextDocumentDidChange (context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	uri := params.TextDocument.URI
-	filepath, err := url.Parse(uri)
+	textDocObj, err := store.GetStore().Get(uri)
 	if err != nil {
-		return nil, errors.New(fmt.Sprint("Can't parse file uri provided", uri))
+		return err
 	}
 
-	data, err := os.ReadFile(filepath.Path)
-	if err != nil {
-		return nil, errors.New(fmt.Sprint("Can't read file at", filepath))
+	textDocObj.Unwrap().Version = params.TextDocument.Version
+	contentChanges := params.ContentChanges // TextDocumentContentChangeEvent or TextDocumentContentChangeEventWhole
+
+	for index, contextChange := range contentChanges {
+		switch changeType := contextChange.(type) {
+		case protocol.TextDocumentContentChangeEventWhole:
+			textDocObj.UpdateWhole(changeType)
+		case protocol.TextDocumentContentChangeEvent:
+			textDocObj.Update(changeType)
+		default:
+			return errors.New(fmt.Sprintf("ABORT: Can't following %d'th file change, get %v", index, contextChange))
+		}
 	}
 
-	stringData := string(data)
+	return nil
+}
 
-	l := lexer.New(stringData)
+func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFormattingParams) ([]protocol.TextEdit, error) {
+	formated := make([]protocol.TextEdit, 0)
+
+	uri := params.TextDocument.URI
+
+	ef, err := store.GetStore().Get(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	if (ef.Unwrap().Text[:43] == "// Yah want formatting? My job here is done") {
+		return formated, nil
+	}
+
+	l := lexer.New(ef.Unwrap().Text)
 	p := parser.New(l)
 	program := p.ParseProgram()
 
-	formated := make([]protocol.TextEdit, 0)
-	allfile := protocol.TextEdit{
+	editAllFile := protocol.TextEdit{
 		Range: protocol.Range{
 			Start: protocol.Position{
 				Line:      protocol.UInteger(0),
@@ -44,10 +72,10 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 				Character: protocol.UInteger(l.Character),
 			},
 		},
-		NewText: fmt.Sprintf("// Yah want formatting? My job here is done\n// %s\n", program.String()) + stringData,
+		NewText: fmt.Sprintf("// Yah want formatting? My job here is done\n// %s\n", program.String()) + ef.Unwrap().Text,
 	}
 
-	formated = append(formated, allfile)
+	formated = append(formated, editAllFile)
 	return formated, nil
 }
 

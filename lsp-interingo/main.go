@@ -2,6 +2,7 @@ package main
 
 import (
 	"interingo-lsp/handlers"
+	"interingo-lsp/store"
 
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -16,6 +17,10 @@ const lsName = "Interingo Language Server"
 var version string = "0.0.1"
 var handler protocol.Handler
 
+func Init() {
+	store.Init()
+}
+
 func main() {
 	commonlog.Configure(2, nil)
 
@@ -24,6 +29,8 @@ func main() {
 		Shutdown:               shutdown,
 		TextDocumentCompletion: handlers.TextDocumentCompletion,
 		TextDocumentFormatting: handlers.HandleDocumentFormatting,
+		TextDocumentDidOpen:    handlers.HandleTextDocumentDidOpen,
+		TextDocumentDidChange:  handlers.HandleTextDocumentDidChange,
 	}
 
 	server := server.NewServer(&handler, lsName, true)
