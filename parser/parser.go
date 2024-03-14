@@ -70,13 +70,21 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 	p.infixParseFns[tokenType] = fn
 }
 
+func (p *Parser) skipExtras() {
+	for p.curToken.Type != token.EOF {
+		if (p.curToken.Type == token.COMMENT || p.curToken.Type == token.EOL) {
+			p.curToken = p.peekToken
+			p.peekToken = p.l.NextToken()
+		} else {
+			break
+		}
+	}
+}
+
 func (p *Parser) nextToken() {
 	p.curToken = p.peekToken
 	p.peekToken = p.l.NextToken()
-	for p.curToken.Type == token.COMMENT && p.curToken.Type != token.EOF {
-		p.curToken = p.peekToken
-		p.peekToken = p.l.NextToken()
-	}
+	p.skipExtras()
 }
 
 func (p *Parser) ParseProgram() *ast.Program {

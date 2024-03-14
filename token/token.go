@@ -10,6 +10,7 @@ type Token struct {
 // token/token.go
 const (
 	COMMENT = "COMMENT"
+	EOL     = "EOL"
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 	// Identifiers + literals

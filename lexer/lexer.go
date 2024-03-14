@@ -8,13 +8,13 @@ import (
 type Lexer struct {
 	input        string
 	position     int                     // current position in input (points to current char)
-	Line         int                     // current position in input (line - 0 index)
-	Character    int                     // current position in input (position in line - 0 index)
 	readPosition int                     // current reading position in input (after current char)
 	ch           byte                    // current char under examination
 	SkipedChar   int                     // skiped white-space - for Verbose mode
 	SkipedLine   int                     // skiped comment line - for Verbose mode
 	TokenCount   map[token.TokenType]int // count all token - for Verbose mode
+	Line         int                     // current position in input (line - 0 index)
+	Character    int                     // current position in input (position in line - 0 index)
 }
 
 func New(input string) *Lexer {
@@ -42,16 +42,11 @@ func (l *Lexer) readChar() {
 	}
 	l.position = l.readPosition
 	l.readPosition += 1
-	if l.ch == '\n' {
-		l.Line += 1
-		l.Character = 0
-	} else {
-		l.Character += 1
-	}
+	l.Character += 1
 }
 
 func (l *Lexer) skipWhitespace() {
-	for l.ch == ' ' || l.ch == '\t' || l.ch == '\n' || l.ch == '\r' {
+	for l.ch == ' ' || l.ch == '\t' {
 		if share.VerboseMode {
 			l.SkipedChar += 1
 		}
@@ -127,6 +122,21 @@ func (l *Lexer) NextToken() token.Token {
 		tok = newToken(token.LBRACE, l.ch)
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
+	case '\n':
+		tok = newToken(token.EOL, l.ch)
+		l.Line += 1
+		l.Character = 0
+	case '\r':
+		if l.peakChar() == '\n' {
+			ch := l.ch
+			l.readChar()
+			literal := ch + l.ch
+			tok = newToken(token.EOL, literal)
+		} else {
+			tok = newToken(token.EOL, l.ch)
+		}
+		l.Line += 1
+		l.Character = 0
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF

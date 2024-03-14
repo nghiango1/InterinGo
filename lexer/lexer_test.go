@@ -42,11 +42,7 @@ func testOperator1(t *testing.T) {
 }
 
 func testKeywords1(t *testing.T) {
-	input := `let five = 5;
-let ten = 10;
-let add = fn(x, y) {
-    x + y;
-};`
+	input := `let five = 5; let ten = 10; let add = fn(x, y) { x + y; };`
 	tests := []expectedReturn{
 		{token.LET, "let"},
 		{token.IDENT, "five"},
@@ -80,11 +76,7 @@ let add = fn(x, y) {
 }
 
 func testKeywords2(t *testing.T) {
-	input := `if (5 < 10) {
-    return true;
-} else {
-    return false;
-}`
+	input := `if (5 < 10) { return true; } else { return false; }`
 	tests := []expectedReturn{
 		{token.IF, "if"},
 		{token.LPAREN, "("},
@@ -109,8 +101,7 @@ func testKeywords2(t *testing.T) {
 }
 
 func testOperator2(t *testing.T) {
-	input := `!-/*5;
-5 < 10 > 5;`
+	input := `!-/*5; 5 < 10 > 5;`
 	tests := []expectedReturn{
 		{token.BANG, "!"},
 		{token.MINUS, "-"},
@@ -130,8 +121,7 @@ func testOperator2(t *testing.T) {
 }
 
 func testOperator3(t *testing.T) {
-	input := `10 == 10;
-10 != 9;`
+	input := `10 == 10; 10 != 9;`
 	tests := []expectedReturn{
 		{token.INT, "10"},
 		{token.EQ, "=="},
@@ -156,10 +146,7 @@ func TestNextToken(t *testing.T) {
 }
 
 func testBinding1(t *testing.T) {
-	input := "let x = 5;"
-	input += "\nlet y = 10;"
-	input += "\nlet foobar = add(5, 5);"
-	input += "let barfoo = 5 * 5 / 10 + 18 - add(5, 5) + multiply(124);"
+	input := "let x = 5; let y = 10; let foobar = add(5, 5); let barfoo = 5 * 5 / 10 + 18 - add(5, 5) + multiply(124);"
 	tests := []expectedReturn{
 		{token.LET, "let"},
 		{token.IDENT, "x"},
@@ -181,28 +168,28 @@ func testBinding1(t *testing.T) {
 		{token.INT, "5"},
 		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
-		{token.LET, "let" },
+		{token.LET, "let"},
 		{token.IDENT, "barfoo"},
-		{token.ASSIGN , "="},
-		{token.INT , "5"},
-		{token.ASTERISK , "*"},
-		{token.INT , "5"},
-		{token.SLASH , "/"},
-		{token.INT , "10"},
-		{token.PLUS , "+"},
-		{token.INT , "18"},
-		{token.MINUS , "-"},
-		{token.IDENT , "add"},
-		{token.LPAREN , "("},
-		{token.INT , "5"},
+		{token.ASSIGN, "="},
+		{token.INT, "5"},
+		{token.ASTERISK, "*"},
+		{token.INT, "5"},
+		{token.SLASH, "/"},
+		{token.INT, "10"},
+		{token.PLUS, "+"},
+		{token.INT, "18"},
+		{token.MINUS, "-"},
+		{token.IDENT, "add"},
+		{token.LPAREN, "("},
+		{token.INT, "5"},
 		{token.COMMA, ","},
-		{token.INT , "5"},
-		{token.RPAREN , ")"},
-		{token.PLUS , "+"},
-		{token.IDENT , "multiply"},
-		{token.LPAREN , "("},
-		{token.INT , "124"},
-		{token.RPAREN , ")"},
+		{token.INT, "5"},
+		{token.RPAREN, ")"},
+		{token.PLUS, "+"},
+		{token.IDENT, "multiply"},
+		{token.LPAREN, "("},
+		{token.INT, "124"},
+		{token.RPAREN, ")"},
 		{token.SEMICOLON, ";"},
 		{token.EOF, ""},
 	}
