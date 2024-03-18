@@ -53,13 +53,17 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 		return nil, err
 	}
 
-	if (ef.Unwrap().Text[:43] == "// Yah want formatting? My job here is done") {
-		return formated, nil
-	}
+	// Not format yet
+	format := ef.Unwrap().Text
 
 	l := lexer.New(ef.Unwrap().Text)
 	p := parser.New(l)
 	program := p.ParseProgram()
+	if len(p.Errors()) == 0 {
+		format = FormatedAST(program, params.Options, 0)
+	} else {
+		return nil, errors.New(p.Errors()[0])
+	}
 
 	editAllFile := protocol.TextEdit{
 		Range: protocol.Range{
@@ -72,7 +76,7 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 				Character: protocol.UInteger(l.Character),
 			},
 		},
-		NewText: fmt.Sprintf("// Yah want formatting? My job here is done\n// %s\n", program.String()) + ef.Unwrap().Text,
+		NewText: format,
 	}
 
 	formated = append(formated, editAllFile)
