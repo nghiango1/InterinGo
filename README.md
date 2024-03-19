@@ -1,6 +1,6 @@
 # interpreter-in-go
 
-"interprester-in-go" or InterinGo (for short) is a new interpreter language, come with LSP and highlighter for neovim. It can be run in 3 mode
+"interprester-in-go" or InterinGo (for short) is a new interpreter language, come with [LSP](lsp-interingo/) and [highlighter](tree-sitter-interingo/) for neovim. It can be run in 3 mode
 - REPL mode: Which stand for read-evaluation-print-loop, similar to `python`
 - File mode: Execute code as input from file
 - Server mode: Which have a pretty UI for REPL on a HTTP Server
@@ -193,3 +193,14 @@ Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
 - `make tailwind-watch`: Tailwind watch mode - Auto rebuild when files change
 - `make templ-watch`: Templ watch mode - Auto rebuild when files change
 - `go run . -s` or `make go-run`: Run the server without build
+
+## Build - LSP, Highlight
+
+LSP and Treesitter highlight can be overkill as it per need specific text editor configuration (some even need specific plugin/extension configuration). Currently, I only setup a Neovim config as Local, as provide them as a fully working component with one click install seem like an overkill. Following each correspond README.md to properly config and use them in neovim if you interested
+- Read LSP how to build and use [here](lsp-interingo/README.md) 
+- Read treesitter highlight build [here](tree-sitter-interingo/README.md)
+
+I at least can provide some pictures to prove it work:
+- In markdown file: [Placeholder]
+- In specific `*.iig` file extension: [Placeholder]
+- In LSP auto format: [Placeholder]
