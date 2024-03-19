@@ -1,13 +1,13 @@
 # interpreter-in-go
 
-"interprester-in-go" or InterinGo (for short) is a new interpreter language. It can be run in 3 mode
+"interprester-in-go" or InterinGo (for short) is a new interpreter language, come with LSP and highlighter for neovim. It can be run in 3 mode
 - REPL mode: Which stand for read-evaluation-print-loop, similar to `python`
 - File mode: Execute code as input from file
 - Server mode: Which have a pretty UI for REPL on a HTTP Server
 
 ## Why
 
-To challenge my knowledge with `go` language and advanced (interpreter) concept. I also set up a http server to public InterinGo interpreter. You can access evaluating the language right now via link in the repo [Github description](https://github.com/nghiango1/hello).
+To challenge my knowledge with `go` language and advanced (interpreter) concept. I also set up a http server to public InterinGo interpreter, that you can access evaluating the [language right now](https://nghiango.asia/).
 
 ## Techstack:
 
@@ -59,7 +59,6 @@ Unknow what to do yet, use test code in 'test/' directory as your start point. E
 ./interingo -f test/return-01.iig
 ```
 
-
 ### Server mode
 
 > As expected, who know what you got if they can't just test it directly on the browser
@@ -93,101 +92,11 @@ $ ./interingo
 >> toggleVerbose()
 ```
 
-
 ## The "interprester-in-go" language syntax:
 
-### Keyword
+You can go to [server/docs/](server/docs/) or read live [docs website](https://nghiango.asia/docs)
 
-Here is the list of all keyword that already reserved and cannot be used as variable names
-
-```iig
-fn      let      if      else
-return  true     false
-```
-
-"interpreter-in-go" is a case-sensitive language, meanning that `fn` and `FN` is a different names. making `FN` can be use as a new name to assign a variable
-
-### Statement
-
-Single line statement can end with `;` or not
-
-```iig
-let x = 1
-let y = 2;
-```
-
-Double statement in one line can be seperated by a semicolon `;` for ensuring the parse to work correctly.
-
-```iig
-let x = 1; let y = 2;
-```
-
-> In-case there is no semicolon, it parse left to right and try to match statement inorder until error occurs
-
-A block statement (syntax of creating a new function)
-
-```iig
-let f = fn (x,y) {
-   return x + y;
-}
-```
-
-### Value, Variable, Type initiation and assignment
-
-"interpreter-in-go" is a dynamicly type language (which mean it not have type)
-
-Variable can be initialized and assign with this syntax.
-
-```iig
-let x = 1
-```
-
-List of right value expression support:
-- Boolean (`true`, `false`)
-- Integer (`0`, `1`, ...)
-- Identifiers (any string that not a part of the language keyword)
-- `NULL`
-- Numeric Operation (`+`,`-`, `*`, `/`)
-- Comparation (`>`, `<`, `<=`, `>=`, `==`)
-- Prefix operation (`!true`, `-(4+3)`)
-- Function call(`add(3,4)`)
-
-More example:
-
-```iig
-let x = 1 + 3
-```
-```iig
-let y = x + (-3) * 5 (4 - 9)
-```
-```iig
-let z = NULL
-```
-```iig
-let a = true
-```
-```iig
-let b = !(x >= y)
-```
-```iig
-let c = add(3, 4)
-```
-
-Function assign used
-
-```iig
-let f = add(x,y) { return x + y }
-```
-
-### Logic flow control
-
-"interpreter-in-go" support if then else control flow.
-
-```iig
-let x = 1; let y = 2; if ( x >= y ) { return true; } else { return false; };
-```
-
-## Build - REPL
+## Build - Minimal REPL build
 
 ### Prerequisite
 
@@ -229,7 +138,7 @@ Test all module with
 go test ./...
 ```
 
-## Build - Server front-end
+## Build - Full build with Server front-end
 
 All server source file is in `/server/` directory, which need special handle for `templ` files - containing frontend code. This require extra build tool and generating code step. `Makefile` is add to help handle these process
 
@@ -264,7 +173,7 @@ apt-get -y install make
 
 ### Using `Make` tools
 
-#### Build mode
+#### Build
 
 I setup Makefile to handle CLI operation, use `make build-run` to rebuild and start the server
 - `make` or `make all` or `make help`: Show all option command

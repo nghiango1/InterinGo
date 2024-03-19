@@ -15,11 +15,17 @@ Install tree-sitter cli globally
 npm install -g tree-sitter-cli
 ```
 
+Build parse.c file
+```sh
+# "parse": "tree-sitter parse ../test/function-02.iig",
+npm run build
+```
+
 Config tree-sitter, adding language file to place
 ```sh
 tree-sitter init-config
 mkdir ~/dev
-ln -s ~/path/to/interpreter/tree-sitter-interingo ~/dev/
+ln -s ~/path/to/InterinGo/tree-sitter-interingo ~/dev/
 ```
 
 Try parsing, you can test with any other file in `../test/`
@@ -67,6 +73,6 @@ After that, start `nvim` and run command `:TSInstall interingo`.
 `:TSInstall` will not copy query files from the grammar repository. To make the installed InterinGo grammar to be useful, we must manually add query files to nvim-treesitter installation directory.
 
 ```sh
-ln -s ~/path/to/interpreter/tree-sitter-interingo/queries ~/.local/share/nvim/lazy/nvim-treesitter/interingo
-#      ^^^^^^^^^^^^^^^^^^^^ change to repo directory                          ^^^^^^^^^^^^^^^^^^^^ repace this path if you not using lazy package manager
+ln -s ~/path/to/tree-sitter-interingo/queries ~/.local/share/nvim/lazy/nvim-treesitter/interingo
+#      ^^^^^^^^ change to repo directory                          ^^^^^^^^^^^^^^^^^^^^ repace this path if you not using lazy package manager
 ```

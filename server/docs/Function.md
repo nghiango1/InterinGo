@@ -1,7 +1,10 @@
 # Function
 
-Test
+InterinGo support function assignment
 
-## Example
-
-Test
+```iig
+//Function assign
+let add  = fn(x,y) { return x + y }
+let call = add(3, 4)
+return call
+```
