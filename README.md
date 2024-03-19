@@ -198,9 +198,9 @@ Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
 
 LSP and Treesitter highlight can be overkill as it per need specific text editor configuration (some even need specific plugin/extension configuration). Currently, I only setup a Neovim config as Local, as provide them as a fully working component with one click install seem like an overkill. Following each correspond README.md to properly config and use them in neovim if you interested
 - Read LSP how to build and use [here](lsp-interingo/README.md) 
-- Read treesitter highlight build [here](tree-sitter-interingo/README.md)
+- Read treesitter highlight how to build and use [here](tree-sitter-interingo/README.md)
 
 I at least can provide some pictures to prove it work:
-- In markdown file: [Placeholder]
-- In specific `*.iig` file extension: [Placeholder]
-- In LSP auto format: [Placeholder]
+- In markdown file: ![Screenshot highlight markdown embed](https://github.com/nghiango1/InterinGo/assets/31164703/bb83a148-a7a6-4cc4-adda-5b54f419139b)
+- In specific `*.iig` file extension: ![Screenshot highlight](https://github.com/nghiango1/InterinGo/assets/31164703/c5aafa6e-c7ad-490e-ae4c-e0ed0217b53e)
+- In LSP auto format: ![InterinGo_LSP_formater](https://github.com/nghiango1/InterinGo/assets/31164703/3539591a-6575-46ef-99e7-6ee851a45ef4)
