@@ -1,0 +1,4 @@
+// function object return it self "fn(x){ (x + 2) }"
+fn(x){
+    x+2;
+};

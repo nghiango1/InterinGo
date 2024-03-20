@@ -1,0 +1,2 @@
+// "type mismatch: INTEGER + BOOLEAN"
+5 + true
