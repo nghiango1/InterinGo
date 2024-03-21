@@ -7,7 +7,7 @@ Providing highlighting and language support for Iteringo by using treesitter
 Prerequire install
 ```sh
 apt install make
-apt install node
+apt install nodejs
 ```
 
 Install tree-sitter cli globally
@@ -73,6 +73,6 @@ After that, start `nvim` and run command `:TSInstall interingo`.
 `:TSInstall` will not copy query files from the grammar repository. To make the installed InterinGo grammar to be useful, we must manually add query files to nvim-treesitter installation directory.
 
 ```sh
-ln -s ~/path/to/tree-sitter-interingo/queries ~/.local/share/nvim/lazy/nvim-treesitter/interingo
+ln -s ~/path/to/tree-sitter-interingo/queries ~/.local/share/nvim/lazy/nvim-treesitter/queries/interingo
 #      ^^^^^^^^ change to repo directory                          ^^^^^^^^^^^^^^^^^^^^ repace this path if you not using lazy package manager
 ```

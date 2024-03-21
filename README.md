@@ -23,8 +23,10 @@ Back-end:
 
 ## How to use
 
-> Build the program and get `./interingo` file executable or download Released binary
-> Run `./interingo -h` to get help on runner flag directly (for TLDR folks)
+Build the program and get `./interingo` file executable or download Released binary. You can run `./interingo -h` to get help on runner flag directly (for TLDR folks). You can also using my Dockerfile setup, which will pull and build the code too
+```sh
+sudo docker run -it --entrypoint="interingo" interingo
+```
 
 ### REPL mode
 
@@ -155,7 +157,7 @@ Install `templ` tools, learn more in [templ.guide](https://templ.guide/). Make s
 
 ```sh
 go install github.com/a-h/templ/cmd/templ@latest
-export $PATH="$PATH:~/go/bin"
+export PATH="$PATH:~/go/bin"
 ```
 
 > In case that you using Neovim with Mason, you can install templ directly from there (LSP templ). You will need setup mason bin to PATH instead
@@ -169,7 +171,7 @@ export $PATH="$PATH:~/go/bin"
 Download latest `tailwind` CLI standalone tool from their [github](https://github.com/tailwindlabs/tailwindcss/releases/) and put it in to `PATH`. This should be add in `.profile` file
 
 ```sh
-wget https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.1/tailwindcss-linux-x64
+wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
 cp tailwindcss-linux-x64 ~/.local/bin
 export PATH="$HOME/.local/bin:$PATH"
 ```
@@ -204,6 +206,12 @@ Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
 - `go run . -s` or `make go-run`: Run the server without build
 
 ## Build - LSP, Highlight
+
+Docker ready neovim with full configuration is here
+```sh
+sudo docker build -t interingo .
+sudo docker run -it interingo
+```
 
 LSP and Treesitter highlight can be overkill as it per need specific text editor configuration (some even need specific plugin/extension configuration). Currently, I only setup a Neovim config as Local, as provide them as a fully working component with one click install seem like an overkill. Following each correspond README.md to properly config and use them in neovim if you interested
 - Read LSP how to build and use [here](lsp-interingo/README.md) 
