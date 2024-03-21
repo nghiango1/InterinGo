@@ -1,5 +1,5 @@
 // 10
-let add = fn(x, y){
+let add = fn(x, y) {
     x+y;
 };
 add(5, 5);

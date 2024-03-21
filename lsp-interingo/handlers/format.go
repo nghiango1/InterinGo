@@ -97,8 +97,8 @@ func FormatedFunctionLiteral(node *ast.FunctionLiteral, option protocol.Formatti
 	}
 	formated += ")"
 
-	// Format space between ")" and function body, could be `\n`
-	if false {
+	// Format space between ")" and "{" function body, could be `\n`
+	if true {
 		formated += " "
 	}
 

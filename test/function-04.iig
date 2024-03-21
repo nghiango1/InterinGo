@@ -1,5 +1,5 @@
 // 5
-let identity = fn(x){
+let identity = fn(x) {
     x;
 };
 identity(5);
