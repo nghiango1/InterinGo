@@ -151,11 +151,20 @@ gvm install go1.22.0 -B
 gvm use go1.22.0 -default
 ```
 
-Install `templ` tools, learn more in [templ.guide](https://templ.guide/)
+Install `templ` tools, learn more in [templ.guide](https://templ.guide/). Make sure to setup `go/bin` into your environment.
 
 ```sh
 go install github.com/a-h/templ/cmd/templ@latest
+export $PATH="$PATH:~/go/bin"
 ```
+
+> In case that you using Neovim with Mason, you can install templ directly from there (LSP templ). You will need setup mason bin to PATH instead
+> ```sh
+> $ which templ
+> /home/username/.local/share/nvim/mason/bin/templ
+> #    ^^^^^^^^^ change this to your username
+> ```
+
 
 Download latest `tailwind` CLI standalone tool from their [github](https://github.com/tailwindlabs/tailwindcss/releases/) and put it in to `PATH`. This should be add in `.profile` file
 
