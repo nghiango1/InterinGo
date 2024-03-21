@@ -3,6 +3,8 @@ import argparse
 from typing import List
 from os import path, listdir
 import subprocess
+import apiTesting
+import utils.globalConfig as conf
 
 
 parser = argparse.ArgumentParser(
@@ -24,15 +26,14 @@ parser.add_argument('--outEncode', dest='outEncode',
                     help='Set the default encode for command output')
 args = parser.parse_args()
 
-DEBUG: bool = args.debug
-TEST_DIR: str = args.inDir
-OUT_DIR: str = args.outDir
-OUTPUT_ENCODE: str = args.outEncode
-TEST_CMD = "./interingo"
+conf.DEBUG = args.debug
+conf.IN_DIR = args.inDir
+conf.OUT_DIR = args.outDir
+conf.OUT_ENCODE = args.outEncode
 
 # The script intent to be run in project root directory rather than in script/
 # Change this flag to True only when you need to debug it (inside script/)
-if DEBUG:
+if conf.DEBUG:
     from os import chdir
     chdir("..")
 
@@ -56,7 +57,7 @@ def buildCommand(*args, **kwargs) -> str:
         A string that contain build command with all the flag
     """
 
-    base = f"{TEST_CMD}"
+    base = f"{conf.EXEC_PATH}"
     singleFlag = " ".join([f"-{i}" for i in args])
     valueFlag = " ".join(
         [f"-{flag}={value}" for (flag, value) in kwargs.items()])
@@ -82,7 +83,7 @@ def getInputFileList() -> List[str]:
 
     # Dirty trick as I know there can't be any other file in there with `.iig`
     # in its name
-    return [i for i in listdir(TEST_DIR) if ".iig" in i]
+    return [i for i in listdir(conf.IN_DIR) if ".iig" in i]
 
 
 def checkOutFile(outputFilePath: str, result: bytes):
@@ -123,15 +124,15 @@ def evaluateIigFile(inputFileName: str):
 
 
 def fileModeTest():
-    if DEBUG:
+    if conf.DEBUG:
         print("INFO: Start regression check File mode result")
     testFiles = getInputFileList()
     for fn in testFiles:
-        if DEBUG:
+        if conf.DEBUG:
             print(f"INFO: Check {fn} test file output ...")
 
-        fullPathInput = path.join(TEST_DIR, fn)
-        fullPathOutput = path.join(OUT_DIR, fn)[:-4] + '.out'
+        fullPathInput = path.join(conf.IN_DIR, fn)
+        fullPathOutput = path.join(conf.OUT_DIR, fn)[:-4] + '.out'
 
         result = evaluateIigFile(fullPathInput)
         checkOutFile(fullPathOutput, result)
@@ -139,7 +140,7 @@ def fileModeTest():
 
 
 def goTest():
-    if DEBUG:
+    if conf.DEBUG:
         print("Start go native test...")
     out = subprocess.Popen("go test ./...",
                            shell=True, stdout=subprocess.PIPE).stdout
@@ -147,7 +148,7 @@ def goTest():
     if out is None:
         return
 
-    goTestOutput = out.read().decode(OUTPUT_ENCODE)
+    goTestOutput = out.read().decode(conf.OUT_ENCODE)
     lines = goTestOutput.split("\n")
     for line in lines:
         if line == "":
@@ -166,4 +167,5 @@ def goTest():
 if __name__ == "__main__":
     validateArgs()
     fileModeTest()
+    apiTesting.serverTest(conf.EXEC_PATH, conf.IN_DIR, conf.OUT_DIR)
     goTest()

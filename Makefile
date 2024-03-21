@@ -33,6 +33,9 @@ templ-watch: # Build/rebuild all `templ` templates files in watch mode
 go-run: # Run the code without build step in server mode
 	go run . -s
 
+regression-test: # Run the code without build step in server mode
+	python script/regressionTesting.py
+
 ### REPL Helper
 
 repl-test: # Test all REPL project module

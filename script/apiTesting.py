@@ -3,6 +3,7 @@ import argparse
 from typing import List, Tuple
 from os import path, listdir
 import subprocess
+import utils.globalConfig as conf
 
 
 parser = argparse.ArgumentParser(
@@ -18,23 +19,6 @@ parser.add_argument('--output', dest='outDir',
                     action='store',
                     default="test/result/",
                     help='Path that contain all outputfile, default "test/result/"')
-parser.add_argument('--outEncode', dest='outEncode',
-                    action='store',
-                    default="ascii",
-                    help='Set the default encode for command output')
-args = parser.parse_args()
-
-DEBUG: bool = args.debug
-TEST_DIR: str = args.inDir
-OUT_DIR: str = args.outDir
-OUTPUT_ENCODE: str = args.outEncode
-TEST_CMD = "./interingo"
-
-# The script intent to be run in project root directory rather than in script/
-# Change this flag to True only when you need to debug it (inside script/)
-if DEBUG:
-    from os import chdir
-    chdir("..")
 
 
 def validateArgs():
@@ -44,7 +28,7 @@ def validateArgs():
         raise ValueError("Output directory is not a valid path")
 
 
-def buildCommand(*args: str, **kwargs) -> str:
+def buildCommand(execPath: str, *args: str, **kwargs) -> str:
     """Helper to build test command
 
     Args:
@@ -56,23 +40,23 @@ def buildCommand(*args: str, **kwargs) -> str:
         A string that contain build command with all the flag
     """
 
-    base = f"{TEST_CMD}"
+    base = f"{execPath}"
     singleFlag = " ".join([f"-{i}" for i in args])
     valueFlag = " ".join(
         [f"-{flag}={value}" for (flag, value) in kwargs.items()])
     return " ".join([base, singleFlag, valueFlag])
 
 
-def buildDevServerCommand(listenAddress: str = "127.0.0.1:0", *args: str, **kwargs):
-    return buildCommand("s", l=listenAddress, *args, **kwargs)
+def buildDevServerCommand(execPath: str, listenAddress: str = "127.0.0.1:0", *args: str, **kwargs):
+    return buildCommand(execPath, "s", l=listenAddress, *args, **kwargs)
 
 
-def getInputFileList() -> List[str]:
+def getInputFileList(inDir: str) -> List[str]:
     """ Return list of input file """
 
     # Dirty trick as I know there can't be any other file in there with `.iig`
     # in its name
-    return [i for i in listdir(TEST_DIR) if ".iig" in i]
+    return [i for i in listdir(inDir) if ".iig" in i]
 
 
 def checkOutFile(outputFilePath: str, result: bytes):
@@ -103,13 +87,14 @@ def checkOutFile(outputFilePath: str, result: bytes):
     if diffcheck:
         print(f"FAIL: Output change, please recheck {outputFilePath} manually")
     else:
-        if DEBUG:
+        if conf.DEBUG:
             print("DEBUG: Server response match provided output")
 
 
 class REPLServer:
-    def __init__(self):
+    def __init__(self, serverExecutablePath):
         self.serverURL = REPLServer.getFreeLocalAdr()
+        self.execPath = serverExecutablePath
         self.process = None
         self.startREPLServer(self.serverURL)
 
@@ -119,14 +104,14 @@ class REPLServer:
         Args:
             listenAddress: Address that REPL server listen
         """
-        if DEBUG:
+        if conf.DEBUG:
             print("DEBUG: Start server subprocess")
         if self.process is not None:
-            if DEBUG:
+            if conf.DEBUG:
                 print(
                     f"DEBUG: Server subprocess already start, pid={self.process.pid}, URL={self.serverURL}")
             return
-        command = buildDevServerCommand(listenAddress)
+        command = buildDevServerCommand(self.execPath, listenAddress)
         self.process = subprocess.Popen(
             command, shell=True, stdout=subprocess.PIPE)
         self.serverURL = listenAddress
@@ -179,24 +164,23 @@ def getInputFromFile(inputFilePath: str):
             f"Can't open input file, please check environment. Skipping {inputFilePath}", e)
 
 
-def serverTest():
+def serverTest(execPath: str, inDir: str, outDir: str):
     """Check the REPL API result spawn by ./interingo -s"""
-
-    if DEBUG:
+    if conf.DEBUG:
         print("DEBUG: Start API test on REPL server")
-    testFiles = getInputFileList()
-    replServer = REPLServer()
+    testFiles = getInputFileList(inDir)
+    replServer = REPLServer(execPath)
 
     for fn in testFiles:
-        if DEBUG:
+        if conf.DEBUG:
             print(f"DEBUG: Check {fn} test file - sending to API...")
 
-        fullPathInput = path.join(TEST_DIR, fn)
-        fullPathOutput = path.join(OUT_DIR, fn)[:-4] + '.out'
+        fullPathInput = path.join(inDir, fn)
+        fullPathOutput = path.join(outDir, fn)[:-4] + '.out'
 
         input = getInputFromFile(fullPathInput)
         result, statusCode = replServer.sendInputToREPLEndpoint(input)
-        if DEBUG:
+        if conf.DEBUG:
             print(f"DEBUG: Server response {result[:20]}...")
         if statusCode == 200:
             checkOutFile(fullPathOutput, result)
@@ -206,5 +190,14 @@ def serverTest():
 
 
 if __name__ == "__main__":
+    args = parser.parse_args()
+
+    # The script intent to be run in project root directory rather than in script/
+    # Change this flag to True only when you need to debug it inside script/
+    conf.DEBUG = args.debug
+    if conf.DEBUG:
+        from os import chdir
+        chdir("..")
     validateArgs()
-    serverTest()
+
+    serverTest(conf.EXEC_PATH, args.inDir, args.outDir)
