@@ -23,9 +23,14 @@ Back-end:
 
 ## How to use
 
-Build the program and get `./interingo` file executable or download Released binary. You can run `./interingo -h` to get help on runner flag directly (for TLDR folks). You can also using my Dockerfile setup, which will pull and build the code too
+Build the program and get `./interingo` file executable or download Released binary. You can run `./interingo -h` to get help on runner flag directly (for TLDR folks). You can also using Docker, which already pull and build the code too
 ```sh
-sudo docker run -it --entrypoint="interingo" interingo
+sudo docker run -it --entrypoint="interingo" nghiango1/interingo
+```
+
+Using bash session can be even better
+```sh
+sudo docker run -it --entrypoint="/bin/bash" nghiango1/interingo
 ```
 
 ### REPL mode
@@ -212,6 +217,15 @@ Docker ready neovim with full configuration is here
 sudo docker build -t interingo .
 sudo docker run -it interingo
 ```
+or pull directly from docker hub
+```sh
+sudo docker run -it nghiango1/interingo
+```
+
+Using neovim quick guide
+- Using `<space>f` to format the file (comment isn't properly parse by lsp server yet though)
+- Using `<space>pv` to open the list of new file to choose and formating
+- Using `<F5><enter>` to run the file with InterinGo REPL mode  
 
 LSP and Treesitter highlight can be overkill as it per need specific text editor configuration (some even need specific plugin/extension configuration). Currently, I only setup a Neovim config as Local, as provide them as a fully working component with one click install seem like an overkill. Following each correspond README.md to properly config and use them in neovim if you interested
 - Read LSP how to build and use [here](lsp-interingo/README.md) 
