@@ -5,6 +5,7 @@ return by all possible Evaluation process of the intepreter. They are:
 
 - Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li>
 - Integer: The numbers which uses 64-bit integers</li>
+- String: Everything between two double qoute "" consider a string
 - Null: Hate it or wanted it, InterinGo have null, a special object representing nothing. Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values
 
 ## Example 

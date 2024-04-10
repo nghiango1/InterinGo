@@ -26,4 +26,5 @@ let y = x + (-3) * 5 (4 - 9)
 let z = NULL
 let a = true
 let b = !(x >= y)
+let s = "Hello world"
 ```

@@ -134,6 +134,7 @@ module.exports = grammar({
     identifier: $ => /[a-zA-Z_]+/,
 
     interger_literal: $ => /\d+/,
+    interger_literal: $ => /\".*\"/,
 
     boolean: $ => choice(
       'true',
