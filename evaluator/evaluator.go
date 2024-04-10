@@ -42,6 +42,8 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalBooleanLiteral(node)
 	case *ast.IntegerLiteral:
 		return evalIntegerLiteral(node)
+	case *ast.StringLiteral:
+		return evalStringLiteral(node)
 	case *ast.Identifier:
 		return evalIdentifier(node, env)
 	case *ast.CallExpression:
@@ -119,6 +121,14 @@ func evalIntegerLiteral(node ast.Node) object.Object {
 		Value: intLiteral.Value,
 	}
 	return intObj
+}
+
+func evalStringLiteral(node ast.Node) object.Object {
+	strLiteral, _ := node.(*ast.StringLiteral)
+	strObj := &object.String{
+		Value: strLiteral.Value,
+	}
+	return strObj
 }
 
 func evalIdentifier(node ast.Node, env *object.Environment) object.Object {

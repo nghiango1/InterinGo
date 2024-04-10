@@ -7,6 +7,19 @@ import (
 	"testing"
 )
 
+func TestEvalStringExpression(t *testing.T) {
+	tests := []struct {
+		input    string
+		expected string
+	}{
+		{"\"Hello world\"", "Hello world"},
+	}
+	for _, tt := range tests {
+		evaluated := testEval(tt.input)
+		testStringObject(t, evaluated, tt.expected)
+	}
+}
+
 func TestEvalIntegerExpression(t *testing.T) {
 	tests := []struct {
 		input    string
@@ -87,6 +100,20 @@ func testBooleanObject(t *testing.T, obj object.Object, expected bool) bool {
 	return true
 }
 
+func testStringObject(t *testing.T, obj object.Object, expected string) bool {
+	result, ok := obj.(*object.String)
+	if !ok {
+		t.Errorf("object is not String. got=%T (%+v)", obj, obj)
+		return false
+	}
+	if result.Value != expected {
+		t.Errorf("object has wrong value. got=%s, want=%s",
+			result.Value, expected)
+		return false
+	}
+	return true
+}
+
 func testIntegerObject(t *testing.T, obj object.Object, expected int64) bool {
 	result, ok := obj.(*object.Integer)
 	if !ok {
@@ -156,6 +183,7 @@ func TestReturnStatements(t *testing.T) {
 		input    string
 		expected int64
 	}{
+		{"return 5;", 5},
 		{"return 10;", 10},
 		{"return 10; 9;", 10},
 		{"return 2 * 5; 9;", 10},
@@ -259,6 +287,16 @@ func TestLetStatements(t *testing.T) {
 	for _, tt := range tests {
 		testIntegerObject(t, testEval(tt.input), tt.expected)
 	}
+
+	teststr := []struct {
+		input    string
+		expected string
+	}{
+		{"let s = \"Hello\"; s;", "Hello"},
+	}
+	for _, tt := range teststr {
+		testStringObject(t, testEval(tt.input), tt.expected)
+	}
 }
 
 func TestFunctionObject(t *testing.T) {
@@ -295,7 +333,6 @@ func TestFunctionApplication(t *testing.T) {
 		{"let add = fn(x, y) { x + y; }; add(5, 5);", 10},
 		{"let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", 20},
 		{"fn(x) { x; }(5)", 5},
-		{"return 5;", 5},
 	}
 	for _, tt := range tests {
 		result := testEval(tt.input)
