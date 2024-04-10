@@ -14,8 +14,9 @@ const (
 	ILLEGAL = "ILLEGAL"
 	EOF     = "EOF"
 	// Identifiers + literals
-	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT   = "INT"   // 1343456
+	IDENT  = "IDENT"  // add, foobar, x, y, ...
+	INT    = "INT"    // 1343456
+	STRING = "STRING" // 1343456
 	// Operators
 	ASSIGN   = "="
 	PLUS     = "+"
@@ -54,6 +55,8 @@ var keywords = map[string]TokenType{
 	"false":  FALSE,
 }
 
+// LookupIdent check if identifier match predefined keyword of InterinGo language.
+// If true, return that keyword token type instead, else it is a valid identifier and return type IDENT
 func LookupIdent(ident string) TokenType {
 	if tok, ok := keywords[ident]; ok {
 		return tok

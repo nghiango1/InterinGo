@@ -71,6 +71,7 @@ func (l *Lexer) skipCurrentLine() string {
 func (l *Lexer) NextToken() token.Token {
 	var tok token.Token
 	l.skipWhitespace()
+
 	switch l.ch {
 	case '=':
 		if l.peakChar() == '=' {
@@ -81,12 +82,19 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.ASSIGN, l.ch)
 		}
+		// This goes pass the current token
+		l.readChar()
+
 	case ';':
 		tok = newToken(token.SEMICOLON, l.ch)
+		l.readChar()
 	case '(':
 		tok = newToken(token.LPAREN, l.ch)
+		l.readChar()
 	case '-':
 		tok = newToken(token.MINUS, l.ch)
+		l.readChar()
+
 	case '!':
 		if l.peakChar() == '=' {
 			ch := l.ch
@@ -96,36 +104,54 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.BANG, l.ch)
 		}
+		l.readChar()
+
 	case '*':
 		tok = newToken(token.ASTERISK, l.ch)
+		l.readChar()
 	case '/':
 		if l.peakChar() == '/' {
 			tok.Type = token.COMMENT
 			literal := l.skipCurrentLine()
 			tok.Literal = literal
-
-			return tok
 		} else {
 			tok = newToken(token.SLASH, l.ch)
 		}
+		l.readChar()
+
 	case '>':
 		tok = newToken(token.GT, l.ch)
+		l.readChar()
 	case '<':
 		tok = newToken(token.LT, l.ch)
+		l.readChar()
 	case ')':
 		tok = newToken(token.RPAREN, l.ch)
+		l.readChar()
 	case ',':
 		tok = newToken(token.COMMA, l.ch)
+		l.readChar()
 	case '+':
 		tok = newToken(token.PLUS, l.ch)
+		l.readChar()
 	case '{':
 		tok = newToken(token.LBRACE, l.ch)
+		l.readChar()
 	case '}':
 		tok = newToken(token.RBRACE, l.ch)
+		l.readChar()
+
 	case '\n':
 		tok = newToken(token.EOL, l.ch)
+		l.readChar()
 		l.Line += 1
 		l.Character = 0
+
+	case '"':
+		tok.Literal = l.readString()
+		tok.Type = token.STRING
+		l.readChar()
+
 	case '\r':
 		if l.peakChar() == '\n' {
 			ch := l.ch
@@ -135,33 +161,25 @@ func (l *Lexer) NextToken() token.Token {
 		} else {
 			tok = newToken(token.EOL, l.ch)
 		}
+		l.readChar()
 		l.Line += 1
 		l.Character = 0
+
 	case 0:
 		tok.Literal = ""
 		tok.Type = token.EOF
+
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
 			tok.Type = token.LookupIdent(tok.Literal)
-
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
-			return tok
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readDigit()
 			tok.Type = token.INT
-
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
-			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, l.ch)
 		}
 	}
-	l.readChar()
 
 	if share.VerboseMode {
 		l.TokenCount[tok.Type] += 1
@@ -180,6 +198,16 @@ func (l *Lexer) readDigit() string {
 	}
 	return l.input[pos:l.position]
 }
+
+func (l *Lexer) readString() string {
+	l.readChar()
+	pos := l.position
+	for l.ch != '"' {
+		l.readChar()
+	}
+	return l.input[pos:l.position]
+}
+
 
 func (l *Lexer) readIdentifier() string {
 	pos := l.position

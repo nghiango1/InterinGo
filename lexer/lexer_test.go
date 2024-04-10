@@ -136,6 +136,16 @@ func testOperator3(t *testing.T) {
 	test(t, input, tests, "Operator 3")
 }
 
+func testString1(t *testing.T) {
+	input := "\"foobar\" \"foo bar\""
+	tests := []expectedReturn{
+		{token.STRING, "foobar"},
+		{token.STRING, "foo bar"},
+		{token.EOF, ""},
+	}
+	test(t, input, tests, "String 1")
+}
+
 func TestNextToken(t *testing.T) {
 	testOperator1(t)
 	testOperator2(t)
@@ -143,6 +153,7 @@ func TestNextToken(t *testing.T) {
 	testKeywords1(t)
 	testKeywords2(t)
 	testBinding1(t)
+	testString1(t)
 }
 
 func testBinding1(t *testing.T) {
