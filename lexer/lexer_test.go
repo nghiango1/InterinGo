@@ -146,6 +146,35 @@ func testString1(t *testing.T) {
 	test(t, input, tests, "String 1")
 }
 
+// testString2 address that string can be unfinish - which not have closing
+// double qoute, current handle will not throwing error but instead assumming
+// that the string end when we reach EOF. (effectively causing all input is a
+// string, almost)
+// Example wanted python output look like this:
+// 
+//     >>> a = "aaaaaa
+//     File "<stdin>", line 1
+//       a = "aaaaaa
+//           ^
+//     SyntaxError: unterminated string literal (detected at line 1)
+//     
+func testString2(t *testing.T) {
+	input := "let x=\"foobar; let y = \"foo bar\";"
+	tests := []expectedReturn{
+		{token.LET, "let"},
+		{token.IDENT, "x"},
+		{token.ASSIGN, "="},
+
+		// Imagine this is your 100% test coverate
+		{token.STRING, "foobar; let y = "},
+		{token.IDENT, "foo"},
+		{token.IDENT, "bar"},
+		{token.STRING, ";"},
+		{token.EOF, ""},
+	}
+	test(t, input, tests, "String 1")
+}
+
 func TestNextToken(t *testing.T) {
 	testOperator1(t)
 	testOperator2(t)
@@ -154,6 +183,7 @@ func TestNextToken(t *testing.T) {
 	testKeywords2(t)
 	testBinding1(t)
 	testString1(t)
+	testString2(t)
 }
 
 func testBinding1(t *testing.T) {

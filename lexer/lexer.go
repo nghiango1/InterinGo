@@ -202,7 +202,7 @@ func (l *Lexer) readDigit() string {
 func (l *Lexer) readString() string {
 	l.readChar()
 	pos := l.position
-	for l.ch != '"' {
+	for l.ch != '"' && l.ch != 0 {
 		l.readChar()
 	}
 	return l.input[pos:l.position]
