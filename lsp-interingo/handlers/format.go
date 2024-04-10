@@ -159,6 +159,9 @@ func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, inde
 	case *ast.Boolean:
 		formated = node.TokenLiteral()
 
+	case *ast.StringLiteral:
+		formated = "\"" + node.TokenLiteral() + "\""
+
 	case *ast.IntegerLiteral:
 		formated = node.TokenLiteral()
 
