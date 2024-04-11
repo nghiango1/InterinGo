@@ -28,6 +28,8 @@
 
 (interger_literal) @number
 
+(string_literal) @string
+
 (let_statement
   name: (identifier) @function
   value: (expression

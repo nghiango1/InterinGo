@@ -104,6 +104,7 @@ module.exports = grammar({
       prec(precedences_value.PRIORITY, seq('(', $.expression, ')')),
       prec(precedences_value.LOWEST, $.identifier),
       prec(precedences_value.LOWEST, $.interger_literal),
+      prec(precedences_value.LOWEST, $.string_literal),
       prec(precedences_value.LOWEST, $.boolean),
       prec(precedences_value.PREFIX, seq('-', $.expression)),
       prec(precedences_value.PREFIX, seq('!', $.expression)),
@@ -134,7 +135,8 @@ module.exports = grammar({
     identifier: $ => /[a-zA-Z_]+/,
 
     interger_literal: $ => /\d+/,
-    interger_literal: $ => /\".*\"/,
+
+    string_literal: $ => /\".*\"/,
 
     boolean: $ => choice(
       'true',
