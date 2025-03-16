@@ -1,11 +1,13 @@
 module interingo
 
-go 1.21.4
+go 1.23
+
+toolchain go1.24.1
 
 require (
-	github.com/a-h/templ v0.2.639
+	github.com/a-h/templ v0.3.833
 	github.com/chzyer/readline v1.5.1
 	github.com/gomarkdown/markdown v0.0.0-20231222211730-1d6d20845b47
 )
 
-require golang.org/x/sys v0.15.0 // indirect
+require golang.org/x/sys v0.28.0 // indirect
