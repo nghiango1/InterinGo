@@ -11,7 +11,7 @@ build: tailwind-build templ-build go-build # Build all the code
 build-run: build run # Build and run the code
 
 tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -c tailwind.config.js -o server/assets/stylesheet.css
+	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css
 
 templ-build: # Build/rebuild all `templ` templates files
 	templ generate
@@ -25,7 +25,7 @@ run: # Run the build file in server mode
 ### Development helper
 
 tailwind-watch: # Start tailwind in watch mode - looking for change and rebuild, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -c tailwind.config.js -o server/assets/stylesheet.css -w
+	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css -w
 
 templ-watch: # Build/rebuild all `templ` templates files in watch mode
 	templ generate --watch
