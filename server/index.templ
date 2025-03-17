@@ -302,8 +302,8 @@ templ LinkedComponent(linked *Linked) {
 }
 
 templ DocsFragment(docs string, linked *Linked) {
-	<div class="grid md:grid-cols-docs grid-cols-1 px-8 ">
-		<div class="fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto">
+	<div class="grid md:grid-cols-(--docs-grid-cols) px-8">
+		<div class="fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto min-w-[2rem]">
 			@LinkedComponent(linked)
 		</div>
 		<div class="overflow-auto">

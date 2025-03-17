@@ -1,2 +1,42 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
+
+@theme {
+  --docs-grid-cols: 19rem 1fr;
+}
+
+@utility horizontal-tb {
+  writing-mode: horizontal-tb;
+}
+
+@utility vertical-rl {
+  writing-mode: vertical-rl;
+  --webkit-writing-mode: vertical-rl;
+  --ms-writing-mode: vertical-rl;
+}
+
+@utility vertical-lr {
+  writing-mode: vertical-lr;
+  --webkit-writing-mode: vertical-lr;
+  --ms-writing-mode: vertical-lr;
+}
+
+@layer scrollbar::--webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+@layer scrollbar::--webkit-scrollbar-track {
+  border-radius: 100vh;
+  background: #f7f4ed;
+}
+
+@layer scrollbar::--webkit-scrollbar-thumb {
+  background: #e0cbcb;
+  border-radius: 100vh;
+  border: 2px solid #f6f7ed;
+}
+
+@layer scrollbar::--webkit-scrollbar-thumb:hover {
+  background: #c0a0b9;
+}

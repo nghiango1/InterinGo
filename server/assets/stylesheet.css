@@ -28,6 +28,7 @@
     --default-mono-font-family: var(--font-mono);
     --default-mono-font-feature-settings: var(--font-mono--font-feature-settings);
     --default-mono-font-variation-settings: var(--font-mono--font-variation-settings);
+    --docs-grid-cols: 19rem 1fr;
   }
 }
 @layer base {
@@ -695,6 +696,9 @@
   .min-w-80 {
     min-width: calc(var(--spacing) * 80);
   }
+  .min-w-\[2rem\] {
+    min-width: 2rem;
+  }
   .min-w-fit {
     min-width: fit-content;
   }
@@ -715,9 +719,6 @@
   }
   .list-disc {
     list-style-type: disc;
-  }
-  .grid-cols-1 {
-    grid-template-columns: repeat(1, minmax(0, 1fr));
   }
   .flex-col {
     flex-direction: column;
@@ -892,8 +893,21 @@
     --tw-ease: var(--ease-in);
     transition-timing-function: var(--ease-in);
   }
+  .vertical-lr {
+    writing-mode: vertical-lr;
+    --webkit-writing-mode: vertical-lr;
+    --ms-writing-mode: vertical-lr;
+  }
+  .vertical-rl {
+    writing-mode: vertical-rl;
+    --webkit-writing-mode: vertical-rl;
+    --ms-writing-mode: vertical-rl;
+  }
   .\[a-zA-Z\:\\-\\\.\] {
     a-zA-Z: \-\.;
+  }
+  .horizontal-tb {
+    writing-mode: horizontal-tb;
   }
   .peer-checked\:block {
     &:is(:where(.peer):checked ~ *) {
@@ -1215,6 +1229,11 @@
       display: none;
     }
   }
+  .md\:grid-cols-\(--docs-grid-cols\) {
+    @media (width >= 48rem) {
+      grid-template-columns: var(--docs-grid-cols);
+    }
+  }
   .xl\:mx-8 {
     @media (width >= 80rem) {
       margin-inline: calc(var(--spacing) * 8);
@@ -1313,6 +1332,22 @@
       }
     }
   }
+}
+@layer scrollbar::--webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+@layer scrollbar::--webkit-scrollbar-track {
+  border-radius: 100vh;
+  background: #f7f4ed;
+}
+@layer scrollbar::--webkit-scrollbar-thumb {
+  background: #e0cbcb;
+  border-radius: 100vh;
+  border: 2px solid #f6f7ed;
+}
+@layer scrollbar::--webkit-scrollbar-thumb:hover {
+  background: #c0a0b9;
 }
 @property --tw-border-style {
   syntax: "*";

@@ -667,7 +667,7 @@ func DocsFragment(docs string, linked *Linked) templ.Component {
 			templ_7745c5c3_Var22 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"grid md:grid-cols-docs grid-cols-1 px-8 \"><div class=\"fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 38, "<div class=\"grid md:grid-cols-(--docs-grid-cols) px-8\"><div class=\"fixed z-20 md:static top-0 left-0 bottom-0 overflow-y-auto min-w-[2rem]\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
