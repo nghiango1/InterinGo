@@ -1,4 +1,4 @@
-TAILWIND_CLI := tailwindcss-linux-x64
+TAILWIND_CLI ?= tailwindcss-linux-x64
 
 .PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run clean server-clean repl-clean
 
