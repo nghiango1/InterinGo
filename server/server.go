@@ -182,7 +182,8 @@ func populateHandle(path string, linked *Linked) {
 		populateHandle(path+"/"+k, linked.nestedLink[k])
 	}
 	for _, file := range linked.docs {
-		http.HandleFunc(path+"/"+file, DocsHandler)
+		escapePath := strings.ReplaceAll(path+"/"+file, " ", "%20")
+		http.HandleFunc(escapePath, DocsHandler)
 	}
 }
 
