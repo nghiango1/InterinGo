@@ -4,6 +4,10 @@ LSP for interingo language
 
 ## Build and install
 
+### Dependancies
+
+Reuse the same environment with the language build
+
 ### Get LSP server executable 
 
 Build the code with

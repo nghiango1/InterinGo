@@ -1,6 +1,8 @@
 module interingo-lsp
 
-go 1.22.0
+go 1.23
+
+toolchain go1.24.1
 
 require (
 	github.com/tliron/commonlog v0.2.15
@@ -25,7 +27,7 @@ require (
 	github.com/tliron/kutil v0.3.18 // indirect
 	golang.org/x/crypto v0.21.0 // indirect
 	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.18.0 // indirect
+	golang.org/x/sys v0.28.0 // indirect
 	golang.org/x/term v0.18.0 // indirect
 )
 

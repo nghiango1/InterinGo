@@ -1,0 +1,38 @@
+{
+  "$schema": "https://tree-sitter.github.io/tree-sitter/assets/schemas/config.schema.json",
+  "grammars": [
+    {
+      "name": "interingo",
+      "camelcase": "InterinGo",
+      "title": "InterinGo",
+      "scope": "source.interingo",
+      "file-types": [
+        "iig"
+      ],
+      "injection-regex": "^interingo$",
+      "class-name": "TreeSitterInteringo"
+    }
+  ],
+  "metadata": {
+    "version": "0.1.0",
+    "license": "MIT",
+    "description": "Interingo grammar for tree-sitter",
+    "authors": [
+      {
+        "name": "nghiango1"
+      }
+    ],
+    "links": {
+      "repository": "https://github.com/tree-sitter/tree-sitter-interingo"
+    }
+  },
+  "bindings": {
+    "c": true,
+    "go": true,
+    "node": true,
+    "python": true,
+    "rust": true,
+    "swift": true,
+    "zig": false
+  }
+}
