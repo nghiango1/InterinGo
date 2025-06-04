@@ -112,7 +112,16 @@ You can go to [server/docs/](server/docs/) or read live [docs website](https://n
 
 ### Prerequisite
 
-Go
+TLDR:
+
+```
+go v1.24.1
+tailwindcss v4.0.8
+```
+
+#### Ubuntu machine
+
+Go: Prefered to use version manager
 
 - Install go version manager [`gvm`](https://github.com/moovweb/gvm)
 
@@ -128,21 +137,47 @@ Go
   # Delete the last line of `gvm-default` file - Which change cd functionality
   ```
 
-- Install latest (currently at v1.22.0) version from binary file and set it as default
+- Install latest (currently at v1.24.1) version from binary file and set it as default
 
   ```sh
-  gvm install go1.22.0 -B
-  gvm use go1.22.0 --default
+  gvm install go1.24.1 -B
+  gvm use go1.24.1 --default
   ```
 
-### Build
+Tailwindcss CLI: Following <https://tailwindcss.com/docs/installation/tailwind-cli> for installing guide. Currently the project using version v4.0.8
 
-> To make build process simplier who, the project still contain the build file of templ and tailwindcss. Read more on how to build the front-end in `SERVER.md` file
+- Example install command, you can also download the binary file `tailwindcss-linux-x64` directly from tailwind github release page
+
+```sh
+npm install tailwindcss @tailwindcss/cli
+```
+
+- Then setup correct cli tools path to `TAILWIND_CLI` os environment. Bellow is the default in the make file (which will be used if the variable isnot set)
+
+```make
+TAILWIND_CLI ?= tailwindcss-linux-x64
+```
+
+#### Nix/Nix-shell
+
+Install nix-shell if you not using NixOS: Following guide from <https://nix.dev/manual/nix/2.29/installation/index.html>
+
+```sh
+curl -L https://nixos.org/nix/install | sh -s -- --daemon
+```
+
+Then all prerequired can be done using nix-shell from project root (which have `shell.nix` file). This will create a virtual (like `python3-venv`) shell with correct build tools version installed
+
+```sh
+nix-shell
+```
+
+### Build
 
 Build the code with
 
 ```sh
-go build .
+make build
 ```
 
 ### Test
