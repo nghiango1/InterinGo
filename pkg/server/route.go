@@ -11,7 +11,10 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path"
+	"path/filepath"
 
+	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
@@ -31,7 +34,7 @@ func InfoHandler(c *gin.Context) {
 }
 
 func NotFoundHandler(c *gin.Context) {
-	c.HTML(http.StatusOK, "", NotFound())
+	c.HTML(http.StatusNotFound, "", NotFound())
 }
 
 func EvaluateHandler(c *gin.Context) {
@@ -53,7 +56,7 @@ func EvaluateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//go:embed content
+//go:embed content/**/*
 var embedContent embed.FS
 
 func pageRoute(r *gin.Engine) {
@@ -66,6 +69,12 @@ func pageRoute(r *gin.Engine) {
 	// enforce traversal
 	// - Direct http.FS(embedContent) will not work
 	r.StaticFS("/assets", http.FS(subFS))
+    r.NoRoute(NotFoundHandler)
+
+	// traversal(r, "content/dist", "/")
+	webpage, err := static.EmbedFolder(embedContent, "content/dist")
+	log.Printf("[INFO] Server static FS `%v` at `%v`\n", "/", "content/dist")
+	r.Use(static.Serve("/", webpage))
 
 	// Templ render
 	ginHtmlRenderer := r.HTMLRender
