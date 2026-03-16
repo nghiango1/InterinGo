@@ -3,7 +3,7 @@ package object
 import (
 	"bytes"
 	"fmt"
-	"interingo/ast"
+	"interingo/pkg/ast"
 	"strings"
 )
 

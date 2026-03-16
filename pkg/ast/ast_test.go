@@ -1,7 +1,7 @@
 package ast
 
 import (
-	"interingo/token"
+	"interingo/pkg/token"
 	"testing"
 )
 

@@ -11,13 +11,14 @@ build: tailwind-build templ-build go-build # Build all the code
 build-run: build run # Build and run the code
 
 tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css
+	$(TAILWIND_CLI) -i pkg/server/input.css -c pkg/server/tailwind.config.js -o pkg/server/assets/stylesheet.css
 
 templ-build: # Build/rebuild all `templ` templates files
 	templ generate
 
 go-build: # Build go binary file
-	go build .
+	mkdir -p dist
+	go build -o dist/interingo cmd/interingo/main.go
 
 run: # Run the build file in server mode
 	./interingo -s

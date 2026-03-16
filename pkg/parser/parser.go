@@ -2,9 +2,9 @@ package parser
 
 import (
 	"fmt"
-	"interingo/ast"
-	"interingo/lexer"
-	"interingo/token"
+	"interingo/pkg/ast"
+	"interingo/pkg/lexer"
+	"interingo/pkg/token"
 	"strconv"
 )
 

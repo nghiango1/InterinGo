@@ -2,8 +2,8 @@ package evaluator
 
 import (
 	"fmt"
-	"interingo/ast"
-	"interingo/object"
+	"interingo/pkg/ast"
+	"interingo/pkg/object"
 )
 
 var (
@@ -131,7 +131,7 @@ func evalIdentifier(node ast.Node, env *object.Environment) object.Object {
 	return value
 }
 
-func evalFunctionLiteral(fl *ast.FunctionLiteral, env *object.Environment) *object.Function{
+func evalFunctionLiteral(fl *ast.FunctionLiteral, env *object.Environment) *object.Function {
 	params := fl.Parameters
 	body := fl.Body
 	return &object.Function{Parameters: params, Body: body, Env: env}

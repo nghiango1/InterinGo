@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 	"html/template"
-	"interingo/repl"
+	"interingo/pkg/repl"
 	"log"
 	"net/http"
 	"os"

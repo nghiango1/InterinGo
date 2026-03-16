@@ -2,8 +2,8 @@ package parser
 
 import (
 	"fmt"
-	"interingo/ast"
-	"interingo/lexer"
+	"interingo/pkg/ast"
+	"interingo/pkg/lexer"
 	"testing"
 )
 

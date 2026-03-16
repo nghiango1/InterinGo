@@ -1,9 +1,9 @@
 package evaluator
 
 import (
-	"interingo/lexer"
-	"interingo/object"
-	"interingo/parser"
+	"interingo/pkg/object"
+	"interingo/pkg/lexer"
+	"interingo/pkg/parser"
 	"testing"
 )
 
