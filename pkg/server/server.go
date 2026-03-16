@@ -9,8 +9,6 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"github.com/gin-contrib/static"
-
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
 	"github.com/gomarkdown/markdown/parser"
@@ -86,15 +84,11 @@ type News struct {
 	Body     string
 }
 
-
 func Start(listenAdrr string) {
 	log.Println("Started listening on", listenAdrr)
 
 	// Create a Gin router with default middleware (logger and recovery)
 	r := gin.Default()
-
-	// Force to handle static file
-	static.Serve("assets/", static.EmbedFolder(server, " content ")))
 
 	// Now start handing data
 	Route(r)

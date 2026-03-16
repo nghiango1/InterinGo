@@ -2,10 +2,13 @@ package server
 
 import (
 	"bytes"
+	"embed"
 	"fmt"
 	"interingo/pkg/repl"
 	"interingo/pkg/server/render"
 	"interingo/pkg/service/common"
+	"io/fs"
+	"log"
 	"net/http"
 	"os"
 
@@ -14,7 +17,7 @@ import (
 
 // Handler functions.
 func HomeHandle(c *gin.Context) {
-	c.HTML(http.StatusOK,"", Home())
+	c.HTML(http.StatusOK, "", Home())
 }
 
 func InfoHandler(c *gin.Context) {
@@ -27,14 +30,13 @@ func InfoHandler(c *gin.Context) {
 	}
 }
 
-
 func NotFoundHandler(c *gin.Context) {
 	c.HTML(http.StatusOK, "", NotFound())
 }
 
 func EvaluateHandler(c *gin.Context) {
 	// Input validate
-	var req common.EvalRequest;
+	var req common.EvalRequest
 	errs := c.BindJSON(&req)
 	if errs != nil {
 		fmt.Println("API error, can't parse form value")
@@ -51,7 +53,21 @@ func EvaluateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-func Route(r *gin.Engine) {
+//go:embed content
+var embedContent embed.FS
+
+func pageRoute(r *gin.Engine) {
+	// Isolate assets static file (css, js) from embeded content
+	subFS, err := fs.Sub(embedContent, "content/assets")
+	if err != nil {
+		log.Fatal(err)
+	}
+	// Gin only serve the file from FS directly, there isn't params to
+	// enforce traversal
+	// - Direct http.FS(embedContent) will not work
+	r.StaticFS("/assets", http.FS(subFS))
+
+	// Templ render
 	ginHtmlRenderer := r.HTMLRender
 	r.HTMLRender = &render.HTMLTemplRenderer{FallbackHtmlRenderer: ginHtmlRenderer}
 
@@ -61,11 +77,13 @@ func Route(r *gin.Engine) {
 	// populateHandle("", allDocs) - Will embed later
 	r.GET("/info", InfoHandler)
 	r.GET("/404", NotFoundHandler)
+}
+
+func apiRoute(r *gin.Engine) {
 	r.POST("/api/evaluate", EvaluateHandler)
+}
 
-
-	// Static assets file like javascript and css
-	staticFileHandler := http.FileServer(http.Dir("./server/assets"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", staticFileHandler))
-
+func Route(r *gin.Engine) {
+	pageRoute(r)
+	apiRoute(r)
 }

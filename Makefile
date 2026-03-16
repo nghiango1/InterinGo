@@ -28,7 +28,7 @@ go-build: # Build go binary file
 	go build -o dist/interingo cmd/interingo/main.go
 
 run: # Run the build file in server mode
-	./interingo -s
+	./dist/interingo -s
 
 ### Development helper
 
