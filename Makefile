@@ -19,6 +19,7 @@ ember-content: tailwind-build
 	rm -rf pkg/server/content/**
 	cp -r website/assets/ pkg/server/content/
 	cp -r website/docs/ pkg/server/content/
+	cp -r website/dist/ pkg/server/content/
 
 templ-build: # Build/rebuild all `templ` templates files
 	templ generate

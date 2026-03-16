@@ -146,6 +146,7 @@ templ inputComponent() {
 		hx-target="#repl-result"
 		hx-swap="innerHTML"
 		hx-on:htmx:config-request="addCommand()"
+		hx-ext="json-enc"
 	>
 		<p class="hidden sm:block sm:my-auto">Custom command:</p>
 		<input
