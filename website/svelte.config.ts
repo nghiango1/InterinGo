@@ -1,6 +1,5 @@
 import adapter from '@sveltejs/adapter-static';
 
-/** @type {import('@sveltejs/kit').Config} */
 const config = {
 	kit: {
 		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
@@ -10,10 +9,13 @@ const config = {
 			fallback: '200.html', // may differ from host to host
 			pages: 'dist',
 			assets: 'dist',
-			fallback: undefined,
 			precompress: false,
 			strict: true
 		}),
+	},
+	// https://svelte.dev/docs/kit/configuration#files
+	files: {
+		assets: "assets" // Public dir -> vite publicDir overide
 	}
 };
 
