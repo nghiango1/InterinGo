@@ -11,8 +11,6 @@ import (
 	"log"
 	"net/http"
 	"os"
-	"path"
-	"path/filepath"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
@@ -69,9 +67,7 @@ func pageRoute(r *gin.Engine) {
 	// enforce traversal
 	// - Direct http.FS(embedContent) will not work
 	r.StaticFS("/assets", http.FS(subFS))
-    r.NoRoute(NotFoundHandler)
 
-	// traversal(r, "content/dist", "/")
 	webpage, err := static.EmbedFolder(embedContent, "content/dist")
 	log.Printf("[INFO] Server static FS `%v` at `%v`\n", "/", "content/dist")
 	r.Use(static.Serve("/", webpage))
@@ -86,6 +82,8 @@ func pageRoute(r *gin.Engine) {
 	// populateHandle("", allDocs) - Will embed later
 	r.GET("/info", InfoHandler)
 	r.GET("/404", NotFoundHandler)
+	// 404
+    r.NoRoute(NotFoundHandler)
 }
 
 func apiRoute(r *gin.Engine) {
