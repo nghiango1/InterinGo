@@ -1,17 +1,24 @@
 TAILWIND_CLI ?= tailwindcss-linux-x64
 
 .PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run clean server-clean repl-clean
+.PHONY: ember-content
 
  all: help
 
 ### Build command
 
-build: tailwind-build templ-build go-build # Build all the code
+build: ember-content templ-build  go-build # Build all the code
 
 build-run: build run # Build and run the code
 
 tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i pkg/server/input.css -c pkg/server/tailwind.config.js -o pkg/server/assets/stylesheet.css
+	$(TAILWIND_CLI) -i website/input.css -c website/tailwind.config.js -o website/assets/stylesheet.css
+
+# Currently we doesn't build, so just directly copy over the data is ok
+ember-content: tailwind-build
+	rm -rf pkg/server/content/**
+	cp -r website/assets/ pkg/server/content/
+	cp -r website/docs/ pkg/server/content/
 
 templ-build: # Build/rebuild all `templ` templates files
 	templ generate
