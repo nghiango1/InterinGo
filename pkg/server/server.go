@@ -1,15 +1,13 @@
 package server
 
 import (
-	"context"
 	"fmt"
 	"html/template"
-	"interingo/pkg/repl"
 	"log"
-	"net/http"
 	"os"
-	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
 
 	"github.com/gomarkdown/markdown"
 	"github.com/gomarkdown/markdown/html"
@@ -47,45 +45,11 @@ var allDocs *Linked
 var docsPath = "server/docs/"
 
 func Init() {
-	fmt.Println("server init")
-	mdPages = make(map[string]string)
-	content, err := os.ReadFile("README.md")
-	if err == nil {
-		mdPages["/docs"] = string(mdToHTML(content))
-	}
-	allDocs = &Linked{
-		nestedLink: make(map[string]*Linked),
-	}
-	err = filepath.Walk(docsPath, populatedPage)
-	if err != nil {
-		fmt.Printf("Read docs path error\n")
-	}
 }
 
 func isMDextension(fileInfo os.FileInfo) bool {
 	splitedName := strings.Split(fileInfo.Name(), ".")
 	return len(splitedName) > 1 && splitedName[len(splitedName)-1] == "md"
-}
-
-func populatedPage(path string, file os.FileInfo, err error) error {
-	if file.IsDir() {
-		return nil
-	}
-
-	if !isMDextension(file) {
-		return nil
-	}
-
-	docs, err := os.ReadFile(path)
-	if err != nil {
-		return nil
-	}
-
-	mdPages["/"+path] = string(mdToHTML(docs))
-	allDocs.add(path, file.Name())
-	fmt.Printf("Init poplated page %s\n", path)
-
-	return nil
 }
 
 func getPage(fileName string) (string, bool) {
@@ -120,90 +84,16 @@ type News struct {
 	Body     string
 }
 
-// Handler functions.
-func HomeHandle(w http.ResponseWriter, r *http.Request) {
-	if r.URL.Path != "/" {
-		w.WriteHeader(200)
-		NotFoundHandler(w, r)
-		return
-	}
-
-	component := Home()
-	component.Render(context.Background(), w)
-}
-
-func InfoHandler(w http.ResponseWriter, r *http.Request) {
-	component := Info("<p>This is infomation about Authors of InterinGo language<p>")
-	info, err := os.ReadFile("server/assets/resume.md")
-	if err == nil {
-		component = Info(string(mdToHTML(info)))
-	}
-	component.Render(context.Background(), w)
-}
-
-func DocsHandler(w http.ResponseWriter, r *http.Request) {
-	component := Docs("<p>This is documentations of InterinGo language<p>", allDocs)
-
-	docs, ok := getPage(r.URL.Path)
-	if ok {
-		component = Docs(string(docs), allDocs)
-	}
-	component.Render(context.Background(), w)
-}
-
-func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
-	component := NotFound()
-	component.Render(context.Background(), w)
-}
-
-func EvaluateHandler(w http.ResponseWriter, r *http.Request) {
-	if r.Method != "POST" {
-		fmt.Fprintf(w, "Not support")
-	}
-
-	errs := r.ParseForm()
-	if errs != nil {
-		fmt.Fprintf(w, "API error, can't parse form value")
-		fmt.Println("API error, can't parse form value")
-		fmt.Println(r.Form)
-	}
-
-	if r.Form.Has("repl-input") {
-		r.Form.Get("repl-input")
-		repl.Handle(r.Form.Get("repl-input"), w)
-	} else {
-		fmt.Fprintf(w, "API error, need `repl-input` value to be set")
-		fmt.Println("API error, need `repl-input` value to be set")
-	}
-}
-
-func populateHandle(path string, linked *Linked) {
-	for k := range linked.nestedLink {
-		populateHandle(path+"/"+k, linked.nestedLink[k])
-	}
-	for _, file := range linked.docs {
-		escapePath := strings.ReplaceAll(path+"/"+file, " ", "%20")
-		http.HandleFunc(escapePath, DocsHandler)
-	}
-}
 
 func Start(listenAdrr string) {
 	log.Println("Started listening on", listenAdrr)
 
-	// Registering our handler functions, and creating paths.
-	http.HandleFunc("/", HomeHandle)
-	http.HandleFunc("/docs", DocsHandler)
-	populateHandle("", allDocs)
-	http.HandleFunc("/info", InfoHandler)
-	http.HandleFunc("/404", NotFoundHandler)
-	http.HandleFunc("/api/evaluate", EvaluateHandler)
-
-	// Static assets file like javascript and css
-	staticFileHandler := http.FileServer(http.Dir("./server/assets"))
-	http.Handle("/assets/", http.StripPrefix("/assets/", staticFileHandler))
+	// Create a Gin router with default middleware (logger and recovery)
+	r := gin.Default()
+	Route(r)
 
 	// Spinning up the server.
-	err := http.ListenAndServe(listenAdrr, nil)
+	err := r.Run(listenAdrr)
 	if err != nil {
 		log.Fatal(err)
 	}

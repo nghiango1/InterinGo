@@ -47,14 +47,14 @@ func (b *Boolean) Inspect() string  { return fmt.Sprintf("%t", b.Value) }
 type Null struct{}
 
 func (n *Null) Type() ObjectType { return NULL_OBJ }
-func (n *Null) Inspect() string  { return fmt.Sprintf("null") }
+func (n *Null) Inspect() string  { return "null" }
 
 type ReturnValue struct {
 	Value Object
 }
 
 func (rv *ReturnValue) Type() ObjectType { return RETURN_VALUE_OBJ }
-func (rv *ReturnValue) Inspect() string  { return fmt.Sprintf(rv.Value.Inspect()) }
+func (rv *ReturnValue) Inspect() string  { return fmt.Sprintf("%s", rv.Value.Inspect()) }
 
 type Function struct {
 	Parameters []*ast.Identifier
