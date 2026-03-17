@@ -1,8 +1,5 @@
-import { env } from 'process';
-
-// Mock ?
 export interface ErrorResponse {
-    status: number;
+    status: 400 | 500;
     message: string;
 }
 export interface EvalRequest {
