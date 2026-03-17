@@ -30,7 +30,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	let output: EvalResponse;
 
 	if (env.BACKEND_SERVER_URL) {
-		output = await evaluateServer(data);
+		output = await evaluateServer(data, env.BACKEND_SERVER_URL);
 	} else {
 		output = evaluateMock(data);
 	}

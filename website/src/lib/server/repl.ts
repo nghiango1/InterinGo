@@ -1,7 +1,9 @@
+import { env } from 'process';
+
 // Mock ?
 export interface ErrorResponse {
     status: number;
-    message: string
+    message: string;
 }
 export interface EvalRequest {
     data: string;
@@ -14,8 +16,8 @@ export interface EvalResponseSuccess {
 
 export type EvalResponse = EvalResponseSuccess | ErrorResponse;
 
-export async function evaluateServer(req: EvalRequest): Promise<EvalResponse> {
-    const response = await fetch('http://localhost:8000/api/evaluate', {
+export async function evaluateServer(req: EvalRequest, base?: string): Promise<EvalResponse> {
+    const response = await fetch(new URL('/api/evaluate', base), {
         method: 'POST',
         body: JSON.stringify(req),
         headers: {
@@ -29,7 +31,7 @@ export async function evaluateServer(req: EvalRequest): Promise<EvalResponse> {
     } catch (e) {
         return {
             status: 500,
-            message: "Server error"
+            message: 'Server error'
         };
     }
 }
