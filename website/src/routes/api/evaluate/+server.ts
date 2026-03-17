@@ -14,8 +14,7 @@ const HTTP_STATUS_OK = 200;
 export const POST: RequestHandler = async ({ request }) => {
 	let data: EvalRequest;
 	try {
-		const { done } = await request.json();
-		data = done;
+		data = await request.json();
 	} catch (e) {
 		const error: EvalResponse = {
 			status: BAD_REQUEST,
@@ -25,11 +24,12 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json(error, { status: BAD_REQUEST });
 	}
 
-	console.log('[INFO] Input: ', data);
+	console.log('[INFO] Got eval request: ', data);
 
 	let output: EvalResponse;
 
 	if (env.BACKEND_SERVER_URL) {
+		console.log('[INFO] Send eval request to', env.BACKEND_SERVER_URL);
 		output = await evaluateServer(data, env.BACKEND_SERVER_URL);
 	} else {
 		output = evaluateMock(data);

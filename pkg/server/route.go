@@ -41,15 +41,19 @@ func EvaluateHandler(c *gin.Context) {
 	errs := c.BindJSON(&req)
 	if errs != nil {
 		fmt.Println("API error, can't parse form value")
+		errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
+		c.JSON(http.StatusBadRequest, errorResp)
 	}
+
+	log.Printf("[INFO] Eval request, got: %v", req)
 
 	// Handling eval
 	buf := bytes.Buffer{}
 	repl.Handle(req.Data, &buf)
 
 	// Return
-	resp := common.EvalResponse{
-		Result: buf.String(),
+	resp := common.EvalResponseSuccess{
+		Output: buf.String(),
 	}
 	c.JSON(http.StatusOK, resp)
 }
@@ -83,7 +87,7 @@ func pageRoute(r *gin.Engine) {
 	r.GET("/info", InfoHandler)
 	r.GET("/404", NotFoundHandler)
 	// 404
-    r.NoRoute(NotFoundHandler)
+	r.NoRoute(NotFoundHandler)
 }
 
 func apiRoute(r *gin.Engine) {

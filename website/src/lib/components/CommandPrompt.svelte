@@ -44,10 +44,10 @@
 		};
 		addCommand();
 
-		const resp = await postEvaluate(req);
+		const [status, resp] = await postEvaluate(req);
 
-		if (resp.status == 200) {
-			copyEvalResult(resp);
+		if (status == 200) {
+			copyEvalResult((resp as EvalResponseSuccess));
 			// command = '';
 		}
 		isEval = false;

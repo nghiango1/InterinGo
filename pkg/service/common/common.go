@@ -1,17 +1,19 @@
 package common
 
 type EchoRequest struct {
-	Data string `json: data`
+	Data string `json:"data"`
 }
 
 type EchoResponse struct {
-	Data string `json: data`
+	Data string `json:"data"`
 }
 
 type EvalRequest struct {
-	Data string `json: data`
+	Data string `json:"data"`
 }
 
-type EvalResponse struct {
-	Result string `json: result`
+// Interface can be tricky
+// Status 200
+type EvalResponseSuccess struct {
+	Output string `json:"output,omitempty"`
 }

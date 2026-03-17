@@ -1,13 +1,15 @@
+// JSON schema will be better to handle this
 export interface ErrorResponse {
-    status: 400 | 500;
+    type: string;
+    code: string;
     message: string;
 }
+
 export interface EvalRequest {
     data: string;
 }
 
 export interface EvalResponseSuccess {
-    status: 200;
     output: string;
 }
 
@@ -27,15 +29,15 @@ export async function evaluateServer(req: EvalRequest, base?: string): Promise<E
         return output as EvalResponse;
     } catch (e) {
         return {
-            status: 500,
-            message: 'Server error'
+            code: "internal_error",
+            type: "internal_error",
+            message: 'Internal server error'
         };
     }
 }
 
 export function evaluateMock(_req: EvalRequest): EvalResponse {
     return {
-        status: 200,
         output: 'Mock output'
     };
 }
