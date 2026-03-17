@@ -2,11 +2,11 @@
 	import Line from './command_prompt/Line.svelte';
 	import { postEvaluate } from '$lib/controller/repl';
 	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
-	import { onMount, tick } from 'svelte';
 
 	let isEval = $state(false);
 	let stick = $state(false);
 	let hide = $state(false);
+	// For even more freeform use tailwind break-all 
 	let wrap = $state(false);
 
 	const STARTED_LINE = 'Let start with help() command';
@@ -15,9 +15,6 @@
 
 	function updateStick() {
 		stick != stick;
-	}
-	function updateWrap() {
-		wrap != wrap;
 	}
 
 	// Bind to the command prompt output element
@@ -63,23 +60,9 @@
 		class="sticky top-4 flex flex-col gap-1 before:absolute before:-inset-4 before:-top-4 before:-z-10 before:rounded-b-lg before:bg-white/30 before:object-none before:backdrop-blur-sm after:absolute after:-inset-2 after:-top-2 after:-z-10 after:rounded-b-lg after:bg-white/30 after:object-none after:blur-sm dark:text-[#d1d5db] before:dark:bg-[#050510]/30 after:dark:bg-[#050510]/30"
 	>
 		<div class="overflow-hidden rounded-t-lg border-2 border-blue-500 dark:border-white">
-			<input id="hiddenwrap" class="peer/wrap hidden" type="checkbox" name="wrap" />
-			<input
-				id="hiddenhide"
-				class="peer/hide hidden"
-				type="checkbox"
-				bind:checked={hide}
-				name="hide"
-			/>
 			<div class="flex gap-2 border-b-2 bg-blue-200 p-1 dark:bg-[#090d1a]">
 				<h2 class="m-auto block flex-1 overflow-clip whitespace-nowrap">Command-prompt window</h2>
-				<input
-					id="wrap"
-					class="peer/wrap m-auto"
-					type="checkbox"
-					name="wrap"
-					oninput={updateWrap}
-				/>
+				<input id="wrap" class="peer/wrap m-auto" type="checkbox" name="wrap" bind:checked={wrap} />
 				<label
 					for="wrap"
 					class="m-auto flex flex-row gap-2 rounded-lg object-none peer-checked:bg-gray-200 peer-checked/wrap:font-bold"
@@ -114,9 +97,8 @@
 				<pre
 					id="repl-output"
 					bind:this={replOutput}
-					class="scrollbar flex h-56 resize-y overflow-auto rounded-lg p-2 whitespace-pre outline-blue-200 peer-checked/wrap:whitespace-pre-wrap">{#each lines as line}<Line
-							{line}
-						/>{/each}</pre>
+					class={'scrollbar flex h-56 resize-y overflow-auto rounded-lg p-2 whitespace-pre outline-blue-200 ' +
+						(wrap ? 'whitespace-pre-wrap' : '')}>{#each lines as line}<Line {line} />{/each}</pre>
 			{/if}
 		</div>
 		<form class="flex h-fit flex-row gap-4 outline-blue-200 dark:outline-white" method="POST">
