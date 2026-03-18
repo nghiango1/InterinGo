@@ -1,3 +1,4 @@
+import { mdsvex } from 'mdsvex';
 import adapter from '@sveltejs/adapter-static';
 
 const config = {
@@ -12,12 +13,25 @@ const config = {
 			precompress: false,
 			strict: true
 		}),
+		prerender: {
+			crawl: true,
+			entries : [
+				'/',
+				'/docs',
+				'/docs/keyword',
+			]
+		}
 	},
 	// https://svelte.dev/docs/kit/configuration#files
 	files: {
-		assets: "assets" // Public dir -> vite publicDir overide
-	}
+		assets: 'assets' // Public dir -> vite publicDir overide
+	},
+	preprocess: [
+		mdsvex({
+			extensions: ['.md', '.svx']
+		})
+	],
+	extensions: ['.svelte', '.svx', '.md']
 };
 
 export default config;
-

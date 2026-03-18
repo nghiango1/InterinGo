@@ -15,6 +15,8 @@ tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.
 
 .PHONY: embed-dist
 embed-dist: # Build website static file, output into website/dist 
+	rm -rf website/src/lib/docs/
+	cp -r docs website/src/lib
 	cd website/ && npm install && npm run build
 
 .PHONY: embed-content
