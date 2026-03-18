@@ -1,4 +1,5 @@
 /*! tailwindcss v4.0.8 | MIT License | https://tailwindcss.com */
+@import url('https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css');
 @layer theme, base, components, utilities;
 @layer theme {
   :root, :host {
@@ -711,7 +712,13 @@
   .flex-shrink {
     flex-shrink: 1;
   }
+  .shrink {
+    flex-shrink: 1;
+  }
   .flex-grow {
+    flex-grow: 1;
+  }
+  .grow {
     flex-grow: 1;
   }
   .resize {
@@ -854,6 +861,9 @@
   .pl-4 {
     padding-left: calc(var(--spacing) * 4);
   }
+  .text-center {
+    text-align: center;
+  }
   .font-mono {
     font-family: var(--font-mono);
   }
@@ -914,6 +924,9 @@
   }
   .\[a-zA-Z\:\\-\\\.\] {
     a-zA-Z: \-\.;
+  }
+  .\[writing-mode\:vertical-lr\] {
+    writing-mode: vertical-lr;
   }
   .horizontal-tb {
     writing-mode: horizontal-tb;

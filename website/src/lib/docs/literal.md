@@ -1,3 +1,7 @@
+---
+title: Literal value
+---
+
 # Literal value
 
 In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result

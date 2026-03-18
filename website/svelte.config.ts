@@ -1,5 +1,21 @@
 import { mdsvex } from 'mdsvex';
 import adapter from '@sveltejs/adapter-static';
+import { sync } from 'glob';
+
+function getEntries(): string[] {
+	let entries: string[] = ['/', '/docs', '/docs'];
+	const pattern = 'src/lib/docs/**/*.md';
+	try {
+		const files: string[] = sync(pattern);
+		files.forEach((file: string) => {
+			entries.push(file.replace('src/lib', '').replace('.md', ''));
+		});
+	} catch (err) {
+		console.error('Error fetching files: ', err);
+	}
+
+	return entries;
+}
 
 const config = {
 	kit: {
@@ -11,15 +27,11 @@ const config = {
 			pages: 'dist',
 			assets: 'dist',
 			precompress: false,
-			strict: true
+			strict: true,
 		}),
 		prerender: {
 			crawl: true,
-			entries : [
-				'/',
-				'/docs',
-				'/docs/keyword',
-			]
+			entries: getEntries()
 		}
 	},
 	// https://svelte.dev/docs/kit/configuration#files
