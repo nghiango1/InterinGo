@@ -5,35 +5,13 @@ import (
 	"embed"
 	"fmt"
 	"interingo/pkg/repl"
-	"interingo/pkg/server/render"
 	"interingo/pkg/service/common"
-	"io/fs"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
-
-// Handler functions.
-func HomeHandle(c *gin.Context) {
-	c.HTML(http.StatusOK, "", Home())
-}
-
-func InfoHandler(c *gin.Context) {
-	component := Info("<p>This is infomation about Authors of InterinGo language<p>")
-	info, err := os.ReadFile("server/assets/resume.md")
-	if err == nil {
-		c.HTML(http.StatusOK, "", Info(string(mdToHTML(info))))
-	} else {
-		c.HTML(http.StatusOK, "", component)
-	}
-}
-
-func NotFoundHandler(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "", NotFound())
-}
 
 func EvaluateHandler(c *gin.Context) {
 	// Input validate
@@ -58,36 +36,16 @@ func EvaluateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//go:embed content/**/*
+//go:embed all:content
 var embedContent embed.FS
 
 func pageRoute(r *gin.Engine) {
-	// Isolate assets static file (css, js) from embeded content
-	subFS, err := fs.Sub(embedContent, "content/assets")
+	webpage, err := static.EmbedFolder(embedContent, "content/dist")
 	if err != nil {
 		log.Fatal(err)
 	}
-	// Gin only serve the file from FS directly, there isn't params to
-	// enforce traversal
-	// - Direct http.FS(embedContent) will not work
-	r.StaticFS("/assets", http.FS(subFS))
-
-	webpage, err := static.EmbedFolder(embedContent, "content/dist")
 	log.Printf("[INFO] Server static FS `%v` at `%v`\n", "/", "content/dist")
 	r.Use(static.Serve("/", webpage))
-
-	// Templ render
-	ginHtmlRenderer := r.HTMLRender
-	r.HTMLRender = &render.HTMLTemplRenderer{FallbackHtmlRenderer: ginHtmlRenderer}
-
-	// Registering our handler functions, and creating paths.
-	r.GET("/", HomeHandle)
-	// r.GET("/docs", DocsHandler)
-	// populateHandle("", allDocs) - Will embed later
-	r.GET("/info", InfoHandler)
-	r.GET("/404", NotFoundHandler)
-	// 404
-	r.NoRoute(NotFoundHandler)
 }
 
 func apiRoute(r *gin.Engine) {

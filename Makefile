@@ -1,30 +1,21 @@
-TAILWIND_CLI ?= tailwindcss-linux-x64
-
-.PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run clean server-clean repl-clean
+.PHONY: all build build-run help go-build run clean server-clean repl-clean
 
  all: help
 
 ### Build command
 
-build: embed-content templ-build  go-build # Build all the code
+build: embed-content go-build # Build all the code
 
 build-run: build run # Build and run the code
-
-tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i website/input.css -c website/tailwind.config.js -o website/assets/stylesheet.css
 
 .PHONY: embed-dist
 embed-dist: # Build website static file, output into website/dist 
 	cd website/ && npm install && npm run build
 
 .PHONY: embed-content
-embed-content: tailwind-build embed-dist # Build webpage then output it into embed directory for go compile
+embed-content: embed-dist # Build webpage then output it into embed directory for go compile
 	rm -rf pkg/server/content/**
-	cp -r website/assets/ pkg/server/content/
 	cp -r website/dist/ pkg/server/content/
-
-templ-build: # Build/rebuild all `templ` templates files
-	templ generate
 
 go-build: # Build go binary file
 	mkdir -p dist
@@ -35,14 +26,11 @@ run: # Run the build file in server mode
 
 ### Development helper
 
-tailwind-watch: # Start tailwind in watch mode - looking for change and rebuild, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css -w
-
 templ-watch: # Build/rebuild all `templ` templates files in watch mode
 	templ generate --watch
 
 go-run: # Run the code without build step in server mode
-	go run . -s
+	go run ./cmd/interingo/ -s
 
 regression-test: # Run the code without build step in server mode
 	python script/regressionTesting.py

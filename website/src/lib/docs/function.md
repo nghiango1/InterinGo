@@ -1,3 +1,7 @@
+---
+title: Function
+---
+
 # Function
 
 InterinGo support function assignment
