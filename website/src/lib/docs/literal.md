@@ -1,5 +1,6 @@
 ---
 title: Literal value
+session: Syntax
 ---
 
 # Literal value

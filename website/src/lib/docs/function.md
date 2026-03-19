@@ -1,5 +1,6 @@
 ---
 title: Function
+session: Syntax
 ---
 
 # Function

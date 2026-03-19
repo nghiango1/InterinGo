@@ -1,5 +1,6 @@
 ---
 title: Personal walkthrough note
+session: Misc
 ---
 
 # Personal walkthrough note

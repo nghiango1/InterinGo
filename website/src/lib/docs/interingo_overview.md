@@ -1,5 +1,7 @@
 ---
 title: InterinGo overview
+session: Getting started
+index: 1
 ---
 
 # InterinGo

@@ -5,20 +5,14 @@
 
 	const {
 		docs,
-		name,
-		handleHide
+		name
 	}: {
 		docs: DocInfo[];
 		name: string;
-		handleHide: () => void;
 	} = $props();
 </script>
 
 <ol class="block list-disc">
-	<div class="flex flex-row items-end py-4">
-		<h1 class="block flex-1 text-xl font-bold dark:text-white">Documentation</h1>
-		<button class="block md:hidden" onclick={handleHide}> Hide menu </button>
-	</div>
 	<h2 class="my-4 font-bold">{name}</h2>
 	{#each docs as doc}
 		<NavigationItem href={resolve(`/docs/${doc.slug}`)} name={doc.title || doc.slug} />

@@ -1,8 +1,10 @@
 ---
-title: How to use
+title: Usage
+session: Getting started
+index: 2
 ---
 
-# How to use
+# Usage
 
 Build the program and get `./interingo` file executable or download [Released binary](https://github.com/nghiango1/InterinGo/releases). You can run `./interingo -h` to get help on runner flag directly (for TLDR folks)
 
