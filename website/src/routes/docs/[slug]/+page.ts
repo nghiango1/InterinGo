@@ -9,8 +9,8 @@ export const load: PageLoad = async ({ params, parent }) => {
     let docs;
     try {
         docs = await import(`$lib/docs/${params.slug}.md`);
-    } catch {
-        return error(404, 'Document not found');
+    } catch (e) {
+        return error(404, `Document not found`);
     }
     let metadata = null;
     if (docs.metadata) {

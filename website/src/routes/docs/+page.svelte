@@ -1,7 +1,5 @@
 <script lang="ts">
-	import type { PageProps } from './$types';
-	let { data }: PageProps = $props();
-	import Usage from '$lib/docs/usage.md';
+	import Overview from '$lib/docs/interingo_overview.md';
 </script>
 
-<Usage />
+<Overview />

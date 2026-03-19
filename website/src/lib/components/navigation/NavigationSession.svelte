@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { DocRecord } from '$lib/type';
+	import { resolve } from '$app/paths';
+	import type { DocInfo } from '$lib/type';
 	import NavigationItem from './NavigationItem.svelte';
 
 	const {
@@ -7,7 +8,7 @@
 		name,
 		handleHide
 	}: {
-		docs: DocRecord[];
+		docs: DocInfo[];
 		name: string;
 		handleHide: () => void;
 	} = $props();
@@ -20,6 +21,6 @@
 	</div>
 	<h2 class="my-4 font-bold">{name}</h2>
 	{#each docs as doc}
-		<NavigationItem href={doc.href} name={doc.name} />
+		<NavigationItem href={resolve(`/docs/${doc.slug}`)} name={doc.title || doc.slug} />
 	{/each}
 </ol>
