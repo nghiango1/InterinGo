@@ -24,6 +24,10 @@ go-build: # Build go binary file
 run: # Run the build file in server mode
 	./dist/interingo -s
 
+.PHONY: embed-content
+service-image:
+	docker build -f docker/service.Dockerfile . -t interingo:latest
+
 ### Development helper
 
 templ-watch: # Build/rebuild all `templ` templates files in watch mode
