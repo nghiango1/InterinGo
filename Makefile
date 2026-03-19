@@ -4,7 +4,7 @@
 
 ### Build command
 
-build: embed-content go-build # Build all the code
+build: embed-dist embed-content go-build # Build all the code
 
 build-run: build run # Build and run the code
 
@@ -13,7 +13,7 @@ embed-dist: # Build website static file, output into website/dist
 	cd website/ && npm install && npm run build
 
 .PHONY: embed-content
-embed-content: embed-dist # Build webpage then output it into embed directory for go compile
+embed-content: # Build webpage then output it into embed directory for go compile
 	rm -rf pkg/server/content/**
 	cp -r website/dist/ pkg/server/content/
 
@@ -23,6 +23,10 @@ go-build: # Build go binary file
 
 run: # Run the build file in server mode
 	./dist/interingo -s
+
+.PHONY: embed-content
+service-image:
+	docker build -f docker/service.Dockerfile . -t interingo:latest
 
 ### Development helper
 
