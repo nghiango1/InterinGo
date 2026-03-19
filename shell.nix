@@ -10,10 +10,7 @@ in
 
 pkgs.mkShellNoCC {
   packages = with pkgs; [
+    nodejs
     go
-    tailwindcss_4
-    templ
   ];
-
-  TAILWIND_CLI = "tailwindcss";
 }

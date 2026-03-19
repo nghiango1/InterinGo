@@ -2,12 +2,12 @@ import { mdsvex } from 'mdsvex';
 import adapter from '@sveltejs/adapter-static';
 import { sync } from 'glob';
 
-function getEntries(): string[] {
-	let entries: string[] = ['/', '/docs', '/docs'];
+function getEntries() {
+	let entries = ['/', '/docs', '/docs'];
 	const pattern = 'src/lib/docs/**/*.md';
 	try {
-		const files: string[] = sync(pattern);
-		files.forEach((file: string) => {
+		const files = sync(pattern);
+		files.forEach((file) => {
 			entries.push(file.replace('src/lib', '').replace('.md', ''));
 		});
 	} catch (err) {

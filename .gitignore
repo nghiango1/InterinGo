@@ -3,3 +3,5 @@ interpreter.epub
 
 # ember content, should be built from website directory
 pkg/server/content/
+venv/
+
