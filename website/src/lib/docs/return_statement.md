@@ -1,3 +1,8 @@
+---
+title: Return statement
+session: Syntax
+---
+
 # Return statement
 
 > Control flow is a form of changing how and which statement will be Executed by the Interpreter.
@@ -11,7 +16,6 @@ return x + y;
 let x = 3;
 let x = 4;
 ```
-
 
 ```igg
 return x;

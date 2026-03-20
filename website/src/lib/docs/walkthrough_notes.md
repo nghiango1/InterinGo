@@ -1,3 +1,8 @@
+---
+title: Personal walkthrough note
+session: Misc
+---
+
 # Personal walkthrough note
 
 A parse and a tokenizer in Interpreter is just a big string parsing

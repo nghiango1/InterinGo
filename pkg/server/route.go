@@ -5,35 +5,23 @@ import (
 	"embed"
 	"fmt"
 	"interingo/pkg/repl"
-	"interingo/pkg/server/render"
 	"interingo/pkg/service/common"
 	"io/fs"
 	"log"
 	"net/http"
-	"os"
+	"strings"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
 
-// Handler functions.
-func HomeHandle(c *gin.Context) {
-	c.HTML(http.StatusOK, "", Home())
-}
+const API_ROUTE = "/api"
 
-func InfoHandler(c *gin.Context) {
-	component := Info("<p>This is infomation about Authors of InterinGo language<p>")
-	info, err := os.ReadFile("server/assets/resume.md")
-	if err == nil {
-		c.HTML(http.StatusOK, "", Info(string(mdToHTML(info))))
-	} else {
-		c.HTML(http.StatusOK, "", component)
-	}
-}
+// This is enforce by build script, which copy over website built static file
+// into `content/dist`
+const WEBSITE_FILEPATH = "content/dist"
 
-func NotFoundHandler(c *gin.Context) {
-	c.HTML(http.StatusNotFound, "", NotFound())
-}
+//go:embed all:content
+var embedContent embed.FS
 
 func EvaluateHandler(c *gin.Context) {
 	// Input validate
@@ -58,36 +46,24 @@ func EvaluateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//go:embed content/**/*
-var embedContent embed.FS
-
+// Any call which doesn't match `/api` route will be handle with static fileserver
 func pageRoute(r *gin.Engine) {
-	// Isolate assets static file (css, js) from embeded content
-	subFS, err := fs.Sub(embedContent, "content/assets")
+	fsys, err := fs.Sub(embedContent, WEBSITE_FILEPATH)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Failed to embed folder, got error: ", err)
+		return
 	}
-	// Gin only serve the file from FS directly, there isn't params to
-	// enforce traversal
-	// - Direct http.FS(embedContent) will not work
-	r.StaticFS("/assets", http.FS(subFS))
 
-	webpage, err := static.EmbedFolder(embedContent, "content/dist")
-	log.Printf("[INFO] Server static FS `%v` at `%v`\n", "/", "content/dist")
-	r.Use(static.Serve("/", webpage))
-
-	// Templ render
-	ginHtmlRenderer := r.HTMLRender
-	r.HTMLRender = &render.HTMLTemplRenderer{FallbackHtmlRenderer: ginHtmlRenderer}
-
-	// Registering our handler functions, and creating paths.
-	r.GET("/", HomeHandle)
-	// r.GET("/docs", DocsHandler)
-	// populateHandle("", allDocs) - Will embed later
-	r.GET("/info", InfoHandler)
-	r.GET("/404", NotFoundHandler)
-	// 404
-	r.NoRoute(NotFoundHandler)
+	fileserver := http.FileServer(http.FS(fsys))
+	r.Use(
+		func(c *gin.Context) {
+			isApiCall := strings.HasPrefix(c.Request.URL.Path, API_ROUTE)
+			if !isApiCall {
+				log.Printf("[INFO] huh %v \n", c.Request.URL.Path)
+				fileserver.ServeHTTP(c.Writer, c.Request)
+				c.Abort()
+			}
+		})
 }
 
 func apiRoute(r *gin.Engine) {

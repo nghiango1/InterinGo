@@ -3,6 +3,12 @@
 	import { postEvaluate } from '$lib/controller/repl';
 	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
 
+	let {
+		command
+	} : {
+		command : string
+	} = $props()
+
 	let isEval = $state(false);
 	let stick = $state(false);
 	let hide = $state(false);
@@ -11,7 +17,6 @@
 
 	const STARTED_LINE = 'Let start with help() command';
 	let lines: string[] = $state([STARTED_LINE]);
-	let command = $state('');
 
 	function updateStick() {
 		stick != stick;
@@ -92,7 +97,7 @@
 				</label>
 			</div>
 			{#if hide}
-				<pre id="repl-result" class="block max-h-6 overflow-auto px-2"></pre>
+				<pre id="repl-result" class="block max-h-6 overflow-auto px-2"><Line line={lines[lines.length -1]} /></pre>
 			{:else}
 				<pre
 					id="repl-output"

@@ -1,10 +1,15 @@
+---
+title: Literal value
+session: Syntax
+---
+
 # Literal value
 
 In interinGo language, there is 3 type of object can be treat as it self <b>literally</b>, which also the result
 return by all possible Evaluation process of the intepreter. They are:
 
-- Boolean: The type boolean has two values, <code>false</code> and <code>true</code></li>
-- Integer: The numbers which uses 64-bit integers</li>
+- Boolean: The type boolean has two values, <code>false</code> and <code>true</code>
+- Integer: The numbers which uses 64-bit integers
 - Null: Hate it or wanted it, InterinGo have null, a special object representing nothing. Both <code>null</code> and <code>false</code> make a condition false; so they can be call false values
 
 ## Example 

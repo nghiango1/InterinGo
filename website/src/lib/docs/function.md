@@ -1,3 +1,8 @@
+---
+title: Function
+session: Syntax
+---
+
 # Function
 
 InterinGo support function assignment
