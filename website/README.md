@@ -1,22 +1,9 @@
 # sv
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+Frontend project, drop in replacement for templ and htmx
 
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-npx sv@0.12.7 create --template minimal --types ts --add tailwindcss="plugins:typography" prettier eslint --install npm myapp
-```
+- UI now can support RESTful API with JSON for document content
+- Markdown now move to Svelte Preprocessor, which can support more component
 
 ## Developing
 
@@ -40,3 +27,11 @@ npm run build
 You can preview the production build with `npm run preview`.
 
 > To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+
+### Update dependancy
+
+There might be some warning/error when deal with Svelte build, we should update regularly to prevent problem.
+
+```sh
+npm install @sveltejs/kit@latest
+```
