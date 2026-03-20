@@ -1,5 +1,5 @@
 DEBUG = False
-IN_DIR = "test/"
-OUT_DIR = "test/result/"
+IN_DIR = "input/"
+OUT_DIR = "output/"
 OUT_ENCODE = "ascii"
-EXEC_PATH = "./dist/interingo"
+EXEC_PATH = "../dist/interingo"
