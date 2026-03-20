@@ -8,7 +8,9 @@ import (
 	"interingo/pkg/service/common"
 	"io/fs"
 	"log"
+	"mime"
 	"net/http"
+	"path"
 	"strings"
 
 	"github.com/gin-gonic/gin"
@@ -33,8 +35,6 @@ func EvaluateHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResp)
 	}
 
-	log.Printf("[INFO] Eval request, got: %v", req)
-
 	// Handling eval
 	buf := bytes.Buffer{}
 	repl.Handle(req.Data, &buf)
@@ -54,16 +54,62 @@ func pageRoute(r *gin.Engine) {
 		return
 	}
 
-	fileserver := http.FileServer(http.FS(fsys))
-	r.Use(
-		func(c *gin.Context) {
-			isApiCall := strings.HasPrefix(c.Request.URL.Path, API_ROUTE)
-			if !isApiCall {
-				log.Printf("[INFO] huh %v \n", c.Request.URL.Path)
-				fileserver.ServeHTTP(c.Writer, c.Request)
-				c.Abort()
+	serveFile := func(c *gin.Context, filePath string, status int) {
+		data, err := fs.ReadFile(fsys, filePath)
+		if err != nil {
+			c.AbortWithStatus(http.StatusInternalServerError)
+			return
+		}
+		ext := path.Ext(filePath)
+		mimeType := mime.TypeByExtension(ext)
+		if mimeType == "" {
+			mimeType = "application/octet-stream"
+		}
+		c.Data(status, mimeType, data)
+	}
+
+	r.Use(func(c *gin.Context) {
+		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
+			c.Next()
+			return
+		}
+
+		// Sanitize: clean and strip leading slash
+		urlPath := path.Clean(strings.Trim(c.Request.URL.Path, "/"))
+		if urlPath == "." {
+			urlPath = ""
+		}
+
+		log.Printf("[INFO] go to: %v", urlPath)
+		candidates := []string{"index.html"}
+		if urlPath != "" {
+			candidates = []string{
+				urlPath,
+				urlPath + ".html",
+				urlPath + "/index.html",
 			}
-		})
+		}
+
+		for _, candidate := range candidates {
+			// fs.FS rejects any path containing ".." at the API level
+			log.Printf("[INFO] Check: %v", candidate)
+			fileInfo, err := fs.Stat(fsys, candidate)
+			log.Printf("[ERROR] err: %v", err)
+			if err != nil {
+				continue
+			}
+			if !fileInfo.IsDir() {
+				serveFile(c, candidate, http.StatusOK)
+				c.Abort()
+				return
+
+			}
+		}
+
+		log.Printf("[ERROR] Not find")
+		serveFile(c, "404.html", http.StatusNotFound)
+		c.Abort()
+	})
 }
 
 func apiRoute(r *gin.Engine) {
