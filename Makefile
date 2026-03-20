@@ -1,11 +1,12 @@
-.PHONY: all build build-run help go-build run clean server-clean repl-clean
-
+.PHONY: all
  all: help
 
 ### Build command
 
+.PHONY: build
 build: embed-dist embed-content go-build # Build all the code
 
+.PHONY: build-run
 build-run: build run # Build and run the code
 
 .PHONY: embed-dist
@@ -17,54 +18,37 @@ embed-content: # Build webpage then output it into embed directory for go compil
 	rm -rf pkg/server/content/**
 	cp -r website/dist/ pkg/server/content/
 
+.PHONY: go-build
 go-build: # Build go binary file
 	mkdir -p dist
 	go build -o dist/interingo cmd/interingo/main.go
 
+.PHONY: run clean server-clean repl-clean
 run: # Run the build file in server mode
 	./dist/interingo -s
 
-.PHONY: embed-content
-service-image:
-	docker build -f docker/service.Dockerfile . -t interingo:latest
+### Container deploy helper
+.PHONY: docker-build
+docker-build: # Build the container image
+	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
+
+.PHONY: docker-push
+docker-push: # Push the image into docker.io
+	docker push docker.io/nghiango1/interingo-service:latest
 
 ### Development helper
 
-templ-watch: # Build/rebuild all `templ` templates files in watch mode
-	templ generate --watch
-
+.PHONY: go-run
 go-run: embed-content # Run the code without build step in server mode
 	go run ./cmd/interingo/ -s
 
+.PHONY: regression-test
 regression-test: # Run the code without build step in server mode
 	python script/regressionTesting.py
 
-### REPL Helper
-
-repl-test: # Test all REPL project module
-	go test ./...
-
-repl-build: # Same as make go-build
-	go build .
-
-repl-run: # Run repl with-out build step
-	go run .
-
-repl-build-run: # Build the code then run executable file
-	go build .
-	./interingo
-
-repl-clean: # Remove repl build file
-	rm -f interingo
-
 ### Helper
 
-server-clean: # Remove all frontend build file
-	rm -f server/index_templ.go
-	rm -f server/assets/stylesheet.css
-
-clean: server-clean repl-clean # Remove all build file
-
+.PHONY: help
 help: # Show this help
 	@cat Makefile | \
 		grep -E '^[^.:[:space:]]+:|[#]##' | \
