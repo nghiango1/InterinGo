@@ -8,3 +8,4 @@ dist/
 pkg/server/content/
 venv/
 
+__pycache__/
