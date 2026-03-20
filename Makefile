@@ -27,9 +27,14 @@ go-build: # Build go binary file
 run: # Run the build file in server mode
 	./dist/interingo -s
 
-.PHONY: embed-content
-service-image:
+### Container deploy helper
+.PHONY: docker-build
+docker-build: # Build the container image
 	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
+
+.PHONY: docker-push
+docker-push: # Push the image into docker.io
+	docker push docker.io/nghiango1/interingo-service:latest
 
 ### Development helper
 
