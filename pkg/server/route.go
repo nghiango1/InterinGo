@@ -80,7 +80,6 @@ func pageRoute(r *gin.Engine) {
 			urlPath = ""
 		}
 
-		log.Printf("[INFO] go to: %v", urlPath)
 		candidates := []string{"index.html"}
 		if urlPath != "" {
 			candidates = []string{
@@ -92,9 +91,7 @@ func pageRoute(r *gin.Engine) {
 
 		for _, candidate := range candidates {
 			// fs.FS rejects any path containing ".." at the API level
-			log.Printf("[INFO] Check: %v", candidate)
 			fileInfo, err := fs.Stat(fsys, candidate)
-			log.Printf("[ERROR] err: %v", err)
 			if err != nil {
 				continue
 			}
@@ -106,7 +103,6 @@ func pageRoute(r *gin.Engine) {
 			}
 		}
 
-		log.Printf("[ERROR] Not find")
 		serveFile(c, "404.html", http.StatusNotFound)
 		c.Abort()
 	})
