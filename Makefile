@@ -29,7 +29,7 @@ run: # Run the build file in server mode
 
 .PHONY: embed-content
 service-image:
-	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest .
+	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
 
 ### Development helper
 
