@@ -34,10 +34,6 @@ const config = {
 			entries: getEntries()
 		}
 	},
-	// https://svelte.dev/docs/kit/configuration#files
-	files: {
-		assets: 'assets' // Public dir -> vite publicDir overide
-	},
 	preprocess: [
 		mdsvex({
 			extensions: ['.md', '.svx']

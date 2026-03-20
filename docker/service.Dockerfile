@@ -9,7 +9,7 @@ WORKDIR /root/workspace/website
 RUN npm install
 
 # Copy the application source code
-COPY --parents website/assets/ website/src/ website/*.ts website/*.js /root/workspace
+COPY --parents website/static/ website/src/ website/*.ts website/*.js /root/workspace
 RUN npm run build
 
 # Use the official golang latest Debian base

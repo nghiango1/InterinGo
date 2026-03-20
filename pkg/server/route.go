@@ -59,6 +59,7 @@ func pageRoute(r *gin.Engine) {
 		func(c *gin.Context) {
 			isApiCall := strings.HasPrefix(c.Request.URL.Path, API_ROUTE)
 			if !isApiCall {
+				log.Printf("[INFO] huh %v \n", c.Request.URL.Path)
 				fileserver.ServeHTTP(c.Writer, c.Request)
 				c.Abort()
 			}

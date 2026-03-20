@@ -33,7 +33,7 @@ service-image:
 templ-watch: # Build/rebuild all `templ` templates files in watch mode
 	templ generate --watch
 
-go-run: # Run the code without build step in server mode
+go-run: embed-content # Run the code without build step in server mode
 	go run ./cmd/interingo/ -s
 
 regression-test: # Run the code without build step in server mode
