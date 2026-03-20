@@ -3,4 +3,6 @@
 	let { data }: PageProps = $props();
 </script>
 
-<data.content />
+{#key data.content}
+    <data.content />
+{/key}
