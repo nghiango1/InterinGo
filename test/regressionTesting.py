@@ -39,6 +39,7 @@ if conf.DEBUG:
 
 
 def validateArgs():
+    print(args.inDir, path.isdir(args.inDir))
     if not path.isdir(args.inDir):
         raise ValueError("Input directory is not a valid path")
     if not path.isdir(args.outDir):

@@ -1,5 +1,6 @@
 import argparse
 
+import json
 from typing import List, Tuple
 from os import path, listdir
 import subprocess
@@ -133,14 +134,14 @@ class REPLServer:
 
     replEndpoint = "/api/evaluate"
 
-    def sendInputToREPLEndpoint(self, input) -> Tuple[bytes, int]:
+    def sendInputToREPLEndpoint(self, input: str) -> Tuple[bytes, int]:
         import requests
 
-        body = {'repl-input': input}
+        body = {'data': input}
         r = requests.post(
-            url=f"http://{self.serverURL}{REPLServer.replEndpoint}", data=body)
+            url=f"http://{self.serverURL}{REPLServer.replEndpoint}", json=body)
         if r.status_code == 200:
-            return r.content, r.status_code
+            return r.json()["output"], r.status_code
         else:
             print(
                 f"FAIL: Server not responding, got status code: {r.status_code}")
@@ -153,9 +154,9 @@ class REPLServer:
             self.process.send_signal(15)
 
 
-def getInputFromFile(inputFilePath: str):
+def getInputFromFile(inputFilePath: str) -> str:
     try:
-        fout = open(inputFilePath, 'rb')
+        fout = open(inputFilePath, 'r')
         oldOutput = fout.read()
         fout.close()
         return oldOutput
