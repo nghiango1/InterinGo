@@ -3,11 +3,9 @@ module interingo
 go 1.25.0
 
 require (
-	github.com/a-h/templ v0.3.833
 	github.com/chzyer/readline v1.5.1
-	github.com/gin-contrib/static v1.1.5
 	github.com/gin-gonic/gin v1.12.0
-	github.com/gomarkdown/markdown v0.0.0-20231222211730-1d6d20845b47
+	github.com/gomarkdown/markdown v0.0.0-20260217112301-37c66b85d6ab
 )
 
 require (

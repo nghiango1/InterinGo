@@ -6,12 +6,22 @@ import (
 	"fmt"
 	"interingo/pkg/repl"
 	"interingo/pkg/service/common"
+	"io/fs"
 	"log"
 	"net/http"
+	"strings"
 
-	"github.com/gin-contrib/static"
 	"github.com/gin-gonic/gin"
 )
+
+const API_ROUTE = "/api"
+
+// This is enforce by build script, which copy over website built static file
+// into `content/dist`
+const WEBSITE_FILEPATH = "content/dist"
+
+//go:embed all:content
+var embedContent embed.FS
 
 func EvaluateHandler(c *gin.Context) {
 	// Input validate
@@ -36,16 +46,23 @@ func EvaluateHandler(c *gin.Context) {
 	c.JSON(http.StatusOK, resp)
 }
 
-//go:embed all:content
-var embedContent embed.FS
-
+// Any call which doesn't match `/api` route will be handle with static fileserver
 func pageRoute(r *gin.Engine) {
-	webpage, err := static.EmbedFolder(embedContent, "content/dist")
+	fsys, err := fs.Sub(embedContent, WEBSITE_FILEPATH)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalln("Failed to embed folder, got error: ", err)
+		return
 	}
-	log.Printf("[INFO] Server static FS `%v` at `%v`\n", "/", "content/dist")
-	r.Use(static.Serve("/", webpage))
+
+	fileserver := http.FileServer(http.FS(fsys))
+	r.Use(
+		func(c *gin.Context) {
+			isApiCall := strings.HasPrefix(c.Request.URL.Path, API_ROUTE)
+			if !isApiCall {
+				fileserver.ServeHTTP(c.Writer, c.Request)
+				c.Abort()
+			}
+		})
 }
 
 func apiRoute(r *gin.Engine) {
