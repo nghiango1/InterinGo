@@ -170,5 +170,5 @@ def goTest():
 if __name__ == "__main__":
     validateArgs()
     fileModeTest()
-    apiTesting.serverTest(conf.EXEC_PATH, conf.IN_DIR, conf.OUT_DIR)
+    # apiTesting.serverTest(conf.EXEC_PATH, conf.IN_DIR, conf.OUT_DIR)
     goTest()

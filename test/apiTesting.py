@@ -4,6 +4,8 @@ import json
 from typing import List, Tuple
 from os import path, listdir
 import subprocess
+
+from requests import request
 import utils.globalConfig as conf
 
 
@@ -18,8 +20,8 @@ parser.add_argument('--input', dest='inDir',
                     help='Path that contain all the input file, default "test/"')
 parser.add_argument('--output', dest='outDir',
                     action='store',
-                    default="test/result/",
-                    help='Path that contain all outputfile, default "test/result/"')
+                    default="test/content/",
+                    help='Path that contain all outputfile, default "test/content/"')
 
 
 def validateArgs():
@@ -60,29 +62,39 @@ def getInputFileList(inDir: str) -> List[str]:
     return [i for i in listdir(inDir) if ".iig" in i]
 
 
-def checkOutFile(outputFilePath: str, result: bytes):
-    """recheck output file with a command result to see if it match
+def checkOutFile(outputFilePath: str, content: bytes):
+    """recheck output file with a command content to see if it match
 
     Args:
         outputFilePath: Output file path
-        result: Command new output
+        content: Command new output
 
     Raises:
         OSError: Raise if file can't not access
     """
 
     try:
-        fout = open(outputFilePath, 'rb')
+        fout = open(outputFilePath, 'r')
         oldOutput = fout.read()
         fout.close()
     except OSError as e:
         raise OSError(
             f"ERROR: Can't open output file, please check environment. Skipping {outputFilePath}", e)
 
+    output = ""
+    try:
+        data = json.loads(content.decode('utf-8'))
+        output = data['output']
+    except:
+        print("FAIL: Output doesn't have valid JSON content")
+        return
+
     diffcheck = False
     for i, b in enumerate(oldOutput):
-        if result[i] != b:
+        if output[i] != b:
             diffcheck = True
+            print(f"DEBUG: Need response {
+                  oldOutput[:20]}... , Found diff at: {i} index - `{b}`")
             break
 
     if diffcheck:
@@ -141,7 +153,7 @@ class REPLServer:
         r = requests.post(
             url=f"http://{self.serverURL}{REPLServer.replEndpoint}", json=body)
         if r.status_code == 200:
-            return r.json()["output"], r.status_code
+            return r.content, r.status_code
         else:
             print(
                 f"FAIL: Server not responding, got status code: {r.status_code}")
@@ -166,7 +178,7 @@ def getInputFromFile(inputFilePath: str) -> str:
 
 
 def serverTest(execPath: str, inDir: str, outDir: str):
-    """Check the REPL API result spawn by ./interingo -s"""
+    """Check the REPL API content spawn by ./interingo -s"""
     if conf.DEBUG:
         print("DEBUG: Start API test on REPL server")
     testFiles = getInputFileList(inDir)
@@ -177,14 +189,14 @@ def serverTest(execPath: str, inDir: str, outDir: str):
             print(f"DEBUG: Check {fn} test file - sending to API...")
 
         fullPathInput = path.join(inDir, fn)
-        fullPathOutput = path.join(outDir, fn)[:-4] + '.out'
+        fullPathOutput = path.join(outDir, fn)[:-4] + '.output'
 
         input = getInputFromFile(fullPathInput)
-        result, statusCode = replServer.sendInputToREPLEndpoint(input)
+        content, statusCode = replServer.sendInputToREPLEndpoint(input)
         if conf.DEBUG:
-            print(f"DEBUG: Server response {result[:20]}...")
+            print(f"DEBUG: Server response {content[:20]}...")
         if statusCode == 200:
-            checkOutFile(fullPathOutput, result)
+            checkOutFile(fullPathOutput, content)
 
     replServer.closeREPLServer()
     print(f"PASS: Checked {len(testFiles)} input file")
