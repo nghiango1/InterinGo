@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"interingo-lsp/mappers"
 	"interingo-lsp/store"
-	"interingo/lexer"
-	"interingo/parser"
+	"interingo/pkg/lexer"
+	"interingo/pkg/parser"
 
 	_ "github.com/tliron/commonlog/simple"
 	"github.com/tliron/glsp"

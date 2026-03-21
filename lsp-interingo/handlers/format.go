@@ -3,7 +3,7 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"interingo/ast"
+	"interingo/pkg/ast"
 	"strings"
 
 	_ "github.com/tliron/commonlog/simple"

@@ -1,13 +1,10 @@
 module interingo-lsp
 
-go 1.23
-
-toolchain go1.24.1
+go 1.25.0
 
 require (
 	github.com/tliron/commonlog v0.2.15
 	github.com/tliron/glsp v0.2.1
-	interingo v0.0.0-00010101000000-000000000000
 )
 
 require (
@@ -25,10 +22,11 @@ require (
 	github.com/segmentio/ksuid v1.0.4 // indirect
 	github.com/sourcegraph/jsonrpc2 v0.2.0 // indirect
 	github.com/tliron/kutil v0.3.18 // indirect
-	golang.org/x/crypto v0.21.0 // indirect
-	golang.org/x/net v0.21.0 // indirect
-	golang.org/x/sys v0.28.0 // indirect
-	golang.org/x/term v0.18.0 // indirect
+	golang.org/x/crypto v0.48.0 // indirect
+	golang.org/x/net v0.51.0 // indirect
+	golang.org/x/sys v0.41.0 // indirect
+	golang.org/x/term v0.40.0 // indirect
+	interingo v0.0.0-00010101000000-000000000000 // indirect
 )
 
 replace interingo => ../
