@@ -44,7 +44,15 @@ go-run: embed-content # Run the code without build step in server mode
 
 .PHONY: regression-test
 regression-test: # Run the code without build step in server mode
-	python script/regressionTesting.py
+	python test/regressionTesting.py
+
+.PHONY: go-test
+go-test: # Go lang Unit test 
+	mkdir -p ./dist
+	go test -cover -coverprofile=./dist/coverage.out -coverpkg=./cmd/...,./pkg/...  ./cmd/... ./pkg/...
+	go tool cover -func=./dist/coverage.out
+	go tool cover -html=./dist/coverage.out -o ./dist/coverage.html
+	xdg-open ./dist/coverage.html
 
 ### Helper
 
