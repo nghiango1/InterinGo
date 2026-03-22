@@ -31,6 +31,11 @@ go-build: # Build go binary file
 run: # Run the build file in server mode
 	./dist/interingo -s
 
+.PHONY: lsp-build
+lsp-build: # Build go binary file
+	mkdir -p dist
+	go build -o dist/interingo-lsp cmd/interingo-lsp/main.go
+
 ### Container deploy helper
 .PHONY: docker-build
 docker-build: # Build the container image

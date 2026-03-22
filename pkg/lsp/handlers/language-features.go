@@ -3,8 +3,8 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"interingo-lsp/mappers"
-	"interingo-lsp/store"
+	"interingo/pkg/lsp/mappers"
+	"interingo/pkg/lsp/store"
 	"interingo/pkg/lexer"
 	"interingo/pkg/parser"
 

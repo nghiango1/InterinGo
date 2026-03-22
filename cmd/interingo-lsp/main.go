@@ -1,8 +1,8 @@
 package main
 
 import (
-	"interingo-lsp/handlers"
-	"interingo-lsp/store"
+	"interingo/pkg/lsp/handlers"
+	"interingo/pkg/lsp/store"
 
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
