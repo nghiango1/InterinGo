@@ -33,9 +33,11 @@ var precedences = map[token.TokenType]int{
 }
 
 type Parser struct {
-	l              *lexer.Lexer
+	Program        *ast.Program
+	Lexer          *lexer.Lexer
 	curToken       token.Token
 	peekToken      token.Token
+	Documents      []token.Token
 	errors         []string
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
@@ -74,7 +76,7 @@ func (p *Parser) skipExtras() {
 	for p.curToken.Type != token.EOF {
 		if p.curToken.Type == token.COMMENT || p.curToken.Type == token.EOL {
 			p.curToken = p.peekToken
-			p.peekToken = p.l.NextToken()
+			p.peekToken = p.Lexer.NextToken()
 		} else {
 			break
 		}
@@ -82,12 +84,20 @@ func (p *Parser) skipExtras() {
 }
 
 func (p *Parser) nextToken() {
+	if p.curToken.Type != "" {
+		p.Documents = append(p.Documents, p.curToken)
+		fmt.Printf("[INFO] %v\n", p.curToken.String())
+	}
 	p.curToken = p.peekToken
-	p.peekToken = p.l.NextToken()
+	p.peekToken = p.Lexer.NextToken()
 	p.skipExtras()
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
+	if p.Program != nil {
+		return p.Program
+	}
+
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	for p.curToken.Type != token.EOF {
@@ -97,6 +107,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		}
 		p.nextToken()
 	}
+	p.Program = program
 	return program
 }
 
@@ -253,7 +264,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 }
 
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{Lexer: l}
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)

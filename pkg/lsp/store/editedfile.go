@@ -3,6 +3,8 @@ package store
 import (
 	"errors"
 	"fmt"
+	"interingo/pkg/lexer"
+	"interingo/pkg/parser"
 	"net/url"
 	"os"
 
@@ -11,6 +13,7 @@ import (
 
 type EditedFile struct {
 	data *protocol.TextDocumentItem
+	Parser *parser.Parser
 }
 
 func (ef *EditedFile) Unwrap() *protocol.TextDocumentItem {
@@ -18,8 +21,13 @@ func (ef *EditedFile) Unwrap() *protocol.TextDocumentItem {
 }
 
 func Wrap(tdi *protocol.TextDocumentItem) *EditedFile {
+	l := lexer.New(tdi.Text)
+	p := parser.New(l)
+	p.ParseProgram()
+
 	return &EditedFile {
 		data: tdi,
+		Parser: p,
 	}
 }
 
