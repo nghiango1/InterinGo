@@ -16,7 +16,11 @@ embed-dist: # Build website static file, output into website/dist
 .PHONY: embed-content
 embed-content: # Build webpage then output it into embed directory for go compile
 	rm -rf pkg/server/content/**
-	cp -r website/dist/ pkg/server/content/
+	@if [[ -e website/dist/ ]]; then \
+	  cp -r website/dist/ pkg/server/content/; \
+	else \
+	  touch pkg/server/content/.not_support; \
+	fi
 
 .PHONY: go-build
 go-build: # Build go binary file
