@@ -129,6 +129,14 @@ func (p *Parser) ParseProgram() *ast.Program {
 		}
 		p.nextToken()
 	}
+
+	program.Range.End = p.curToken.End
+
+	for _, curToken := range p.DocumentTokens {
+		if curToken.Kind == SemanticTokenTypeComment {
+			program.Comments = append(program.Comments, curToken.Unwrap())
+		}
+	}
 	p.Program = program
 	return program
 }
@@ -166,10 +174,13 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt := &ast.ExpressionStatement{
 		Token: p.curToken,
 	}
+	stmt.Range.Start = p.curToken.Start
 
 	stmt.Expression = p.parseExpression(LOWEST)
+	stmt.Range.Start = stmt.Expression.GetRange().End
 
 	if p.peekTokenIs(token.SEMICOLON) {
+		stmt.Range.Start = p.curToken.End
 		p.nextToken()
 	}
 
@@ -204,6 +215,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp := &ast.CallExpression{
 		Token: p.curToken,
 	}
+	exp.Range.Start = p.curToken.Start
 
 	exp.Function = function
 	p.reverseIndentityLiteralKind(exp.Function.TokenLiteral(), SemanticTokenTypeFunction)
@@ -215,9 +227,12 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 			p.nextToken()
 		}
 	}
+
+	exp.Range.End = p.curToken.End
 	p.nextToken() // Skip the ')' token
 
 	if p.peekTokenIs(token.SEMICOLON) {
+		exp.Range.End = p.curToken.End
 		p.nextToken()
 	}
 	return exp
@@ -226,11 +241,14 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{
 		Token: p.curToken,
 	}
+	stmt.Range.Start = p.curToken.Start
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 
+	stmt.Range.End = stmt.ReturnValue.GetRange().End
 	if p.peekTokenIs(token.SEMICOLON) {
+		stmt.Range.End = p.curToken.End
 		p.nextToken()
 	}
 
@@ -241,10 +259,10 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	if !p.curTokenIs(token.LBRACE) {
 		return nil
 	}
-
 	block := &ast.BlockStatement{
 		Token: p.curToken,
 	}
+	block.Range.Start = p.curToken.Start
 
 	p.nextToken()
 	for !p.curTokenIs(token.RBRACE) && !p.curTokenIs(token.EOF) {
@@ -252,6 +270,7 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		if curr != nil {
 			block.Statements = append(block.Statements, curr)
 		}
+		block.Range.End = p.curToken.End
 		p.nextToken()
 	}
 
@@ -267,6 +286,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{
 		Token: p.curToken,
 	}
+	stmt.Range.Start = p.curToken.Start
 
 	if !p.expectPeek(token.IDENT) {
 		return nil
@@ -275,6 +295,10 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt.Name = &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
+		Range: ast.Range{
+			Start: p.curToken.Start,
+			End:   p.curToken.End,
+		},
 	}
 
 	if !p.expectPeek(token.ASSIGN) {
@@ -292,7 +316,9 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeVariable)
 	}
 
+	stmt.Range.End = value.GetRange().End
 	if p.peekTokenIs(token.SEMICOLON) {
+		stmt.Range.End = p.curToken.End
 		p.nextToken()
 	}
 
@@ -331,6 +357,7 @@ func New(l *lexer.Lexer) *Parser {
 
 func (p *Parser) parseFunctionLiteral() ast.Expression {
 	function := &ast.FunctionLiteral{Token: p.curToken}
+	function.Range.Start = p.curToken.Start
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil
@@ -355,7 +382,9 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 
 	function.Body = p.parseBlockStatement()
 
+	function.Range.End = function.Body.GetRange().End
 	if p.peekTokenIs(token.SEMICOLON) {
+		function.Range.End = p.curToken.End
 		p.nextToken()
 	}
 
@@ -366,6 +395,7 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 	expression := &ast.IfExpression{
 		Token: p.curToken,
 	}
+	expression.Range.Start = p.curToken.Start
 
 	if !p.expectPeek(token.LPAREN) {
 		return nil
@@ -381,6 +411,7 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 		return nil
 	}
 	expression.Consequence = p.parseBlockStatement()
+	expression.Range.End = expression.Consequence.GetRange().End
 
 	if p.peekTokenIs(token.ELSE) {
 		p.nextToken()
@@ -388,9 +419,11 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 			return nil
 		}
 		expression.Alternative = p.parseBlockStatement()
+		expression.Range.End = expression.Alternative.GetRange().End
 	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
+		expression.Range.End = p.curToken.End
 		p.nextToken()
 	}
 
@@ -403,19 +436,36 @@ func (p *Parser) parseGroupedExpression() ast.Expression {
 	if !p.expectPeek(token.RPAREN) {
 		return nil
 	}
+
 	return exp
 }
 
 func (p *Parser) parseIdentifier() ast.Expression {
-	return &ast.Identifier{Token: p.curToken, Value: p.curToken.Literal}
+	return &ast.Identifier{
+		Token: p.curToken,
+		Value: p.curToken.Literal,
+		Range: ast.Range{
+			Start: p.curToken.Start,
+			End:   p.curToken.End,
+		},
+	}
 }
 
 func (p *Parser) parseBoolean() ast.Expression {
-	return &ast.Boolean{Token: p.curToken, Value: p.curTokenIs(token.TRUE)}
+	return &ast.Boolean{
+		Token: p.curToken,
+		Value: p.curTokenIs(token.TRUE),
+		Range: ast.Range{
+			Start: p.curToken.Start,
+			End:   p.curToken.End,
+		},
+	}
 }
 
 func (p *Parser) parseIntegerLiteral() ast.Expression {
 	lit := &ast.IntegerLiteral{Token: p.curToken}
+	lit.Range.Start = p.curToken.Start
+
 	value, err := strconv.ParseInt(p.curToken.Literal, 0, 64)
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer",
@@ -424,6 +474,8 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 		return nil
 	}
 	lit.Value = value
+
+	lit.Range.End = p.curToken.End
 	return lit
 }
 
@@ -432,8 +484,10 @@ func (p *Parser) parsePrefixExpression() ast.Expression {
 		Token:    p.curToken,
 		Operator: p.curToken.Literal,
 	}
+	expression.Range.Start = p.curToken.Start
 	p.nextToken()
 	expression.Right = p.parseExpression(PREFIX)
+	expression.Range.End = p.curToken.End
 	return expression
 }
 
@@ -443,9 +497,12 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 		Operator: p.curToken.Literal,
 		Left:     left,
 	}
+	expression.Range.Start = left.GetRange().Start
 	precedences := p.curPrecedence()
 	p.nextToken()
 	expression.Right = p.parseExpression(precedences)
+
+	expression.Range.End = expression.Right.GetRange().End
 	return expression
 }
 

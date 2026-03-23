@@ -4,6 +4,8 @@ import (
 	"errors"
 	"fmt"
 	"interingo/pkg/ast"
+	"interingo/pkg/token"
+	"io"
 	"strings"
 
 	_ "github.com/tliron/commonlog/simple"
@@ -64,6 +66,9 @@ func indentPadding(option protocol.FormattingOptions, indent int) (string, error
 
 	return strings.Repeat(spaceTab, indent), nil
 }
+
+var comments []token.Token
+var curr_comments int
 
 func FormatedFunctionLiteral(node *ast.FunctionLiteral, option protocol.FormattingOptions, indent int) string {
 	indentPad, err := indentPadding(option, indent)
@@ -180,63 +185,91 @@ func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, inde
 	return formated
 }
 
+func checkInjectComment(currentLine int, out io.Writer, option protocol.FormattingOptions, indent int) {
+	fmt.Println("[INFO] comment check", curr_comments, comments)
+	if curr_comments >= len(comments) {
+		return
+	}
+	if currentLine > comments[curr_comments].Start.Line {
+		pad, err := indentPadding(option, indent)
+		if err != nil {
+			return
+		}
+		fmt.Fprintf(out, "%s", pad)
+		fmt.Fprintf(out, "%s\n", comments[curr_comments].Literal)
+		curr_comments += 1
+		fmt.Println("[INFO] Added comment:", comments)
+	}
+}
+
 // Format statement
 func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) string {
-	var formated string
+	var formated strings.Builder
 	indentPad, err := indentPadding(option, indent)
 	if err != nil {
 		indentPad = strings.Repeat("    ", indent)
 	}
+	fmt.Println("[INFO]", node)
 	switch node := node.(type) {
 	case *ast.Program:
+		comments = node.Comments
+		curr_comments = 0
 		for index, statement := range node.Statements {
 			stmtFormated := FormatedAST(statement, option, indent)
-			formated += indentPad + stmtFormated
+			formated.WriteString(indentPad + stmtFormated)
 
 			if false {
-				formated += fmt.Sprint(index)
+				fmt.Fprint(&formated, index)
 			}
 
 			if true {
-				formated += ";\n"
+				formated.WriteString(";\n")
 			}
+		}
+		// Cover the remain comment
+		for ; curr_comments < len(comments); curr_comments++ {
+			checkInjectComment(node.GetRange().End.Line + 1, &formated, option, indent)
 		}
 
 	case *ast.BlockStatement:
+		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
 		for index, statement := range node.Statements {
 			stmtFormated := FormatedAST(statement, option, indent)
-			formated += indentPad + stmtFormated
+			formated.WriteString(indentPad + stmtFormated)
 
 			if false {
-				formated += fmt.Sprint(index)
+				fmt.Fprint(&formated, index)
 			}
 
 			if true {
-				formated += ";"
+				formated.WriteString(";")
 			}
 
 			if index < len(node.Statements)-1 {
-				formated += "\n"
+				formated.WriteString("\n")
 			}
 		}
 
 	case *ast.LetStatement:
-		formated += node.TokenLiteral()
-		formated += " "
-		formated += node.Name.String()
-		formated += " = "
-		formated += FormatedExpresionAST(node.Value, option, indent)
+		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(node.TokenLiteral())
+		formated.WriteString(" ")
+		formated.WriteString(node.Name.String())
+		formated.WriteString(" = ")
+		formated.WriteString(FormatedExpresionAST(node.Value, option, indent))
 
 	case *ast.ReturnStatement:
-		formated += node.TokenLiteral()
-		formated += " "
-		formated += FormatedExpresionAST(node.ReturnValue, option, indent)
+		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(node.TokenLiteral())
+		formated.WriteString(" ")
+		formated.WriteString(FormatedExpresionAST(node.ReturnValue, option, indent))
 
 	case *ast.ExpressionStatement:
-		formated += FormatedExpresionAST(node.Expression, option, indent)
+		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(FormatedExpresionAST(node.Expression, option, indent))
 
 	default:
 		return node.String()
 	}
-	return formated
+	return formated.String()
 }

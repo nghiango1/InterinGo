@@ -1,6 +1,7 @@
 package parser
 
 import (
+	"encoding/json"
 	"fmt"
 	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
@@ -44,6 +45,12 @@ func TestLetStatements(t *testing.T) {
 			return
 		}
 
+		jsonData, err := json.Marshal(program)
+		if err != nil {
+			fmt.Printf("[ERROR] Got: %v\n", err)
+		} else {
+			fmt.Printf("[INFO] Data: (%v) %v\n", len(jsonData), string(jsonData))
+		}
 	}
 }
 
@@ -672,4 +679,11 @@ add(1, 2 * 3, 4 + 5);
 	testLiteralExpression(t, exp.Arguments[0], 1)
 	testInfixExpression(t, exp.Arguments[1], 2, "*", 3)
 	testInfixExpression(t, exp.Arguments[2], 4, "+", 5)
+
+	jsonData, err := json.Marshal(program)
+	if err != nil {
+		fmt.Printf("[ERROR] Got: %v\n", err)
+	} else {
+		fmt.Printf("[INFO] Data: (%v) %v\n", len(jsonData), string(jsonData))
+	}
 }
