@@ -15,7 +15,22 @@ RUN go mod download
 COPY --parents ./pkg ./cmd Makefile /root/workspace
 # Along with builded website dist
 
-# Build step
+# Build step - which doesn't embed any document into the server
 RUN make embed-content
 RUN make go-build
 RUN make lsp-build
+
+FROM alpine:latest
+WORKDIR /app/bin
+
+RUN apk add neovim
+
+COPY --from=build-env /root/workspace/dist/ /app/bin
+ENV PATH=/app/bin:$PATH
+COPY test/input/ /app
+
+WORKDIR /root/.config/nvim/
+COPY assets/init.lua .
+
+WORKDIR /app
+ENTRYPOINT nvim .
