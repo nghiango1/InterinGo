@@ -6,7 +6,6 @@ import (
 	"interingo/pkg/lsp/mappers"
 	"interingo/pkg/lsp/store"
 	"interingo/pkg/parser"
-	"interingo/pkg/token"
 
 	_ "github.com/tliron/commonlog/simple"
 	"github.com/tliron/glsp"
@@ -62,112 +61,6 @@ func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *pr
 func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
 	uri := params.TextDocument.URI
 	return handleTextDocumentSemanticTokensFull(uri)
-}
-
-func HandleTextDocumentDocumentSymbol(context *glsp.Context, params *protocol.DocumentSymbolParams) (any, error) {
-	var result []protocol.DocumentSymbol
-
-	uri := params.TextDocument.URI
-	ef, err := store.GetStore().Get(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	for _, v := range ef.Parser.DocumentTokens {
-		var kind protocol.SymbolKind
-		switch v.Unwrap().Type {
-		case
-			token.FUNCTION:
-			kind = protocol.SymbolKindFunction
-		case
-			token.EQ,
-			token.ASSIGN,
-			token.BANG,
-			token.NOT_EQ:
-			kind = protocol.SymbolKindNumber
-		case
-			token.TRUE,
-			token.FALSE:
-			kind = protocol.SymbolKindBoolean
-		case token.IDENT:
-			kind = protocol.SymbolKindVariable
-		default:
-			kind = 0
-		}
-
-		result = append(result, protocol.DocumentSymbol{
-			Name:       v.Unwrap().Literal,
-			Detail:     nil,
-			Kind:       kind,
-			Tags:       nil,
-			Deprecated: nil,
-			Children:   nil,
-			Range: protocol.Range{
-				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().Start.Line),
-					Character: protocol.UInteger(v.Unwrap().Start.Character),
-				},
-				End: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().End.Line),
-					Character: protocol.UInteger(v.Unwrap().End.Character),
-				},
-			},
-			SelectionRange: protocol.Range{
-				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().Start.Line),
-					Character: protocol.UInteger(v.Unwrap().Start.Character),
-				},
-				End: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().End.Line),
-					Character: protocol.UInteger(v.Unwrap().End.Character),
-				},
-			},
-		})
-	}
-	return result, nil
-}
-
-func HandleTextDocumentDocumentHighlight(context *glsp.Context, params *protocol.DocumentHighlightParams) ([]protocol.DocumentHighlight, error) {
-	uri := params.TextDocument.URI
-	ef, err := store.GetStore().Get(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	var result []protocol.DocumentHighlight
-	for _, v := range ef.Parser.DocumentTokens {
-		var kind protocol.DocumentHighlightKind
-		switch v.Unwrap().Type {
-		case
-			token.EQ,
-			token.ASSIGN,
-			token.BANG,
-			token.NOT_EQ,
-			token.FUNCTION:
-			kind = 2
-		case token.IDENT:
-			kind = 1
-		default:
-			kind = 0
-		}
-
-		result = append(result, protocol.DocumentHighlight{
-			Range: protocol.Range{
-				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().Start.Line),
-					Character: protocol.UInteger(v.Unwrap().Start.Character),
-				},
-				End: protocol.Position{
-					Line:      protocol.UInteger(v.Unwrap().End.Line),
-					Character: protocol.UInteger(v.Unwrap().End.Character),
-				},
-			},
-			Kind: &kind,
-		})
-
-	}
-
-	return result, nil
 }
 
 func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
@@ -238,7 +131,7 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	return formated, nil
 }
 
-func TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (interface{}, error) {
+func TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
 	var completionItems []protocol.CompletionItem
 
 	kindConstant := protocol.CompletionItemKindConstant

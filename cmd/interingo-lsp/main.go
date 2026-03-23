@@ -33,8 +33,6 @@ func main() {
 		TextDocumentFormatting: handlers.HandleDocumentFormatting,
 		TextDocumentDidOpen:    handlers.HandleTextDocumentDidOpen,
 		TextDocumentDidChange:  handlers.HandleTextDocumentDidChange,
-		TextDocumentDocumentSymbol:  handlers.HandleTextDocumentDocumentSymbol,
-		TextDocumentDocumentHighlight:  handlers.HandleTextDocumentDocumentHighlight,
 	}
 
 	server := server.NewServer(&handler, lsName, true)
@@ -48,8 +46,6 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, 
 	capabilities := handler.CreateServerCapabilities()
 
 	capabilities.CompletionProvider = &protocol.CompletionOptions{}
-	capabilities.DocumentHighlightProvider = &protocol.DocumentHighlightOptions{}
-	capabilities.DocumentSymbolProvider = &protocol.DocumentSymbolOptions{}
 	capabilities.DocumentFormattingProvider = &protocol.DocumentFormattingOptions{}
 	capabilities.SemanticTokensProvider = &protocol.SemanticTokensOptions{
 		Legend: protocol.SemanticTokensLegend{
