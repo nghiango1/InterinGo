@@ -105,7 +105,6 @@ func (p *Parser) reverseIndentityLiteralKind(literal string, newKind SemanticTok
 func (p *Parser) handlerNextToken() {
 	if p.curToken.Type != "" {
 		p.DocumentTokens = append(p.DocumentTokens, DocumentTokenWrap(p.curToken, TokenTypeToSemanticKind(p.curToken.Type)))
-		fmt.Printf("[INFO] %v\n", p.curToken.String())
 	}
 	p.curToken = p.peekToken
 	p.peekToken = p.Lexer.NextToken()
