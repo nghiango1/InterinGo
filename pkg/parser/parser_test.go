@@ -11,7 +11,7 @@ func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
-		expectedValue      interface{}
+		expectedValue      any
 	}{
 		{"let x = 5;", "x", 5},
 		{"let y = true;", "y", true},

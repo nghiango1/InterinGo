@@ -259,13 +259,20 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	return block
 }
 
+func isFunctionLiteral(expr ast.Expression) bool {
+	_, ok := expr.(*ast.FunctionLiteral)
+	return ok
+}
+
 func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{
 		Token: p.curToken,
 	}
+
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
+
 	stmt.Name = &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
@@ -279,6 +286,12 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 
 	value := p.parseExpression(LOWEST)
 	stmt.Value = value
+
+	if isFunctionLiteral(value) {
+		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeFunction)
+	} else {
+		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeVariable)
+	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
