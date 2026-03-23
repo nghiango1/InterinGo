@@ -6,7 +6,6 @@ import (
 )
 
 type Node interface {
-	GetToken()
 	TokenLiteral() string
 	String() string
 }
@@ -25,7 +24,6 @@ type Program struct {
 	Statements []Statement
 }
 
-func (p *Program) GetToken() {}
 func (p *Program) TokenLiteral() string {
 	if len(p.Statements) > 0 {
 		return p.Statements[0].TokenLiteral()
@@ -40,7 +38,6 @@ type LetStatement struct {
 	Value Expression
 }
 
-func (ls *LetStatement) GetToken()            {}
 func (ls *LetStatement) statementNode()       {}
 func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
 
@@ -61,7 +58,6 @@ type ReturnStatement struct {
 	ReturnValue Expression
 }
 
-func (rs *ReturnStatement) GetToken()            {}
 func (rs *ReturnStatement) statementNode()       {}
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
 
@@ -79,7 +75,6 @@ type ExpressionStatement struct {
 	Expression Expression
 }
 
-func (es *ExpressionStatement) GetToken()            {}
 func (es *ExpressionStatement) statementNode()       {}
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
 
@@ -95,7 +90,6 @@ type Identifier struct {
 	Value string
 }
 
-func (i *Identifier) GetToken()            {}
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
 
@@ -121,7 +115,6 @@ type InfixExpression struct {
 	Right    Expression
 }
 
-func (ie *InfixExpression) GetToken()            {}
 func (ie *InfixExpression) expressionNode()      {}
 func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *InfixExpression) String() string {
@@ -140,7 +133,6 @@ type PrefixExpression struct {
 	Right    Expression
 }
 
-func (pe *PrefixExpression) GetToken()            {}
 func (pe *PrefixExpression) expressionNode()      {}
 func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
 func (pe *PrefixExpression) String() string {
@@ -157,7 +149,6 @@ type IntegerLiteral struct {
 	Value int64
 }
 
-func (il *IntegerLiteral) GetToken()            {}
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
 func (il *IntegerLiteral) String() string       { return il.Token.Literal }
@@ -167,7 +158,6 @@ type Boolean struct {
 	Value bool
 }
 
-func (b *Boolean) GetToken()            {}
 func (b *Boolean) expressionNode()      {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
 func (b *Boolean) String() string       { return b.Token.Literal }
@@ -179,7 +169,6 @@ type IfExpression struct {
 	Alternative *BlockStatement
 }
 
-func (ie *IfExpression) GetToken()            {}
 func (ie *IfExpression) expressionNode()      {}
 func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
 func (ie *IfExpression) String() string {
@@ -201,7 +190,6 @@ type FunctionLiteral struct {
 	Body       *BlockStatement
 }
 
-func (fe *FunctionLiteral) GetToken()            {}
 func (fe *FunctionLiteral) expressionNode()      {}
 func (fe *FunctionLiteral) TokenLiteral() string { return fe.Token.Literal }
 func (fe *FunctionLiteral) String() string {
@@ -225,7 +213,6 @@ type CallExpression struct {
 	Arguments []Expression
 }
 
-func (ce *CallExpression) GetToken()            {}
 func (ce *CallExpression) expressionNode()      {}
 func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
 func (ce *CallExpression) String() string {
@@ -247,7 +234,6 @@ type BlockStatement struct {
 	Statements []Statement
 }
 
-func (bs *BlockStatement) GetToken()            {}
 func (bs *BlockStatement) expressionNode()      {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
 func (bs *BlockStatement) String() string {

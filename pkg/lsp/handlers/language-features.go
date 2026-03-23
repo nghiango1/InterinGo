@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"interingo/pkg/lsp/mappers"
 	"interingo/pkg/lsp/store"
+	"interingo/pkg/parser"
 	"interingo/pkg/token"
 
 	_ "github.com/tliron/commonlog/simple"
@@ -12,11 +13,9 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-// Returns: SemanticTokens | SemanticTokensDelta | SemanticTokensDeltaPartialResult | nil
-func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *protocol.SemanticTokensDeltaParams) (any, error) {
+func handleTextDocumentSemanticTokensFull(uri protocol.DocumentUri) (*protocol.SemanticTokens, error) {
 	data := []uint32{}
 
-	uri := params.TextDocument.URI
 	ef, err := store.GetStore().Get(uri)
 	if err != nil {
 		return nil, err
@@ -24,62 +23,20 @@ func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *pr
 
 	var prevLine uint32 = 0
 	var prevChar uint32 = 0
-	for _, v := range ef.Parser.Documents {
-		var deltaLine uint32 = uint32(v.Start.Line) - prevLine
+	for _, v := range ef.Parser.DocumentTokens {
+		var deltaLine uint32 = uint32(v.Unwrap().Start.Line) - prevLine
 		// New line will start with a absolute character position
-		var deltaChar uint32 = uint32(v.Start.Character)
+		var deltaChar uint32 = uint32(v.Unwrap().Start.Character)
 
 		// Same line will use delta character position
 		if deltaLine == 0 {
 			deltaChar -= prevChar
 		}
-		prevLine = uint32(v.Start.Line)
-		prevChar = uint32(v.Start.Character)
-		var length uint32 = uint32(len(v.Literal))
-		var tokenType SemanticTokenType = 0
+		prevLine = uint32(v.Unwrap().Start.Line)
+		prevChar = uint32(v.Unwrap().Start.Character)
+		var length uint32 = uint32(len(v.Unwrap().Literal))
+		var tokenType parser.SemanticTokenType = v.Kind
 		var tokenModifiers uint32 = 0
-		switch v.Type {
-		case token.COMMENT:
-			tokenType = SemanticTokenTypeComment
-		case token.FUNCTION:
-			tokenType = SemanticTokenTypeFunction
-		case
-			token.ASSIGN,
-			token.PLUS,
-			token.MINUS,
-			token.BANG,
-			token.ASTERISK,
-			token.SLASH,
-			token.GT,
-			token.LT,
-			token.EQ,
-			token.NOT_EQ,
-			token.COMMA,
-			token.SEMICOLON,
-			token.LPAREN,
-			token.RPAREN,
-			token.LBRACE,
-			token.RBRACE:
-			tokenType = SemanticTokenTypeOperator
-		case
-			token.IF,
-			token.LET,
-			token.ELSE,
-			token.RETURN:
-			tokenType = SemanticTokenTypeKeyword
-		case
-			token.TRUE,
-			token.FALSE:
-			tokenType = SemanticTokenTypeMacro
-		case token.INT:
-			tokenType = SemanticTokenTypeNumber
-		case token.IDENT:
-			tokenType = SemanticTokenTypeVariable
-		case token.ILLEGAL:
-			tokenType = SemanticTokenTypeType
-		default:
-			tokenType = SemanticTokenTypeType
-		}
 
 		data = append(data, deltaLine,
 			deltaChar,
@@ -93,86 +50,18 @@ func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *pr
 		ResultID: nil,
 		Data:     data,
 	}, nil
+
+}
+
+// Returns: SemanticTokens | SemanticTokensDelta | SemanticTokensDeltaPartialResult | nil
+func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *protocol.SemanticTokensDeltaParams) (any, error) {
+	uri := params.TextDocument.URI
+	return handleTextDocumentSemanticTokensFull(uri)
 }
 
 func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
-	data := []uint32{}
-
 	uri := params.TextDocument.URI
-	ef, err := store.GetStore().Get(uri)
-	if err != nil {
-		return nil, err
-	}
-
-	var prevLine uint32 = 0
-	var prevChar uint32 = 0
-	for _, v := range ef.Parser.Documents {
-		var deltaLine uint32 = uint32(v.Start.Line) - prevLine
-		// New line will start with a absolute character position
-		var deltaChar uint32 = uint32(v.Start.Character)
-
-		// Same line will use delta character position
-		if deltaLine == 0 {
-			deltaChar -= prevChar
-		}
-		prevLine = uint32(v.Start.Line)
-		prevChar = uint32(v.Start.Character)
-		var length uint32 = uint32(len(v.Literal))
-		var tokenType SemanticTokenType = 0
-		var tokenModifiers uint32 = 0
-		switch v.Type {
-		case token.FUNCTION:
-			tokenType = SemanticTokenTypeFunction
-		case
-			token.ASSIGN,
-			token.PLUS,
-			token.MINUS,
-			token.BANG,
-			token.ASTERISK,
-			token.SLASH,
-			token.GT,
-			token.LT,
-			token.EQ,
-			token.NOT_EQ,
-			token.COMMA,
-			token.SEMICOLON,
-			token.LPAREN,
-			token.RPAREN,
-			token.LBRACE,
-			token.RBRACE:
-			tokenType = SemanticTokenTypeOperator
-		case
-			token.IF,
-			token.LET,
-			token.ELSE,
-			token.RETURN:
-			tokenType = SemanticTokenTypeKeyword
-		case
-			token.TRUE,
-			token.FALSE:
-			tokenType = SemanticTokenTypeType
-		case token.INT:
-			tokenType = SemanticTokenTypeNumber
-		case token.IDENT:
-			tokenType = SemanticTokenTypeVariable
-		case token.ILLEGAL:
-			tokenType = SemanticTokenTypeComment
-		default:
-			tokenType = SemanticTokenTypeComment
-		}
-
-		data = append(data, deltaLine,
-			deltaChar,
-			length,
-			uint32(tokenType),
-			tokenModifiers,
-		)
-	}
-
-	return &protocol.SemanticTokens{
-		ResultID: nil,
-		Data:     data,
-	}, nil
+	return handleTextDocumentSemanticTokensFull(uri)
 }
 
 func HandleTextDocumentDocumentSymbol(context *glsp.Context, params *protocol.DocumentSymbolParams) (any, error) {
@@ -184,9 +73,9 @@ func HandleTextDocumentDocumentSymbol(context *glsp.Context, params *protocol.Do
 		return nil, err
 	}
 
-	for _, v := range ef.Parser.Documents {
+	for _, v := range ef.Parser.DocumentTokens {
 		var kind protocol.SymbolKind
-		switch v.Type {
+		switch v.Unwrap().Type {
 		case
 			token.FUNCTION:
 			kind = protocol.SymbolKindFunction
@@ -207,7 +96,7 @@ func HandleTextDocumentDocumentSymbol(context *glsp.Context, params *protocol.Do
 		}
 
 		result = append(result, protocol.DocumentSymbol{
-			Name:       v.Literal,
+			Name:       v.Unwrap().Literal,
 			Detail:     nil,
 			Kind:       kind,
 			Tags:       nil,
@@ -215,22 +104,22 @@ func HandleTextDocumentDocumentSymbol(context *glsp.Context, params *protocol.Do
 			Children:   nil,
 			Range: protocol.Range{
 				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Start.Line),
-					Character: protocol.UInteger(v.Start.Character),
+					Line:      protocol.UInteger(v.Unwrap().Start.Line),
+					Character: protocol.UInteger(v.Unwrap().Start.Character),
 				},
 				End: protocol.Position{
-					Line:      protocol.UInteger(v.End.Line),
-					Character: protocol.UInteger(v.End.Character),
+					Line:      protocol.UInteger(v.Unwrap().End.Line),
+					Character: protocol.UInteger(v.Unwrap().End.Character),
 				},
 			},
 			SelectionRange: protocol.Range{
 				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Start.Line),
-					Character: protocol.UInteger(v.Start.Character),
+					Line:      protocol.UInteger(v.Unwrap().Start.Line),
+					Character: protocol.UInteger(v.Unwrap().Start.Character),
 				},
 				End: protocol.Position{
-					Line:      protocol.UInteger(v.End.Line),
-					Character: protocol.UInteger(v.End.Character),
+					Line:      protocol.UInteger(v.Unwrap().End.Line),
+					Character: protocol.UInteger(v.Unwrap().End.Character),
 				},
 			},
 		})
@@ -246,9 +135,9 @@ func HandleTextDocumentDocumentHighlight(context *glsp.Context, params *protocol
 	}
 
 	var result []protocol.DocumentHighlight
-	for _, v := range ef.Parser.Documents {
+	for _, v := range ef.Parser.DocumentTokens {
 		var kind protocol.DocumentHighlightKind
-		switch v.Type {
+		switch v.Unwrap().Type {
 		case
 			token.EQ,
 			token.ASSIGN,
@@ -265,12 +154,12 @@ func HandleTextDocumentDocumentHighlight(context *glsp.Context, params *protocol
 		result = append(result, protocol.DocumentHighlight{
 			Range: protocol.Range{
 				Start: protocol.Position{
-					Line:      protocol.UInteger(v.Start.Line),
-					Character: protocol.UInteger(v.Start.Character),
+					Line:      protocol.UInteger(v.Unwrap().Start.Line),
+					Character: protocol.UInteger(v.Unwrap().Start.Character),
 				},
 				End: protocol.Position{
-					Line:      protocol.UInteger(v.End.Line),
-					Character: protocol.UInteger(v.End.Character),
+					Line:      protocol.UInteger(v.Unwrap().End.Line),
+					Character: protocol.UInteger(v.Unwrap().End.Character),
 				},
 			},
 			Kind: &kind,
@@ -323,7 +212,7 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 
 	// Not format yet
 	format := ef.Unwrap().Text
-	println("[INFO] parser document len", len(ef.Parser.Documents))
+	println("[INFO] parser document len", len(ef.Parser.DocumentTokens))
 
 	if len(ef.Parser.Errors()) == 0 {
 		format = FormatedAST(ef.Parser.Program, params.Options, 0)

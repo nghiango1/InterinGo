@@ -1,69 +1,38 @@
 package handlers
 
-import protocol "github.com/tliron/glsp/protocol_3_16"
+import (
+	"interingo/pkg/parser"
 
-type SemanticTokenType uint32
-
-const (
-	SemanticTokenTypeNamespace = SemanticTokenType(iota)
-	/**
-	 * Represents a generic type. Acts as a fallback for types which
-	 * can't be mapped to a specific type like class or enum.
-	 */
-	SemanticTokenTypeType
-	SemanticTokenTypeClass
-	SemanticTokenTypeEnum
-	SemanticTokenTypeInterface
-	SemanticTokenTypeStruct
-	SemanticTokenTypeTypeParameter
-	SemanticTokenTypeParameter
-	SemanticTokenTypeVariable
-	SemanticTokenTypeProperty
-	SemanticTokenTypeEnumMember
-	SemanticTokenTypeEvent
-	SemanticTokenTypeFunction
-	SemanticTokenTypeMethod
-	SemanticTokenTypeMacro
-	SemanticTokenTypeKeyword
-	SemanticTokenTypeModifier
-	SemanticTokenTypeComment
-	SemanticTokenTypeString
-	SemanticTokenTypeNumber
-	SemanticTokenTypeRegexp
-	SemanticTokenTypeOperator
+	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-var tokenName = map[SemanticTokenType]protocol.SemanticTokenType{
-	SemanticTokenTypeNamespace: protocol.SemanticTokenTypeNamespace,
+var tokenName = map[parser.SemanticTokenType]protocol.SemanticTokenType{
+	parser.SemanticTokenTypeNamespace: protocol.SemanticTokenTypeNamespace,
 	/**
 	 * Represents a generic type. Acts as a fallback for types which
 	 * can't be mapped to a specific type like class or enum.
 	 */
-	SemanticTokenTypeType:          protocol.SemanticTokenTypeType,
-	SemanticTokenTypeClass:         protocol.SemanticTokenTypeClass,
-	SemanticTokenTypeEnum:          protocol.SemanticTokenTypeEnum,
-	SemanticTokenTypeInterface:     protocol.SemanticTokenTypeInterface,
-	SemanticTokenTypeStruct:        protocol.SemanticTokenTypeStruct,
-	SemanticTokenTypeTypeParameter: protocol.SemanticTokenTypeTypeParameter,
-	SemanticTokenTypeParameter:     protocol.SemanticTokenTypeParameter,
-	SemanticTokenTypeVariable:      protocol.SemanticTokenTypeVariable,
-	SemanticTokenTypeProperty:      protocol.SemanticTokenTypeProperty,
-	SemanticTokenTypeEnumMember:    protocol.SemanticTokenTypeEnumMember,
-	SemanticTokenTypeEvent:         protocol.SemanticTokenTypeEvent,
-	SemanticTokenTypeFunction:      protocol.SemanticTokenTypeFunction,
-	SemanticTokenTypeMethod:        protocol.SemanticTokenTypeMethod,
-	SemanticTokenTypeMacro:         protocol.SemanticTokenTypeMacro,
-	SemanticTokenTypeKeyword:       protocol.SemanticTokenTypeKeyword,
-	SemanticTokenTypeModifier:      protocol.SemanticTokenTypeModifier,
-	SemanticTokenTypeComment:       protocol.SemanticTokenTypeComment,
-	SemanticTokenTypeString:        protocol.SemanticTokenTypeString,
-	SemanticTokenTypeNumber:        protocol.SemanticTokenTypeNumber,
-	SemanticTokenTypeRegexp:        protocol.SemanticTokenTypeRegexp,
-	SemanticTokenTypeOperator:      protocol.SemanticTokenTypeOperator,
-}
-
-func (ss SemanticTokenType) String() protocol.SemanticTokenType {
-	return tokenName[ss]
+	parser.SemanticTokenTypeType:          protocol.SemanticTokenTypeType,
+	parser.SemanticTokenTypeClass:         protocol.SemanticTokenTypeClass,
+	parser.SemanticTokenTypeEnum:          protocol.SemanticTokenTypeEnum,
+	parser.SemanticTokenTypeInterface:     protocol.SemanticTokenTypeInterface,
+	parser.SemanticTokenTypeStruct:        protocol.SemanticTokenTypeStruct,
+	parser.SemanticTokenTypeTypeParameter: protocol.SemanticTokenTypeTypeParameter,
+	parser.SemanticTokenTypeParameter:     protocol.SemanticTokenTypeParameter,
+	parser.SemanticTokenTypeVariable:      protocol.SemanticTokenTypeVariable,
+	parser.SemanticTokenTypeProperty:      protocol.SemanticTokenTypeProperty,
+	parser.SemanticTokenTypeEnumMember:    protocol.SemanticTokenTypeEnumMember,
+	parser.SemanticTokenTypeEvent:         protocol.SemanticTokenTypeEvent,
+	parser.SemanticTokenTypeFunction:      protocol.SemanticTokenTypeFunction,
+	parser.SemanticTokenTypeMethod:        protocol.SemanticTokenTypeMethod,
+	parser.SemanticTokenTypeMacro:         protocol.SemanticTokenTypeMacro,
+	parser.SemanticTokenTypeKeyword:       protocol.SemanticTokenTypeKeyword,
+	parser.SemanticTokenTypeModifier:      protocol.SemanticTokenTypeModifier,
+	parser.SemanticTokenTypeComment:       protocol.SemanticTokenTypeComment,
+	parser.SemanticTokenTypeString:        protocol.SemanticTokenTypeString,
+	parser.SemanticTokenTypeNumber:        protocol.SemanticTokenTypeNumber,
+	parser.SemanticTokenTypeRegexp:        protocol.SemanticTokenTypeRegexp,
+	parser.SemanticTokenTypeOperator:      protocol.SemanticTokenTypeOperator,
 }
 
 // nvimsupported
@@ -96,7 +65,6 @@ func (ss SemanticTokenType) String() protocol.SemanticTokenType {
 // server_legend = {
 // tokenTypes = { "namespace", "type", "class", "enum", "interface", "struct", "typeParameter", "parameter", "variable", "property", "enumMember", "event", "function", "method", "macro", "keyword", "modifier", "comment", "string", "number", "regexp", "operator" }
 // }
-//
 var SupportedSemanticTokenType []string = []string{
 	string(protocol.SemanticTokenTypeNamespace),
 	string(protocol.SemanticTokenTypeType),

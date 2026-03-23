@@ -19,6 +19,8 @@ type Position struct {
 	Character int
 }
 
+type TokenType string
+
 type Token struct {
 	Type    TokenType
 	Literal string
@@ -26,43 +28,41 @@ type Token struct {
 	End     Position
 }
 
-type TokenType string
-
 // token/token.go
 const (
 	COMMENT = TokenType("COMMENT")
-	EOL     = "EOL"
-	ILLEGAL = "ILLEGAL"
-	EOF     = "EOF"
+	EOL     = TokenType("EOL")
+	ILLEGAL = TokenType("ILLEGAL")
+	EOF     = TokenType("EOF")
 	// Identifiers + literals
-	IDENT = "IDENT" // add, foobar, x, y, ...
-	INT   = "INT"   // 1343456
+	IDENT = TokenType("IDENT") // add, foobar, x, y, ...
+	INT   = TokenType("INT")   // 1343456
 	// Operators
-	ASSIGN   = "="
-	PLUS     = "+"
-	MINUS    = "-"
-	BANG     = "!"
-	ASTERISK = "*"
-	SLASH    = "/"
-	GT       = ">"
-	LT       = "<"
-	EQ       = "=="
-	NOT_EQ   = "!="
+	ASSIGN   = TokenType("=")
+	PLUS     = TokenType("+")
+	MINUS    = TokenType("-")
+	BANG     = TokenType("!")
+	ASTERISK = TokenType("*")
+	SLASH    = TokenType("/")
+	GT       = TokenType(">")
+	LT       = TokenType("<")
+	EQ       = TokenType("==")
+	NOT_EQ   = TokenType("!=")
 	// Delimiters
-	COMMA     = ","
-	SEMICOLON = ";"
-	LPAREN    = "("
-	RPAREN    = ")"
-	LBRACE    = "{"
-	RBRACE    = "}"
+	COMMA     = TokenType(",")
+	SEMICOLON = TokenType(";")
+	LPAREN    = TokenType("(")
+	RPAREN    = TokenType(")")
+	LBRACE    = TokenType("{")
+	RBRACE    = TokenType("}")
 	// Keywords
-	FUNCTION = "FN"
-	LET      = "LET"
-	IF       = "IF"
-	ELSE     = "ELSE"
-	RETURN   = "RETURN"
-	TRUE     = "TRUE"
-	FALSE    = "FALSE"
+	FUNCTION = TokenType("FN")
+	LET      = TokenType("LET")
+	IF       = TokenType("IF")
+	ELSE     = TokenType("ELSE")
+	RETURN   = TokenType("RETURN")
+	TRUE     = TokenType("TRUE")
+	FALSE    = TokenType("FALSE")
 )
 
 var keywords = map[string]TokenType{

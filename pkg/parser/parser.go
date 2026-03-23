@@ -37,7 +37,7 @@ type Parser struct {
 	Lexer          *lexer.Lexer
 	curToken       token.Token
 	peekToken      token.Token
-	Documents      []token.Token
+	DocumentTokens []DocumentToken
 	errors         []string
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
@@ -82,9 +82,29 @@ func (p *Parser) skipExtras() {
 	}
 }
 
+// Assumming we handle parse infix, the last insert value kind can have updated
+// Semantic kind after we understand more on the context
+// We have to go back for some value
+func (p *Parser) reverseIndentityLiteralKind(literal string, newKind SemanticTokenType) error {
+	for i := len(p.DocumentTokens) - 1; i >= 0; i-- {
+		if p.DocumentTokens[i].Token.Type != token.IDENT {
+			continue
+		}
+		if p.DocumentTokens[i].Token.Literal != literal {
+			continue
+		}
+		p.DocumentTokens[i].Kind = newKind
+		return nil
+	}
+
+	return fmt.Errorf("Can't find token match `%v` profile", literal)
+}
+
+// This just bind semantic kind without consider of the context, we rely on reverse
+// back into DocumentTokens previous value to cover correct semantic kind
 func (p *Parser) handlerNextToken() {
 	if p.curToken.Type != "" {
-		p.Documents = append(p.Documents, p.curToken)
+		p.DocumentTokens = append(p.DocumentTokens, DocumentTokenWrap(p.curToken, TokenTypeToSemanticKind(p.curToken.Type)))
 		fmt.Printf("[INFO] %v\n", p.curToken.String())
 	}
 	p.curToken = p.peekToken
@@ -187,6 +207,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	}
 
 	exp.Function = function
+	p.reverseIndentityLiteralKind(exp.Function.TokenLiteral(), SemanticTokenTypeFunction)
 
 	for !p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // Skip the '(' and ',' token
