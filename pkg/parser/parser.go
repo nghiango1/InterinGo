@@ -75,21 +75,24 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) skipExtras() {
 	for p.curToken.Type != token.EOF {
 		if p.curToken.Type == token.COMMENT || p.curToken.Type == token.EOL {
-			p.curToken = p.peekToken
-			p.peekToken = p.Lexer.NextToken()
+			p.handlerNextToken()
 		} else {
 			break
 		}
 	}
 }
 
-func (p *Parser) nextToken() {
+func (p *Parser) handlerNextToken() {
 	if p.curToken.Type != "" {
 		p.Documents = append(p.Documents, p.curToken)
 		fmt.Printf("[INFO] %v\n", p.curToken.String())
 	}
 	p.curToken = p.peekToken
 	p.peekToken = p.Lexer.NextToken()
+}
+
+func (p *Parser) nextToken() {
+	p.handlerNextToken()
 	p.skipExtras()
 }
 
