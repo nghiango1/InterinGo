@@ -16,7 +16,11 @@ embed-dist: # Build website static file, output into website/dist
 .PHONY: embed-content
 embed-content: # Build webpage then output it into embed directory for go compile
 	rm -rf pkg/server/content/**
-	cp -r website/dist/ pkg/server/content/
+	@if [[ -e website/dist/ ]]; then \
+	  cp -r website/dist/ pkg/server/content/; \
+	else \
+	  touch pkg/server/content/.not_support; \
+	fi
 
 .PHONY: go-build
 go-build: # Build go binary file
@@ -27,6 +31,11 @@ go-build: # Build go binary file
 run: # Run the build file in server mode
 	./dist/interingo -s
 
+.PHONY: lsp-build
+lsp-build: # Build go binary file
+	mkdir -p dist
+	go build -o dist/interingo-lsp cmd/interingo-lsp/main.go
+
 ### Container deploy helper
 .PHONY: docker-build
 docker-build: # Build the container image
@@ -35,6 +44,15 @@ docker-build: # Build the container image
 .PHONY: docker-push
 docker-push: # Push the image into docker.io
 	docker push docker.io/nghiango1/interingo-service:latest
+
+.PHONY: docker-nvim-build
+docker-nvim-build: embed-content # Build the image for nvim showcase
+	mkdir -p dist
+	docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
+
+.PHONY: docker-nvim-push
+docker-nvim-push: # Push the image for nvim showcase into docker.io
+	docker push docker.io/nghiango1/interingo:latest
 
 ### Development helper
 

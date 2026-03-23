@@ -1,8 +1,8 @@
 package main
 
 import (
-	"interingo-lsp/handlers"
-	"interingo-lsp/store"
+	"interingo/pkg/lsp/handlers"
+	"interingo/pkg/lsp/store"
 
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -27,6 +27,8 @@ func main() {
 	handler = protocol.Handler{
 		Initialize:             initialize,
 		Shutdown:               shutdown,
+		TextDocumentSemanticTokensFull: handlers.HandleTextDocumentSemanticTokensFull,
+		TextDocumentSemanticTokensFullDelta: handlers.HandleTextDocumentSemanticTokensFullDelta,
 		TextDocumentCompletion: handlers.TextDocumentCompletion,
 		TextDocumentFormatting: handlers.HandleDocumentFormatting,
 		TextDocumentDidOpen:    handlers.HandleTextDocumentDidOpen,
@@ -44,6 +46,14 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, 
 	capabilities := handler.CreateServerCapabilities()
 
 	capabilities.CompletionProvider = &protocol.CompletionOptions{}
+	capabilities.DocumentFormattingProvider = &protocol.DocumentFormattingOptions{}
+	capabilities.SemanticTokensProvider = &protocol.SemanticTokensOptions{
+		Legend: protocol.SemanticTokensLegend{
+			TokenTypes: handlers.SupportedSemanticTokenType,
+			TokenModifiers: nil,
+		}, 
+		Full: true,
+	}
 
 	return protocol.InitializeResult{
 		Capabilities: capabilities,

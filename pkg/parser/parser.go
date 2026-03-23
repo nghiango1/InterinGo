@@ -33,9 +33,11 @@ var precedences = map[token.TokenType]int{
 }
 
 type Parser struct {
-	l              *lexer.Lexer
+	Program        *ast.Program
+	Lexer          *lexer.Lexer
 	curToken       token.Token
 	peekToken      token.Token
+	DocumentTokens []DocumentToken
 	errors         []string
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
@@ -73,21 +75,51 @@ func (p *Parser) registerInfix(tokenType token.TokenType, fn infixParseFn) {
 func (p *Parser) skipExtras() {
 	for p.curToken.Type != token.EOF {
 		if p.curToken.Type == token.COMMENT || p.curToken.Type == token.EOL {
-			p.curToken = p.peekToken
-			p.peekToken = p.l.NextToken()
+			p.handlerNextToken()
 		} else {
 			break
 		}
 	}
 }
 
-func (p *Parser) nextToken() {
+// Assumming we handle parse infix, the last insert value kind can have updated
+// Semantic kind after we understand more on the context
+// We have to go back for some value
+func (p *Parser) reverseIndentityLiteralKind(literal string, newKind SemanticTokenType) error {
+	for i := len(p.DocumentTokens) - 1; i >= 0; i-- {
+		if p.DocumentTokens[i].Token.Type != token.IDENT {
+			continue
+		}
+		if p.DocumentTokens[i].Token.Literal != literal {
+			continue
+		}
+		p.DocumentTokens[i].Kind = newKind
+		return nil
+	}
+
+	return fmt.Errorf("Can't find token match `%v` profile", literal)
+}
+
+// This just bind semantic kind without consider of the context, we rely on reverse
+// back into DocumentTokens previous value to cover correct semantic kind
+func (p *Parser) handlerNextToken() {
+	if p.curToken.Type != "" {
+		p.DocumentTokens = append(p.DocumentTokens, DocumentTokenWrap(p.curToken, TokenTypeToSemanticKind(p.curToken.Type)))
+	}
 	p.curToken = p.peekToken
-	p.peekToken = p.l.NextToken()
+	p.peekToken = p.Lexer.NextToken()
+}
+
+func (p *Parser) nextToken() {
+	p.handlerNextToken()
 	p.skipExtras()
 }
 
 func (p *Parser) ParseProgram() *ast.Program {
+	if p.Program != nil {
+		return p.Program
+	}
+
 	program := &ast.Program{}
 	program.Statements = []ast.Statement{}
 	for p.curToken.Type != token.EOF {
@@ -97,6 +129,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		}
 		p.nextToken()
 	}
+	p.Program = program
 	return program
 }
 
@@ -173,6 +206,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	}
 
 	exp.Function = function
+	p.reverseIndentityLiteralKind(exp.Function.TokenLiteral(), SemanticTokenTypeFunction)
 
 	for !p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // Skip the '(' and ',' token
@@ -224,13 +258,20 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 	return block
 }
 
+func isFunctionLiteral(expr ast.Expression) bool {
+	_, ok := expr.(*ast.FunctionLiteral)
+	return ok
+}
+
 func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt := &ast.LetStatement{
 		Token: p.curToken,
 	}
+
 	if !p.expectPeek(token.IDENT) {
 		return nil
 	}
+
 	stmt.Name = &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
@@ -245,6 +286,12 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	value := p.parseExpression(LOWEST)
 	stmt.Value = value
 
+	if isFunctionLiteral(value) {
+		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeFunction)
+	} else {
+		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeVariable)
+	}
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		p.nextToken()
 	}
@@ -253,7 +300,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 }
 
 func New(l *lexer.Lexer) *Parser {
-	p := &Parser{l: l}
+	p := &Parser{Lexer: l}
 	p.prefixParseFns = make(map[token.TokenType]prefixParseFn)
 	p.registerPrefix(token.IDENT, p.parseIdentifier)
 	p.registerPrefix(token.INT, p.parseIntegerLiteral)

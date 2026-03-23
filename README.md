@@ -10,20 +10,6 @@
 
 To challenge my knowledge with `go` language and advanced (interpreter) concept. I also set up a http server to public InterinGo interpreter, that you can access evaluating the [language right now](https://nghiango.asia/).
 
-## Techstack:
-
-Front-end
-
-- `templ` for html template
-- `tailwind.css` for styling
-- `htmx`for server REPL API access
-- `javascript` for some dynamic UI rendering
-
-Back-end:
-
-- `golang` standard library for http-request/server handling
-- `readline` for CLI
-
 ## How to use
 
 Build the program and get `./interingo` file executable or download Released binary. You can run `./interingo -h` to get help on runner flag directly (for TLDR folks). You can also using Docker, which already pull and build the code too
@@ -190,8 +176,6 @@ go test ./...
 
 ## Build - Full build with Server front-end
 
-All server source file is in `/server/` directory, which need special handle for `templ` files - containing frontend code. This require extra build tool and generating code step. `Makefile` is add to help handle these process
-
 ### Prerequire
 
 Install go-lang latest version, currently go 1.22.0
@@ -201,30 +185,7 @@ gvm install go1.22.0 -B
 gvm use go1.22.0 -default
 ```
 
-Install `templ` tools, learn more in [templ.guide](https://templ.guide/). Make sure to setup `go/bin` into your environment.
-
-```sh
-go install github.com/a-h/templ/cmd/templ@latest
-export PATH="$PATH:~/go/bin"
-```
-
-> In case that you using Neovim with Mason, you can install templ directly from there (LSP templ). You will need setup mason bin to PATH instead
->
-> ```sh
-> $ which templ
-> /home/username/.local/share/nvim/mason/bin/templ
-> #    ^^^^^^^^^ change this to your username
-> ```
-
-Download latest `tailwind` CLI standalone tool from their [github](https://github.com/tailwindlabs/tailwindcss/releases/) and put it in to `PATH`. This should be add in `.profile` file
-
-```sh
-wget https://github.com/tailwindlabs/tailwindcss/releases/latest/download/tailwindcss-linux-x64
-cp tailwindcss-linux-x64 ~/.local/bin
-export PATH="$HOME/.local/bin:$PATH"
-```
-
-Install cmake
+Install make
 
 ```sh
 apt-get -y install make
@@ -236,8 +197,8 @@ apt-get -y install make
 
 I setup Makefile to handle CLI operation, use `make build-run` to rebuild and start the server
 
-- `make` or `make all` or `make help`: Show all option command
-- `make build`: Build/Rebuild `templ` template files and generating tailwindcss stylesheet
+- `make` or `make all` or `make help`: Show all option command (`make` just call to `make all` as it is the first recipes)
+- `make build`: Build/Rebuild `frontent` files and generating static pages
 - `make run`: Run built the server
 - `make build-run`: Do both
 
@@ -247,21 +208,73 @@ Example
 make
 ```
 
-#### Dev mode
+#### Dev support
 
-Golang doesn't have watch mode, but `templ` and `tailwindcss` have it
+## LSP for interingo language
 
-- `make tailwind-watch`: Tailwind watch mode - Auto rebuild when files change
-- `make templ-watch`: Templ watch mode - Auto rebuild when files change
-- `go run . -s` or `make go-run`: Run the server without build
+## Build and install
 
-## Build - LSP, Highlight
+### Dependancies
+
+Reuse the same environment with the language build
+
+### Get LSP server executable 
+
+Build the code with
+
+```sh
+make lsp-build
+```
+
+Add build file to default local bin path 
+
+```sh
+ln -s /path/to/build/file/interingo-lsp ~/.local/bin
+#     ^^^^^^^^^^^^^^^^^^^ change to your machine path
+export PATH="$PATH:~/.local/bin"
+```
+
+### Setup LSP for Neovim with `iig` file
+
+Add this to Neovim `after/plugin/iig.lua` file. Assumming we already have `lspconfg` setup
+
+```lua
+vim.filetype.add({ extension = { iig = 'interingo', }, })
+
+local lspconfig = require('lspconfig')
+local configs = require('lspconfig.configs')
+
+local function custom_root_dir(filename, bufnr)
+    return vim.fn.getcwd()
+end
+
+configs.interingo = {
+  default_config = {
+    cmd = { 'interingo-lsp' },
+    filetypes = { 'interingo' },
+    -- root_dir = lspconfig.util.root_pattern('.git', 'deluge'),
+    root_dir = custom_root_dir,
+    settings = {}
+  }
+}
+
+lspconfig.interingo.setup({
+  on_attach = on_attach,
+  capabilities = capabilities,
+  filetypes = { "interingo" },
+})
+```
+
+> For fully default Neovim lsp support, I setup new `assets/init.lua` config and
+> packaged it into docker images via nghiango1/interingo
+
+## Docker - LSP, Highlight
 
 Docker ready neovim with full configuration is here
 
 ```sh
-sudo docker build -t interingo .
-sudo docker run -it interingo
+docker build -f docker/nvim.Dockerfile . -t interingo:latest
+docker run -it --rm interingo:latest
 ```
 
 or pull directly from docker hub

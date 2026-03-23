@@ -11,7 +11,7 @@ func TestLetStatements(t *testing.T) {
 	tests := []struct {
 		input              string
 		expectedIdentifier string
-		expectedValue      interface{}
+		expectedValue      any
 	}{
 		{"let x = 5;", "x", 5},
 		{"let y = true;", "y", true},
@@ -24,8 +24,8 @@ func TestLetStatements(t *testing.T) {
 	// let = 10;
 	// let  8383838;`
 	for _, tt := range tests {
-		input := tt.input
-		l := lexer.New(input)
+		fmt.Printf("[DEBUG] Test start, input %v\n", tt.input)
+		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
 		checkParserErrors(t, p)
@@ -94,6 +94,7 @@ return 123;`
 		t.Fatalf("Program stagements is less than 3, got len=%d ", len(program.Statements))
 	}
 
+	fmt.Printf("[DEBUG] Test start, input %v\n", input)
 	for _, stmt := range program.Statements {
 		returnStmt, ok := stmt.(*ast.ReturnStatement)
 		if !ok {
@@ -191,6 +192,7 @@ func TestParsingPrefixExpressions(t *testing.T) {
 		{"!false;", "!", false},
 	}
 	for _, tt := range prefixTests {
+		fmt.Printf("[DEBUG] Test start, input %v\n", tt.input)
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
@@ -257,6 +259,7 @@ func TestParsingInfixExpressions(t *testing.T) {
 		{"false == false", false, "==", false},
 	}
 	for _, tt := range infixTests {
+		fmt.Printf("[DEBUG] Test start, input %v\n", tt.input)
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()
@@ -380,6 +383,7 @@ func TestOperatorPrecedenceParsing(t *testing.T) {
 		},
 	}
 	for _, tt := range tests {
+		fmt.Printf("[DEBUG] Test start, input %v\n", tt.input)
 		l := lexer.New(tt.input)
 		p := New(l)
 		program := p.ParseProgram()

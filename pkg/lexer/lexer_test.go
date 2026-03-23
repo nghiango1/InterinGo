@@ -1,6 +1,7 @@
 package lexer
 
 import (
+	"fmt"
 	"interingo/pkg/token"
 	"testing"
 )
@@ -12,8 +13,10 @@ type expectedReturn struct {
 
 func test(t *testing.T, input string, tests []expectedReturn, testsName string) {
 	l := New(input)
+	fmt.Printf("[INFO] input: `%v`\n", input)
 	for i, tt := range tests {
 		tok := l.NextToken()
+		fmt.Printf("[INFO] Token: %v %v %v\n", tok.Type, tok.Start, tok.Literal)
 		if tok.Type != tt.expectedType {
 			t.Fatalf("testsName[%s] - tests[%d] - tokentype wrong. expected=%q, got=%q",
 				testsName, i, tt.expectedType, tok.Type)
@@ -136,10 +139,19 @@ func testOperator3(t *testing.T) {
 	test(t, input, tests, "Operator 3")
 }
 
+func testComment1(t *testing.T) {
+	input := `//!-/*5; 5 < 10 > 5; haha`
+	tests := []expectedReturn{
+		{token.COMMENT, "//!-/*5; 5 < 10 > 5; haha"},
+	}
+	test(t, input, tests, "Comment 1")
+}
+
 func TestNextToken(t *testing.T) {
 	testOperator1(t)
 	testOperator2(t)
 	testOperator3(t)
+	testComment1(t)
 	testKeywords1(t)
 	testKeywords2(t)
 	testBinding1(t)

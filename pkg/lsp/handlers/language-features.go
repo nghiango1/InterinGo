@@ -3,9 +3,8 @@ package handlers
 import (
 	"errors"
 	"fmt"
-	"interingo-lsp/mappers"
-	"interingo-lsp/store"
-	"interingo/pkg/lexer"
+	"interingo/pkg/lsp/mappers"
+	"interingo/pkg/lsp/store"
 	"interingo/pkg/parser"
 
 	_ "github.com/tliron/commonlog/simple"
@@ -13,13 +12,64 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+func handleTextDocumentSemanticTokensFull(uri protocol.DocumentUri) (*protocol.SemanticTokens, error) {
+	data := []uint32{}
+
+	ef, err := store.GetStore().Get(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	var prevLine uint32 = 0
+	var prevChar uint32 = 0
+	for _, v := range ef.Parser.DocumentTokens {
+		var deltaLine uint32 = uint32(v.Unwrap().Start.Line) - prevLine
+		// New line will start with a absolute character position
+		var deltaChar uint32 = uint32(v.Unwrap().Start.Character)
+
+		// Same line will use delta character position
+		if deltaLine == 0 {
+			deltaChar -= prevChar
+		}
+		prevLine = uint32(v.Unwrap().Start.Line)
+		prevChar = uint32(v.Unwrap().Start.Character)
+		var length uint32 = uint32(len(v.Unwrap().Literal))
+		var tokenType parser.SemanticTokenType = v.Kind
+		var tokenModifiers uint32 = 0
+
+		data = append(data, deltaLine,
+			deltaChar,
+			length,
+			uint32(tokenType),
+			tokenModifiers,
+		)
+	}
+
+	return &protocol.SemanticTokens{
+		ResultID: nil,
+		Data:     data,
+	}, nil
+
+}
+
+// Returns: SemanticTokens | SemanticTokensDelta | SemanticTokensDeltaPartialResult | nil
+func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *protocol.SemanticTokensDeltaParams) (any, error) {
+	uri := params.TextDocument.URI
+	return handleTextDocumentSemanticTokensFull(uri)
+}
+
+func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
+	uri := params.TextDocument.URI
+	return handleTextDocumentSemanticTokensFull(uri)
+}
+
 func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	ef := store.Wrap(&params.TextDocument)
 	store.GetStore().Add(ef)
 	return nil
 }
 
-func HandleTextDocumentDidChange (context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
+func HandleTextDocumentDidChange(context *glsp.Context, params *protocol.DidChangeTextDocumentParams) error {
 	uri := params.TextDocument.URI
 	textDocObj, err := store.GetStore().Get(uri)
 	if err != nil {
@@ -36,7 +86,7 @@ func HandleTextDocumentDidChange (context *glsp.Context, params *protocol.DidCha
 		case protocol.TextDocumentContentChangeEvent:
 			textDocObj.Update(changeType)
 		default:
-			return errors.New(fmt.Sprintf("ABORT: Can't following %d'th file change, get %v", index, contextChange))
+			return fmt.Errorf("ABORT: Can't following %d'th file change, get %v", index, contextChange)
 		}
 	}
 
@@ -55,14 +105,12 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 
 	// Not format yet
 	format := ef.Unwrap().Text
+	println("[INFO] parser document len", len(ef.Parser.DocumentTokens))
 
-	l := lexer.New(ef.Unwrap().Text)
-	p := parser.New(l)
-	program := p.ParseProgram()
-	if len(p.Errors()) == 0 {
-		format = FormatedAST(program, params.Options, 0)
+	if len(ef.Parser.Errors()) == 0 {
+		format = FormatedAST(ef.Parser.Program, params.Options, 0)
 	} else {
-		return nil, errors.New(p.Errors()[0])
+		return nil, errors.New(ef.Parser.Errors()[0])
 	}
 
 	editAllFile := protocol.TextEdit{
@@ -72,8 +120,8 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 				Character: protocol.UInteger(0),
 			},
 			End: protocol.Position{
-				Line:      protocol.UInteger(l.Line),
-				Character: protocol.UInteger(l.Character),
+				Line:      protocol.UInteger(ef.Parser.Lexer.Line),
+				Character: protocol.UInteger(ef.Parser.Lexer.Character),
 			},
 		},
 		NewText: format,
@@ -83,7 +131,7 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	return formated, nil
 }
 
-func TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (interface{}, error) {
+func TextDocumentCompletion(context *glsp.Context, params *protocol.CompletionParams) (any, error) {
 	var completionItems []protocol.CompletionItem
 
 	kindConstant := protocol.CompletionItemKindConstant
