@@ -45,6 +45,15 @@ docker-build: # Build the container image
 docker-push: # Push the image into docker.io
 	docker push docker.io/nghiango1/interingo-service:latest
 
+.PHONY: docker-nvim-build
+docker-nvim-build: embed-content # Build the image for nvim showcase
+	mkdir -p dist
+	docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
+
+.PHONY: docker-nvim-push
+docker-nvim-push: # Push the image for nvim showcase into docker.io
+	docker push docker.io/nghiango1/interingo:latest
+
 ### Development helper
 
 .PHONY: go-run

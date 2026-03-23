@@ -236,7 +236,7 @@ export PATH="$PATH:~/.local/bin"
 
 ### Setup LSP for Neovim with `iig` file
 
-Add this to Neovim `after/plugin/iig.lua` file
+Add this to Neovim `after/plugin/iig.lua` file. Assumming we already have `lspconfg` setup
 
 ```lua
 vim.filetype.add({ extension = { iig = 'interingo', }, })
@@ -265,13 +265,16 @@ lspconfig.interingo.setup({
 })
 ```
 
+> For fully default Neovim lsp support, I setup new `assets/init.lua` config and
+> packaged it into docker images via nghiango1/interingo
+
 ## Docker - LSP, Highlight
 
 Docker ready neovim with full configuration is here
 
 ```sh
-docker build -t interingo .
-docker run -it interingo
+docker build -f docker/nvim.Dockerfile . -t interingo:latest
+docker run -it --rm interingo:latest
 ```
 
 or pull directly from docker hub
