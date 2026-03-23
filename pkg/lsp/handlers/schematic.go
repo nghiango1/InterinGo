@@ -66,6 +66,14 @@ func (ss SemanticTokenType) String() protocol.SemanticTokenType {
 	return tokenName[ss]
 }
 
+// nvimsupported
+// tokenModifiers = { "declaration", "definition", "readonly", "static", "deprecated", "abstract", "async", "modification", "documentation", "defaultLibrary" },
+// tokenTypes = { "namespace", "type", "class", "enum", "interface", "struct", "typeParameter", "parameter", "variable", "property", "enumMember", "event", "function", "method", "macro", "keyword", "modifier", "comment", "string", "number", "regexp", "operator", "decorator" }
+//
+// server_legend = {
+// tokenTypes = { "namespace", "type", "class", "enum", "interface", "struct", "typeParameter", "parameter", "variable", "property", "enumMember", "event", "function", "method", "macro", "keyword", "modifier", "comment", "string", "number", "regexp", "operator" }
+// }
+//
 var SupportedSemanticTokenType []string = []string{
 	string(protocol.SemanticTokenTypeNamespace),
 	string(protocol.SemanticTokenTypeType),

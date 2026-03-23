@@ -34,10 +34,22 @@ func Wrap(tdi *protocol.TextDocumentItem) *EditedFile {
 func (ef *EditedFile) Update(changeData protocol.TextDocumentContentChangeEvent ) {
 	start, end := changeData.Range.IndexesIn(ef.data.Text)
 	ef.data.Text = ef.data.Text[:start] + changeData.Text + ef.data.Text[end:]
+
+	// Reload the whole file parse data
+	l := lexer.New(ef.data.Text)
+	p := parser.New(l)
+	p.ParseProgram()
+	ef.Parser = p;
 }
 
 func (ef *EditedFile) UpdateWhole(changeData protocol.TextDocumentContentChangeEventWhole ) {
 	ef.data.Text = changeData.Text
+
+	// Reload the whole file parse data
+	l := lexer.New(ef.data.Text)
+	p := parser.New(l)
+	p.ParseProgram()
+	ef.Parser = p;
 }
 
 type ServerFileSyncStore struct {

@@ -12,6 +12,87 @@ import (
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
+// Returns: SemanticTokens | SemanticTokensDelta | SemanticTokensDeltaPartialResult | nil
+func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *protocol.SemanticTokensDeltaParams) (any, error) {
+	data := []uint32{}
+
+	uri := params.TextDocument.URI
+	ef, err := store.GetStore().Get(uri)
+	if err != nil {
+		return nil, err
+	}
+
+	var prevLine uint32 = 0
+	var prevChar uint32 = 0
+	for _, v := range ef.Parser.Documents {
+		var deltaLine uint32 = uint32(v.Start.Line) - prevLine
+		// New line will start with a absolute character position
+		var deltaChar uint32 = uint32(v.Start.Character)
+
+		// Same line will use delta character position
+		if deltaLine == 0 {
+			deltaChar -= prevChar
+		}
+		prevLine = uint32(v.Start.Line)
+		prevChar = uint32(v.Start.Character)
+		var length uint32 = uint32(len(v.Literal))
+		var tokenType SemanticTokenType = 0
+		var tokenModifiers uint32 = 0
+		switch v.Type {
+		case token.FUNCTION:
+			tokenType = SemanticTokenTypeFunction
+		case
+			token.ASSIGN,
+			token.PLUS,
+			token.MINUS,
+			token.BANG,
+			token.ASTERISK,
+			token.SLASH,
+			token.GT,
+			token.LT,
+			token.EQ,
+			token.NOT_EQ,
+			token.COMMA,
+			token.SEMICOLON,
+			token.LPAREN,
+			token.RPAREN,
+			token.LBRACE,
+			token.RBRACE:
+			tokenType = SemanticTokenTypeOperator
+		case
+			token.IF,
+			token.LET,
+			token.ELSE,
+			token.RETURN:
+			tokenType = SemanticTokenTypeKeyword
+		case
+			token.TRUE,
+			token.FALSE:
+			tokenType = SemanticTokenTypeType
+		case token.INT:
+			tokenType = SemanticTokenTypeNumber
+		case token.IDENT:
+			tokenType = SemanticTokenTypeVariable
+		case token.ILLEGAL:
+			tokenType = SemanticTokenTypeComment
+		default:
+			tokenType = SemanticTokenTypeComment
+		}
+
+		data = append(data, deltaLine,
+			deltaChar,
+			length,
+			uint32(tokenType),
+			tokenModifiers,
+		)
+	}
+
+	return &protocol.SemanticTokens{
+		ResultID: nil,
+		Data:     data,
+	}, nil
+}
+
 func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protocol.SemanticTokensParams) (*protocol.SemanticTokens, error) {
 	data := []uint32{}
 
@@ -25,7 +106,10 @@ func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protoco
 	var prevChar uint32 = 0
 	for _, v := range ef.Parser.Documents {
 		var deltaLine uint32 = uint32(v.Start.Line) - prevLine
+		// New line will start with a absolute character position
 		var deltaChar uint32 = uint32(v.Start.Character)
+
+		// Same line will use delta character position
 		if deltaLine == 0 {
 			deltaChar -= prevChar
 		}

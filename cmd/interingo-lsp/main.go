@@ -28,6 +28,7 @@ func main() {
 		Initialize:             initialize,
 		Shutdown:               shutdown,
 		TextDocumentSemanticTokensFull: handlers.HandleTextDocumentSemanticTokensFull,
+		TextDocumentSemanticTokensFullDelta: handlers.HandleTextDocumentSemanticTokensFullDelta,
 		TextDocumentCompletion: handlers.TextDocumentCompletion,
 		TextDocumentFormatting: handlers.HandleDocumentFormatting,
 		TextDocumentDidOpen:    handlers.HandleTextDocumentDidOpen,
