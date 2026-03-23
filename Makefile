@@ -1,67 +1,80 @@
-TAILWIND_CLI ?= tailwindcss-linux-x64
-
-.PHONY: all build build-run tailwind-build tailwind-watch templ-build templ-watch help go-build run clean server-clean repl-clean
-
+.PHONY: all
  all: help
 
 ### Build command
 
-build: tailwind-build templ-build go-build # Build all the code
+.PHONY: build
+build: embed-dist embed-content go-build # Build all the code
 
+.PHONY: build-run
 build-run: build run # Build and run the code
 
-tailwind-build: # Build tailwind css file, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css
+.PHONY: embed-dist
+embed-dist: # Build website static file, output into website/dist 
+	cd website/ && npm install && npm run build
 
-templ-build: # Build/rebuild all `templ` templates files
-	templ generate
+.PHONY: embed-content
+embed-content: # Build webpage then output it into embed directory for go compile
+	rm -rf pkg/server/content/**
+	@if [[ -e website/dist/ ]]; then \
+	  cp -r website/dist/ pkg/server/content/; \
+	else \
+	  touch pkg/server/content/.not_support; \
+	fi
 
+.PHONY: go-build
 go-build: # Build go binary file
-	go build .
+	mkdir -p dist
+	go build -o dist/interingo cmd/interingo/main.go
 
+.PHONY: run clean server-clean repl-clean
 run: # Run the build file in server mode
-	./interingo -s
+	./dist/interingo -s
+
+.PHONY: lsp-build
+lsp-build: # Build go binary file
+	mkdir -p dist
+	go build -o dist/interingo-lsp cmd/interingo-lsp/main.go
+
+### Container deploy helper
+.PHONY: docker-build
+docker-build: # Build the container image
+	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
+
+.PHONY: docker-push
+docker-push: # Push the image into docker.io
+	docker push docker.io/nghiango1/interingo-service:latest
+
+.PHONY: docker-nvim-build
+docker-nvim-build: embed-content # Build the image for nvim showcase
+	mkdir -p dist
+	docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
+
+.PHONY: docker-nvim-push
+docker-nvim-push: # Push the image for nvim showcase into docker.io
+	docker push docker.io/nghiango1/interingo:latest
 
 ### Development helper
 
-tailwind-watch: # Start tailwind in watch mode - looking for change and rebuild, output file server/assets/stylesheet.css
-	$(TAILWIND_CLI) -i server/input.css -c server/tailwind.config.js -o server/assets/stylesheet.css -w
+.PHONY: go-run
+go-run: embed-content # Run the code without build step in server mode
+	go run ./cmd/interingo/ -s
 
-templ-watch: # Build/rebuild all `templ` templates files in watch mode
-	templ generate --watch
-
-go-run: # Run the code without build step in server mode
-	go run . -s
-
+.PHONY: regression-test
 regression-test: # Run the code without build step in server mode
-	python script/regressionTesting.py
+	python test/regressionTesting.py
 
-### REPL Helper
-
-repl-test: # Test all REPL project module
-	go test ./...
-
-repl-build: # Same as make go-build
-	go build .
-
-repl-run: # Run repl with-out build step
-	go run .
-
-repl-build-run: # Build the code then run executable file
-	go build .
-	./interingo
-
-repl-clean: # Remove repl build file
-	rm -f interingo
+.PHONY: go-test
+go-test: # Go lang Unit test 
+	mkdir -p ./dist
+	go test -cover -coverprofile=./dist/coverage.out -coverpkg=./cmd/...,./pkg/...  ./cmd/... ./pkg/...
+	go tool cover -func=./dist/coverage.out
+	go tool cover -html=./dist/coverage.out -o ./dist/coverage.html
+	xdg-open ./dist/coverage.html
 
 ### Helper
 
-server-clean: # Remove all frontend build file
-	rm -f server/index_templ.go
-	rm -f server/assets/stylesheet.css
-
-clean: server-clean repl-clean # Remove all build file
-
+.PHONY: help
 help: # Show this help
 	@cat Makefile | \
 		grep -E '^[^.:[:space:]]+:|[#]##' | \

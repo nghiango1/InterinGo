@@ -1,0 +1,45 @@
+import { mdsvex } from 'mdsvex';
+import adapter from '@sveltejs/adapter-static';
+import { sync } from 'glob';
+
+function getEntries() {
+	let entries = ['/', '/docs', '/docs'];
+	const pattern = 'src/lib/docs/**/*.md';
+	try {
+		const files = sync(pattern);
+		files.forEach((file) => {
+			entries.push(file.replace('src/lib', '').replace('.md', ''));
+		});
+	} catch (err) {
+		console.error('Error fetching files: ', err);
+	}
+
+	return entries;
+}
+
+const config = {
+	kit: {
+		// adapter-auto only supports some environments, see https://svelte.dev/docs/kit/adapter-auto for a list.
+		// If your environment is not supported, or you settled on a specific environment, switch out the adapter.
+		// See https://svelte.dev/docs/kit/adapters for more information about adapters.
+		adapter: adapter({
+			fallback: '200.html', // may differ from host to host
+			pages: 'dist',
+			assets: 'dist',
+			precompress: false,
+			strict: true,
+		}),
+		prerender: {
+			crawl: true,
+			entries: getEntries()
+		}
+	},
+	preprocess: [
+		mdsvex({
+			extensions: ['.md', '.svx']
+		})
+	],
+	extensions: ['.svelte', '.svx', '.md']
+};
+
+export default config;

@@ -1,0 +1,24 @@
+services:
+  service:
+    image: interingo:latest
+    build:
+      context: .
+      dockerfile: docker/service.Dockerfile
+    environment:
+      - GIN_MODE=release
+      - DB_HOST=db:5432
+      - DB_NAME=repl
+      - DB_USER=repl
+      - DB_PASSWD=repl
+    restart: always
+    ports:
+      - 8080:8080
+  db:
+    image: postgres:alpine
+    environment:
+      - POSTGRES_USER=repl
+      - POSTGRES_PASSWORD=repl
+      - POSTGRES_DB=repl
+    restart: always
+    expose:
+      - 5432

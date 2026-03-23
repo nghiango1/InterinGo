@@ -1,2 +1,11 @@
-interingo
-interpreter.epub
+# etc
+*.epub
+
+# Build binary
+dist/
+
+# ember content, should be built from website directory
+pkg/server/content/
+venv/
+
+__pycache__/
