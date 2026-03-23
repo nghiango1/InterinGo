@@ -139,10 +139,19 @@ func testOperator3(t *testing.T) {
 	test(t, input, tests, "Operator 3")
 }
 
+func testComment1(t *testing.T) {
+	input := `//!-/*5; 5 < 10 > 5; haha`
+	tests := []expectedReturn{
+		{token.COMMENT, "//!-/*5; 5 < 10 > 5; haha"},
+	}
+	test(t, input, tests, "Comment 1")
+}
+
 func TestNextToken(t *testing.T) {
 	testOperator1(t)
 	testOperator2(t)
 	testOperator3(t)
+	testComment1(t)
 	testKeywords1(t)
 	testKeywords2(t)
 	testBinding1(t)

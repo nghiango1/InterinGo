@@ -39,6 +39,8 @@ func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *pr
 		var tokenType SemanticTokenType = 0
 		var tokenModifiers uint32 = 0
 		switch v.Type {
+		case token.COMMENT:
+			tokenType = SemanticTokenTypeComment
 		case token.FUNCTION:
 			tokenType = SemanticTokenTypeFunction
 		case
@@ -68,15 +70,15 @@ func HandleTextDocumentSemanticTokensFullDelta(context *glsp.Context, params *pr
 		case
 			token.TRUE,
 			token.FALSE:
-			tokenType = SemanticTokenTypeType
+			tokenType = SemanticTokenTypeMacro
 		case token.INT:
 			tokenType = SemanticTokenTypeNumber
 		case token.IDENT:
 			tokenType = SemanticTokenTypeVariable
 		case token.ILLEGAL:
-			tokenType = SemanticTokenTypeComment
+			tokenType = SemanticTokenTypeType
 		default:
-			tokenType = SemanticTokenTypeComment
+			tokenType = SemanticTokenTypeType
 		}
 
 		data = append(data, deltaLine,

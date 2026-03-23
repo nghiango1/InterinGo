@@ -111,6 +111,8 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Type = token.COMMENT
 			literal := l.skipCurrentLine()
 			tok.Literal = literal
+			tok.Start = start
+			tok.End = l.Position()
 
 			return tok
 		} else {
