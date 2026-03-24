@@ -63,30 +63,37 @@ func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protoco
 	return handleTextDocumentSemanticTokensFull(uri)
 }
 
+func getDiagnostic(errs []parser.ParserError) []protocol.Diagnostic {
+	// Create diagnostic
+	var diagnostics []protocol.Diagnostic
+
+	for _, e := range errs {
+		serverity := protocol.DiagnosticSeverityError
+		diagnostics = append(diagnostics, protocol.Diagnostic{
+			Range:              e.Range.ToProtocolRange(),
+			Severity:           &serverity,
+			Code:               nil,
+			CodeDescription:    nil,
+			Source:             nil,
+			Message:            e.Message,
+			Tags:               nil,
+			RelatedInformation: nil,
+			Data:               nil,
+		})
+	}
+	return diagnostics
+}
+
 func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	ef := store.Wrap(&params.TextDocument)
 	store.GetStore().Add(ef)
-
-	// Create diagnostic
-	var diagnostics []protocol.Diagnostic
-	for _, e := range ef.Parser.Errors {
-		serverity := protocol.DiagnosticSeverityError
-		diagnostics = append(diagnostics, protocol.Diagnostic{
-			Range: e.Range.ToProtocolRange(),
-			Severity: &serverity,
-			Code: nil,
-			CodeDescription: nil,
-			Source: nil,
-			Message : e.Message,
-			Tags: nil,
-			RelatedInformation: nil,
-			Data: nil,
+	found := getDiagnostic(ef.Parser.Errors)
+	if len(found) != 0 {
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         params.TextDocument.URI,
+			Diagnostics: found,
 		})
 	}
-	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-		URI:         params.TextDocument.URI,
-		Diagnostics: diagnostics,
-	})
 	return nil
 }
 
@@ -111,6 +118,13 @@ func HandleTextDocumentDidChange(context *glsp.Context, params *protocol.DidChan
 		}
 	}
 
+	found := getDiagnostic(textDocObj.Parser.Errors)
+	if len(found) != 0 {
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         params.TextDocument.URI,
+			Diagnostics: found,
+		})
+	}
 	return nil
 }
 

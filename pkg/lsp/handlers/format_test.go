@@ -59,6 +59,6 @@ let c = fn(x)  {
 }
 
 func TestMain(m *testing.M) {
-	share.SetDefaultLog()
+	share.SetDefaultLog(slog.LevelDebug)
 	os.Exit(m.Run())
 }

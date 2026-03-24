@@ -211,13 +211,14 @@ func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) s
 		// Cover the remain comment, this doesn't do while loop as there can be possible
 		// inf loop error, this however can lost comment
 		for i := curr_comments; i < len(comments); i++ {
-			if node.GetRange().End.Line+1 < comments[curr_comments].Start.Line {
+			currentLine := node.GetRange().End.Line + 1
+			if currentLine <= comments[curr_comments].Start.Line {
 				break
 			}
 			// We are sure that we can inject new comment base from previous check
 			// New line to seperate the comment if it not originally goes along with the line
 			formated.WriteString("\n")
-			checkInjectComment(node.GetRange().End.Line+1, &formated, option, indent)
+			checkInjectComment(currentLine, &formated, option, indent)
 		}
 
 	case *ast.LetStatement:

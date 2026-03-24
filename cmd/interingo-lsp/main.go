@@ -4,6 +4,7 @@ import (
 	"interingo/pkg/lsp/handlers"
 	"interingo/pkg/lsp/store"
 	"interingo/pkg/share"
+	"log/slog"
 
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -15,7 +16,7 @@ import (
 
 const lsName = "Interingo Language Server"
 
-var version string = "0.0.1"
+var version string
 var handler protocol.Handler
 
 func Init() {
@@ -23,7 +24,7 @@ func Init() {
 }
 
 func main() {
-	share.SetDefaultLog()
+	share.SetDefaultLog(slog.LevelError)
 
 	// Seem to be used by the library
 	commonlog.Configure(2, nil)

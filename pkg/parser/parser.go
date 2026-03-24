@@ -193,12 +193,12 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 }
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
-	msg := fmt.Sprintf("no prefix parse function for %s found", t)
+	msg := fmt.Sprintf("Expression expect, but %s found", t)
 	p.Errors = append(p.Errors, ParserError{
 		Message: msg,
 		Range: share.Range{
-			Start: p.peekToken.Start,
-			End:   p.peekToken.End,
+			Start: p.curToken.Start,
+			End:   p.curToken.End,
 		},
 	})
 }
@@ -229,7 +229,9 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	exp.Range.Start = p.curToken.Start
 
 	exp.Function = function
-	p.reverseIndentityLiteralKind(exp.Function.TokenLiteral(), SemanticTokenTypeFunction)
+	if exp.Function != nil {
+		p.reverseIndentityLiteralKind(exp.Function.TokenLiteral(), SemanticTokenTypeFunction)
+	}
 
 	for !p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // Skip the '(' and ',' token
@@ -248,6 +250,7 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 	}
 	return exp
 }
+
 func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt := &ast.ReturnStatement{
 		Token: p.curToken,
@@ -258,7 +261,10 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	stmt.ReturnValue = p.parseExpression(LOWEST)
 	if stmt.ReturnValue != nil {
 		stmt.Range.End = stmt.ReturnValue.GetRange().End
+	} else {
+		stmt.Range.End = stmt.Token.End
 	}
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		stmt.Range.End = p.curToken.End
 		p.nextToken()

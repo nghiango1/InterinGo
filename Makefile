@@ -1,3 +1,5 @@
+VERSION ?= $(shell git show -s --format='%cd%h' --date=format:'%y.%m.' HEAD)
+
 .PHONY: all
  all: help
 
@@ -34,7 +36,7 @@ run: # Run the build file in server mode
 .PHONY: lsp-build
 lsp-build: # Build go binary file
 	mkdir -p dist
-	go build -o dist/interingo-lsp cmd/interingo-lsp/main.go
+	go build -o dist/interingo-lsp -ldflags "-X main.version=$(VERSION)" cmd/interingo-lsp/main.go
 
 ### Container deploy helper
 .PHONY: docker-build

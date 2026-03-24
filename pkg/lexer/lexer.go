@@ -148,8 +148,7 @@ func (l *Lexer) NextToken() token.Token {
 		l.Line += 1
 		l.Character = 0
 	case 0:
-		tok.Literal = ""
-		tok.Type = token.EOF
+		tok = newToken(token.EOF, "", start)
 	default:
 		if isLetter(l.ch) {
 			tok.Literal = l.readIdentifier()
