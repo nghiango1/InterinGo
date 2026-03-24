@@ -58,13 +58,13 @@ func TestLetStatements(t *testing.T) {
 }
 
 func checkParserErrors(t *testing.T, p *Parser) {
-	errors := p.Errors()
+	errors := p.Errors
 	if len(errors) == 0 {
 		return
 	}
 	t.Errorf("Parser has %d errors", len(errors))
 	for _, msg := range errors {
-		t.Errorf("Parser error: %q", msg)
+		t.Errorf("Parser error: %v", msg)
 	}
 	t.FailNow()
 }
@@ -703,13 +703,20 @@ return /a as dasd
 	let x=/
 	 if () \
 	 if \ \
+let =;
+	()
 identity(5);
+	return
 `
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
-	if len(p.errors) == 0 {
+	if len(p.Errors) == 0 {
 		t.Fatalf("parse can't find any error")
+	}
+
+	for _, e := range p.Errors {
+		slog.Debug(fmt.Sprintf("Got e: %v", e))
 	}
 	if len(program.Statements) == 0 {
 		t.Fatalf("program.Statements does not contain any statements")
@@ -717,6 +724,6 @@ identity(5);
 }
 
 func TestMain(m *testing.M) {
-	share.SetDefaultLog()
+	share.SetDefaultLog(slog.LevelDebug)
 	os.Exit(m.Run())
 }

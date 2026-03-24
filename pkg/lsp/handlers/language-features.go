@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"interingo/pkg/lsp/mappers"
@@ -63,9 +64,37 @@ func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protoco
 	return handleTextDocumentSemanticTokensFull(uri)
 }
 
+func getDiagnostic(errs []parser.ParserError) []protocol.Diagnostic {
+	// Create diagnostic
+	var diagnostics []protocol.Diagnostic
+
+	for _, e := range errs {
+		serverity := protocol.DiagnosticSeverityError
+		diagnostics = append(diagnostics, protocol.Diagnostic{
+			Range:              e.Range.ToProtocolRange(),
+			Severity:           &serverity,
+			Code:               nil,
+			CodeDescription:    nil,
+			Source:             nil,
+			Message:            e.Message,
+			Tags:               nil,
+			RelatedInformation: nil,
+			Data:               nil,
+		})
+	}
+	return diagnostics
+}
+
 func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	ef := store.Wrap(&params.TextDocument)
 	store.GetStore().Add(ef)
+	found := getDiagnostic(ef.Parser.Errors)
+	if len(found) != 0 {
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         params.TextDocument.URI,
+			Diagnostics: found,
+		})
+	}
 	return nil
 }
 
@@ -90,6 +119,13 @@ func HandleTextDocumentDidChange(context *glsp.Context, params *protocol.DidChan
 		}
 	}
 
+	found := getDiagnostic(textDocObj.Parser.Errors)
+	if len(found) != 0 {
+		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+			URI:         params.TextDocument.URI,
+			Diagnostics: found,
+		})
+	}
 	return nil
 }
 
@@ -106,10 +142,22 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	// Not format yet
 	format := ef.Unwrap().Text
 
-	if len(ef.Parser.Errors()) == 0 {
-		format = FormatedAST(ef.Parser.Program, params.Options, 0)
+
+	var fo FormattingOptions
+	d, err := json.Marshal(params.Options)
+	if err != nil {
+		return nil, err
+	} 
+	err = json.Unmarshal(d, &fo)
+
+	if err != nil {
+		return nil, err
+	}
+
+	if len(ef.Parser.Errors) == 0 {
+		format = FormatedAST(ef.Parser.Program, fo, 0)
 	} else {
-		return nil, errors.New(ef.Parser.Errors()[0])
+		return nil, errors.New(ef.Parser.Errors[0].Message)
 	}
 
 	editAllFile := protocol.TextEdit{

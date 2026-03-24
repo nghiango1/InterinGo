@@ -7,10 +7,10 @@ import (
 )
 
 // Opinioned set logging
-func SetDefaultLog() {
+func SetDefaultLog(level slog.Level) {
 	logger := slog.New(slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{
 		AddSource: true, // include source file:line
-		Level:     slog.LevelDebug,
+		Level:     level,
 		ReplaceAttr: func(gs []string, a slog.Attr) slog.Attr {
 			if a.Key == slog.SourceKey {
 				s := a.Value.Any().(*slog.Source)

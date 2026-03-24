@@ -1,31 +1,18 @@
 // token/token.go
 package token
 
-import "fmt"
-
-type Position struct {
-	/**
-	 * Line position in a document (zero-based).
-	 */
-	Line int
-
-	/**
-	 * Character offset on a line in a document (zero-based). The meaning of this
-	 * offset is determined by the negotiated `PositionEncodingKind`.
-	 *
-	 * If the character value is greater than the line length it defaults back
-	 * to the line length.
-	 */
-	Character int
-}
+import (
+	"fmt"
+	"interingo/pkg/share"
+)
 
 type TokenType string
 
 type Token struct {
 	Type    TokenType
 	Literal string
-	Start   Position
-	End     Position
+	Start   share.Position
+	End     share.Position
 }
 
 // token/token.go

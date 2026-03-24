@@ -75,8 +75,8 @@ func codeHandle(line string, out io.Writer, env *object.Environment) {
 		printVerboseInfomation(l, p, program, out)
 	}
 
-	if len(p.Errors()) != 0 {
-		errorsHandler(p.Errors(), out)
+	if len(p.Errors) != 0 {
+		errorsHandler(p.Errors, out)
 		return
 	}
 
@@ -91,10 +91,10 @@ func codeHandle(line string, out io.Writer, env *object.Environment) {
 	}
 }
 
-func errorsHandler(errors []string, out io.Writer) {
+func errorsHandler(errors []parser.ParserError, out io.Writer) {
 	io.WriteString(out, "Errors when parsing:\n")
-	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
+	for _, e := range errors {
+		io.WriteString(out, "\t"+e.Message+"\n")
 	}
 }
 
