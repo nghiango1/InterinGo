@@ -699,6 +699,8 @@ let identity = fn(x) {
 	// 5
 };
 /leta fdaasF a //
+return /a as dasd
+	let x=/
 identity(5);
 `
 	l := lexer.New(input)

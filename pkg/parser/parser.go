@@ -177,7 +177,9 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt.Range.Start = p.curToken.Start
 
 	stmt.Expression = p.parseExpression(LOWEST)
-	stmt.Range.End = stmt.Expression.GetRange().End
+	if stmt.Expression != nil {
+		stmt.Range.End = stmt.Expression.GetRange().End
+	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		stmt.Range.Start = p.curToken.End
@@ -245,8 +247,9 @@ func (p *Parser) parseReturnStatement() *ast.ReturnStatement {
 	p.nextToken()
 
 	stmt.ReturnValue = p.parseExpression(LOWEST)
-
-	stmt.Range.End = stmt.ReturnValue.GetRange().End
+	if stmt.ReturnValue != nil {
+		stmt.Range.End = stmt.ReturnValue.GetRange().End
+	}
 	if p.peekTokenIs(token.SEMICOLON) {
 		stmt.Range.End = p.curToken.End
 		p.nextToken()
@@ -316,7 +319,10 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 		p.reverseIndentityLiteralKind(stmt.Name.Value, SemanticTokenTypeVariable)
 	}
 
-	stmt.Range.End = value.GetRange().End
+	if value != nil {
+		stmt.Range.End = value.GetRange().End
+	}
+
 	if p.peekTokenIs(token.SEMICOLON) {
 		stmt.Range.End = p.curToken.End
 		p.nextToken()
@@ -381,8 +387,9 @@ func (p *Parser) parseFunctionLiteral() ast.Expression {
 	}
 
 	function.Body = p.parseBlockStatement()
-
-	function.Range.End = function.Body.GetRange().End
+	if function.Body != nil {
+		function.Range.End = function.Body.GetRange().End
+	}
 	if p.peekTokenIs(token.SEMICOLON) {
 		function.Range.End = p.curToken.End
 		p.nextToken()
@@ -411,6 +418,9 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 		return nil
 	}
 	expression.Consequence = p.parseBlockStatement()
+	if expression.Consequence != nil {
+		expression.Range.End = expression.Alternative.GetRange().End
+	}
 	expression.Range.End = expression.Consequence.GetRange().End
 
 	if p.peekTokenIs(token.ELSE) {
@@ -419,7 +429,9 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 			return nil
 		}
 		expression.Alternative = p.parseBlockStatement()
-		expression.Range.End = expression.Alternative.GetRange().End
+		if expression.Alternative != nil {
+			expression.Range.End = expression.Alternative.GetRange().End
+		}
 	}
 
 	if p.peekTokenIs(token.SEMICOLON) {
@@ -502,7 +514,9 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	p.nextToken()
 	expression.Right = p.parseExpression(precedences)
 
-	expression.Range.End = expression.Right.GetRange().End
+	if expression.Right != nil {
+		expression.Range.End = expression.Right.GetRange().End
+	}
 	return expression
 }
 
