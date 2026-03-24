@@ -5,6 +5,7 @@ import (
 	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
 	"interingo/pkg/token"
+	"log/slog"
 	"strconv"
 )
 
@@ -130,6 +131,7 @@ func (p *Parser) ParseProgram() *ast.Program {
 		p.nextToken()
 	}
 
+	slog.Debug(fmt.Sprintf("At: %v", p.curToken))
 	program.Range.End = p.curToken.End
 
 	for _, curToken := range p.DocumentTokens {
@@ -419,7 +421,7 @@ func (p *Parser) parseIfElseExpression() ast.Expression {
 	}
 	expression.Consequence = p.parseBlockStatement()
 	if expression.Consequence != nil {
-		expression.Range.End = expression.Alternative.GetRange().End
+		expression.Range.End = expression.Consequence.GetRange().End
 	}
 	expression.Range.End = expression.Consequence.GetRange().End
 

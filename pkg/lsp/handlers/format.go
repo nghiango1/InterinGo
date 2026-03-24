@@ -157,10 +157,11 @@ func checkInjectComment(currentLine int, out io.Writer, option protocol.Formatti
 	if curr_comments >= len(comments) {
 		return
 	}
+	slog.Debug(fmt.Sprintf("Try inject comment (%v 'th) %v, at Line %v", curr_comments, comments[curr_comments], currentLine))
 	if currentLine > comments[curr_comments].Start.Line {
 		pad, err := indentPadding(option, indent)
 		if err != nil {
-			println(err.Error())
+			slog.Debug(fmt.Sprintf("When do indent padding, got %v and have to skip", err.Error()))
 		} else {
 			fmt.Fprintf(out, "%s", pad)
 		}
@@ -186,14 +187,17 @@ func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) s
 
 			formated.WriteString(";\n")
 		}
-		// Cover the remain comment
-		for ; curr_comments < len(comments); curr_comments++ {
+		// Cover the remain comment, this doesn't do while loop as there can be possible
+		// inf loop error, this however can lost comment
+		for i := curr_comments; i < len(comments); i++ {
 			checkInjectComment(node.GetRange().End.Line+1, &formated, option, indent)
 		}
 
+		if curr_comments != len(comments) {
+			slog.Error("Can't inject all comments found in program!")
+		}
+
 	case *ast.BlockStatement:
-		slog.Debug(fmt.Sprintf("Check possible inject: %v into %v", comments[curr_comments], node.GetRange()))
-		// checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
 		for index, statement := range node.Statements {
 			stmtFormated := FormatedAST(statement, option, indent)
 			formated.WriteString(stmtFormated)
@@ -203,7 +207,10 @@ func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) s
 				formated.WriteString("\n")
 			}
 		}
-		for ; curr_comments < len(comments); curr_comments++ {
+
+		// Cover the remain comment, this doesn't do while loop as there can be possible
+		// inf loop error, this however can lost comment
+		for i := curr_comments; i < len(comments); i++ {
 			if node.GetRange().End.Line+1 < comments[curr_comments].Start.Line {
 				break
 			}
