@@ -5,9 +5,15 @@ import (
 	"interingo/pkg/token"
 )
 
+type Range struct {
+	Start token.Position `json:"start"`
+	End   token.Position `json:"end"`
+}
+
 type Node interface {
 	TokenLiteral() string
 	String() string
+	GetRange() Range
 }
 
 type Statement interface {
@@ -21,7 +27,9 @@ type Expression interface {
 }
 
 type Program struct {
-	Statements []Statement
+	Statements []Statement   `json:"statements,omitempty"`
+	Comments   []token.Token `json:"comments,omitempty"`
+	Range      Range         `json:"range"`
 }
 
 func (p *Program) TokenLiteral() string {
@@ -32,14 +40,39 @@ func (p *Program) TokenLiteral() string {
 	}
 }
 
+func (p *Program) String() string {
+	var out bytes.Buffer
+	for i, s := range p.Statements {
+		if i > 0 {
+			out.WriteString("; ")
+		}
+		out.WriteString(s.String())
+	}
+	return out.String()
+}
+
+func (p *Program) GetRange() Range {
+	return Range{
+		Start: p.Range.Start,
+		End:   p.Range.End,
+	}
+}
+
 type LetStatement struct {
 	Token token.Token // the token.LET token
-	Name  *Identifier
-	Value Expression
+	Name  *Identifier `json:"name"`
+	Value Expression  `json:"value"`
+	Range Range       `json:"range"`
 }
 
 func (ls *LetStatement) statementNode()       {}
 func (ls *LetStatement) TokenLiteral() string { return ls.Token.Literal }
+func (ls *LetStatement) GetRange() Range {
+	return Range{
+		Start: ls.Range.Start,
+		End:   ls.Range.End,
+	}
+}
 
 func (ls *LetStatement) String() string {
 	var out bytes.Buffer
@@ -56,10 +89,17 @@ func (ls *LetStatement) String() string {
 type ReturnStatement struct {
 	Token       token.Token // the token.RETURN token
 	ReturnValue Expression
+	Range       Range
 }
 
 func (rs *ReturnStatement) statementNode()       {}
 func (rs *ReturnStatement) TokenLiteral() string { return rs.Token.Literal }
+func (rs *ReturnStatement) GetRange() Range {
+	return Range{
+		Start: rs.Range.Start,
+		End:   rs.Range.End,
+	}
+}
 
 func (rs *ReturnStatement) String() string {
 	var out bytes.Buffer
@@ -73,10 +113,17 @@ func (rs *ReturnStatement) String() string {
 type ExpressionStatement struct {
 	Token      token.Token // the first token of the Expression
 	Expression Expression
+	Range      Range
 }
 
 func (es *ExpressionStatement) statementNode()       {}
 func (es *ExpressionStatement) TokenLiteral() string { return es.Token.Literal }
+func (es *ExpressionStatement) GetRange() Range {
+	return Range{
+		Start: es.Range.Start,
+		End:   es.Range.End,
+	}
+}
 
 func (es *ExpressionStatement) String() string {
 	if es.Expression != nil {
@@ -88,24 +135,20 @@ func (es *ExpressionStatement) String() string {
 type Identifier struct {
 	Token token.Token // the token.IDENT token
 	Value string
+	Range Range
 }
 
 func (i *Identifier) expressionNode()      {}
 func (i *Identifier) TokenLiteral() string { return i.Token.Literal }
+func (i *Identifier) GetRange() Range {
+	return Range{
+		Start: i.Range.Start,
+		End:   i.Range.End,
+	}
+}
 
 func (i *Identifier) String() string {
 	return i.Value
-}
-
-func (p *Program) String() string {
-	var out bytes.Buffer
-	for i, s := range p.Statements {
-		if i > 0 {
-			out.WriteString("; ")
-		}
-		out.WriteString(s.String())
-	}
-	return out.String()
 }
 
 type InfixExpression struct {
@@ -113,10 +156,17 @@ type InfixExpression struct {
 	Operator string
 	Left     Expression
 	Right    Expression
+	Range    Range
 }
 
 func (ie *InfixExpression) expressionNode()      {}
 func (ie *InfixExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *InfixExpression) GetRange() Range {
+	return Range{
+		Start: ie.Range.Start,
+		End:   ie.Range.End,
+	}
+}
 func (ie *InfixExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
@@ -131,10 +181,17 @@ type PrefixExpression struct {
 	Token    token.Token // The prefix token, e.g. !
 	Operator string
 	Right    Expression
+	Range    Range
 }
 
 func (pe *PrefixExpression) expressionNode()      {}
 func (pe *PrefixExpression) TokenLiteral() string { return pe.Token.Literal }
+func (pe *PrefixExpression) GetRange() Range {
+	return Range{
+		Start: pe.Range.Start,
+		End:   pe.Range.End,
+	}
+}
 func (pe *PrefixExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("(")
@@ -147,30 +204,51 @@ func (pe *PrefixExpression) String() string {
 type IntegerLiteral struct {
 	Token token.Token
 	Value int64
+	Range Range
 }
 
 func (il *IntegerLiteral) expressionNode()      {}
 func (il *IntegerLiteral) TokenLiteral() string { return il.Token.Literal }
-func (il *IntegerLiteral) String() string       { return il.Token.Literal }
+func (il *IntegerLiteral) GetRange() Range {
+	return Range{
+		Start: il.Range.Start,
+		End:   il.Range.End,
+	}
+}
+func (il *IntegerLiteral) String() string { return il.Token.Literal }
 
 type Boolean struct {
 	Token token.Token
 	Value bool
+	Range Range
 }
 
 func (b *Boolean) expressionNode()      {}
 func (b *Boolean) TokenLiteral() string { return b.Token.Literal }
-func (b *Boolean) String() string       { return b.Token.Literal }
+func (b *Boolean) GetRange() Range {
+	return Range{
+		Start: b.Range.Start,
+		End:   b.Range.End,
+	}
+}
+func (b *Boolean) String() string { return b.Token.Literal }
 
 type IfExpression struct {
 	Token       token.Token //the "if" token
 	Condition   Expression
 	Consequence *BlockStatement
 	Alternative *BlockStatement
+	Range       Range
 }
 
 func (ie *IfExpression) expressionNode()      {}
 func (ie *IfExpression) TokenLiteral() string { return ie.Token.Literal }
+func (ie *IfExpression) GetRange() Range {
+	return Range{
+		Start: ie.Range.Start,
+		End:   ie.Range.End,
+	}
+}
 func (ie *IfExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString("if ")
@@ -188,10 +266,17 @@ type FunctionLiteral struct {
 	Token      token.Token //the "{" token
 	Parameters []*Identifier
 	Body       *BlockStatement
+	Range      Range
 }
 
 func (fe *FunctionLiteral) expressionNode()      {}
 func (fe *FunctionLiteral) TokenLiteral() string { return fe.Token.Literal }
+func (fe *FunctionLiteral) GetRange() Range {
+	return Range{
+		Start: fe.Range.Start,
+		End:   fe.Range.End,
+	}
+}
 func (fe *FunctionLiteral) String() string {
 	var out bytes.Buffer
 	out.WriteString("fn")
@@ -211,10 +296,17 @@ type CallExpression struct {
 	Token     token.Token //the "(" token
 	Function  Expression
 	Arguments []Expression
+	Range     Range
 }
 
 func (ce *CallExpression) expressionNode()      {}
 func (ce *CallExpression) TokenLiteral() string { return ce.Token.Literal }
+func (ce *CallExpression) GetRange() Range {
+	return Range{
+		Start: ce.Range.Start,
+		End:   ce.Range.End,
+	}
+}
 func (ce *CallExpression) String() string {
 	var out bytes.Buffer
 	out.WriteString(ce.Function.String())
@@ -232,10 +324,17 @@ func (ce *CallExpression) String() string {
 type BlockStatement struct {
 	Token      token.Token //the "{" token
 	Statements []Statement
+	Range      Range
 }
 
 func (bs *BlockStatement) expressionNode()      {}
 func (bs *BlockStatement) TokenLiteral() string { return bs.Token.Literal }
+func (bs *BlockStatement) GetRange() Range {
+	return Range{
+		Start: bs.Range.Start,
+		End:   bs.Range.End,
+	}
+}
 func (bs *BlockStatement) String() string {
 	var out bytes.Buffer
 	out.WriteString("{ ")

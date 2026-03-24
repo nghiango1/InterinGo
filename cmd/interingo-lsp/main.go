@@ -3,6 +3,7 @@ package main
 import (
 	"interingo/pkg/lsp/handlers"
 	"interingo/pkg/lsp/store"
+	"interingo/pkg/share"
 
 	"github.com/tliron/commonlog"
 	"github.com/tliron/glsp"
@@ -22,17 +23,20 @@ func Init() {
 }
 
 func main() {
+	share.SetDefaultLog()
+
+	// Seem to be used by the library
 	commonlog.Configure(2, nil)
 
 	handler = protocol.Handler{
-		Initialize:             initialize,
-		Shutdown:               shutdown,
-		TextDocumentSemanticTokensFull: handlers.HandleTextDocumentSemanticTokensFull,
+		Initialize:                          initialize,
+		Shutdown:                            shutdown,
+		TextDocumentSemanticTokensFull:      handlers.HandleTextDocumentSemanticTokensFull,
 		TextDocumentSemanticTokensFullDelta: handlers.HandleTextDocumentSemanticTokensFullDelta,
-		TextDocumentCompletion: handlers.TextDocumentCompletion,
-		TextDocumentFormatting: handlers.HandleDocumentFormatting,
-		TextDocumentDidOpen:    handlers.HandleTextDocumentDidOpen,
-		TextDocumentDidChange:  handlers.HandleTextDocumentDidChange,
+		TextDocumentCompletion:              handlers.TextDocumentCompletion,
+		TextDocumentFormatting:              handlers.HandleDocumentFormatting,
+		TextDocumentDidOpen:                 handlers.HandleTextDocumentDidOpen,
+		TextDocumentDidChange:               handlers.HandleTextDocumentDidChange,
 	}
 
 	server := server.NewServer(&handler, lsName, true)
@@ -49,9 +53,9 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, 
 	capabilities.DocumentFormattingProvider = &protocol.DocumentFormattingOptions{}
 	capabilities.SemanticTokensProvider = &protocol.SemanticTokensOptions{
 		Legend: protocol.SemanticTokensLegend{
-			TokenTypes: handlers.SupportedSemanticTokenType,
+			TokenTypes:     handlers.SupportedSemanticTokenType,
 			TokenModifiers: nil,
-		}, 
+		},
 		Full: true,
 	}
 

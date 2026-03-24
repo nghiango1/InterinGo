@@ -94,7 +94,7 @@ func HandleTextDocumentDidChange(context *glsp.Context, params *protocol.DidChan
 }
 
 func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFormattingParams) ([]protocol.TextEdit, error) {
-	formated := make([]protocol.TextEdit, 0)
+	var formated []protocol.TextEdit
 
 	uri := params.TextDocument.URI
 
@@ -105,7 +105,6 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 
 	// Not format yet
 	format := ef.Unwrap().Text
-	println("[INFO] parser document len", len(ef.Parser.DocumentTokens))
 
 	if len(ef.Parser.Errors()) == 0 {
 		format = FormatedAST(ef.Parser.Program, params.Options, 0)
