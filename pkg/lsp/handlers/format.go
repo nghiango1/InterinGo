@@ -1,68 +1,52 @@
 package handlers
 
 import (
-	"errors"
+	"encoding/json"
 	"fmt"
 	"interingo/pkg/ast"
 	"interingo/pkg/token"
 	"io"
+	"log/slog"
 	"strings"
 
 	_ "github.com/tliron/commonlog/simple"
 	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
-// /**
-//  * Value-object describing what options formatting should use.
-//  */
-// interface FormattingOptions {
-// 	/** * Size of a tab in spaces. */
-// 	tabSize: uinteger;
-//
-// 	/** * Prefer spaces over tabs. */
-// 	insertSpaces: boolean;
-//
-// 	/** * Trim trailing whitespace on a line. */
-// 	trimTrailingWhitespace?: boolean;
-//
-// 	/** * Insert a newline character at the end of the file if one does not exist. */
-// 	insertFinalNewline?: boolean;
-//
-// 	/** * Trim all newlines after the final newline at the end of the file. */
-// 	trimFinalNewlines?: boolean;
-//
-// 	/** * Signature for further properties. */
-// 	[key: string]: boolean | integer | string;
-// }
+type FormattingOptions struct {
+	// Size of a tab in spaces.
+	TabSize *int `json:"tabSize,omitempty"`
+	// 	Prefer spaces over tabs.
+	InsertSpaces *bool `json:"insertSpaces,omitempty"`
+	// 	Trim trailing whitespace on a line.
+	TrimTrailingWhitespace *bool `json:"trimTrailingWhitespace,omitempty"`
+	// 	Insert a newline character at the end of the file if one does not exist.
+	InsertFinalNewline *bool `json:"insertFinalNewline,omitempty"`
+	// 	Trim all newlines after the final newline at the end of the file.
+	TrimFinalNewlines *bool `json:"trimFinalNewlines,omitempty"`
+}
 
 func indentPadding(option protocol.FormattingOptions, indent int) (string, error) {
-	insertSpaces, ok := option[protocol.FormattingOptionInsertSpaces]
-	if !ok {
-		insertSpaces = true
+	var fo FormattingOptions
+	d, err := json.Marshal(option)
+	if err != nil {
+	} else {
+		err = json.Unmarshal(d, &fo)
 	}
 
-	boolInsertSpaces, ok := insertSpaces.(bool)
-	if !ok {
-		return "", errors.New(fmt.Sprintf("Formating option insertSpaces have wrong value, got = %v instead", insertSpaces))
-	}
-
-	if !boolInsertSpaces {
-		return strings.Repeat("\t", indent), nil
+	if fo.InsertSpaces != nil {
+		if *(fo.InsertSpaces) == true {
+			return strings.Repeat("\t", indent), nil
+		}
 	}
 
 	var spaceTab string
 
-	tabSize, ok := option[protocol.FormattingOptionTabSize]
-	if !ok {
-		tabSize = 4
+	tabSize := 4
+	if fo.TabSize != nil {
+		tabSize = *(fo.TabSize)
 	}
-
-	intTabSize, ok := tabSize.(int)
-	if !ok {
-		return "", errors.New(fmt.Sprintf("Formating option insertSpaces have wrong value, got = %v instead", insertSpaces))
-	}
-
-	spaceTab = strings.Repeat(" ", intTabSize)
+	spaceTab = strings.Repeat(" ", tabSize)
 
 	return strings.Repeat(spaceTab, indent), nil
 }
@@ -76,53 +60,37 @@ func FormatedFunctionLiteral(node *ast.FunctionLiteral, option protocol.Formatti
 		indentPad = strings.Repeat("    ", indent)
 	}
 
-	formated := node.TokenLiteral()
+	var formated strings.Builder
+	formated.WriteString(node.TokenLiteral())
 
-	// Format space between "fn" token and params
-	if false {
-		formated += " "
-	}
-	formated += "("
-
-	// Format space between "(" and the first param
-	if false {
-		formated += " "
-	}
+	formated.WriteString("(")
 
 	for index, param := range node.Parameters {
-		formated += param.Value
+		formated.WriteString(param.Value)
 		if index < len(node.Parameters)-1 {
-			formated += ", "
+			formated.WriteString(", ")
 		}
 	}
 
-	// Format space between ")" and the last param
-	if false {
-		formated += " "
-	}
-	formated += ")"
+	formated.WriteString(")")
 
 	// Format space between ")" and "{" function body, could be `\n`
-	if true {
-		formated += " "
-	}
+	formated.WriteString(" ")
 
-	formated += "{"
+	formated.WriteString("{")
 
 	// Format space between "{" and function body
-	if true {
-		formated += "\n"
-	}
+	formated.WriteString("\n")
 
+	// Each statement already cmoe with a new line \n
 	stmtFormated := FormatedAST(node.Body, option, indent+1)
-	formated += stmtFormated
-	// Format space between function body and "}"
-	if true {
-		formated += "\n" + indentPad
-	}
-	formated += "}"
 
-	return formated
+	formated.WriteString(stmtFormated)
+	// Format space between function body and "}"
+	formated.WriteString(indentPad)
+	formated.WriteString("}")
+
+	return formated.String()
 }
 
 func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, indent int) string {
@@ -186,19 +154,18 @@ func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, inde
 }
 
 func checkInjectComment(currentLine int, out io.Writer, option protocol.FormattingOptions, indent int) {
-	fmt.Println("[INFO] comment check", curr_comments, comments)
 	if curr_comments >= len(comments) {
 		return
 	}
 	if currentLine > comments[curr_comments].Start.Line {
 		pad, err := indentPadding(option, indent)
 		if err != nil {
-			return
+			println(err.Error())
+		} else {
+			fmt.Fprintf(out, "%s", pad)
 		}
-		fmt.Fprintf(out, "%s", pad)
 		fmt.Fprintf(out, "%s\n", comments[curr_comments].Literal)
 		curr_comments += 1
-		fmt.Println("[INFO] Added comment:", comments)
 	}
 }
 
@@ -209,49 +176,46 @@ func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) s
 	if err != nil {
 		indentPad = strings.Repeat("    ", indent)
 	}
-	fmt.Println("[INFO]", node)
 	switch node := node.(type) {
 	case *ast.Program:
 		comments = node.Comments
 		curr_comments = 0
-		for index, statement := range node.Statements {
+		for _, statement := range node.Statements {
 			stmtFormated := FormatedAST(statement, option, indent)
-			formated.WriteString(indentPad + stmtFormated)
+			formated.WriteString(stmtFormated)
 
-			if false {
-				fmt.Fprint(&formated, index)
-			}
-
-			if true {
-				formated.WriteString(";\n")
-			}
+			formated.WriteString(";\n")
 		}
 		// Cover the remain comment
 		for ; curr_comments < len(comments); curr_comments++ {
-			checkInjectComment(node.GetRange().End.Line + 1, &formated, option, indent)
+			checkInjectComment(node.GetRange().End.Line+1, &formated, option, indent)
 		}
 
 	case *ast.BlockStatement:
-		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		slog.Debug(fmt.Sprintf("Check possible inject: %v into %v", comments[curr_comments], node.GetRange()))
+		// checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
 		for index, statement := range node.Statements {
 			stmtFormated := FormatedAST(statement, option, indent)
-			formated.WriteString(indentPad + stmtFormated)
-
-			if false {
-				fmt.Fprint(&formated, index)
-			}
-
-			if true {
-				formated.WriteString(";")
-			}
+			formated.WriteString(stmtFormated)
+			formated.WriteString(";")
 
 			if index < len(node.Statements)-1 {
 				formated.WriteString("\n")
 			}
 		}
+		for ; curr_comments < len(comments); curr_comments++ {
+			if node.GetRange().End.Line+1 < comments[curr_comments].Start.Line {
+				break
+			}
+			// We are sure that we can inject new comment base from previous check
+			// New line to seperate the comment if it not originally goes along with the line
+			formated.WriteString("\n")
+			checkInjectComment(node.GetRange().End.Line+1, &formated, option, indent)
+		}
 
 	case *ast.LetStatement:
 		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(indentPad)
 		formated.WriteString(node.TokenLiteral())
 		formated.WriteString(" ")
 		formated.WriteString(node.Name.String())
@@ -260,12 +224,14 @@ func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) s
 
 	case *ast.ReturnStatement:
 		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(indentPad)
 		formated.WriteString(node.TokenLiteral())
 		formated.WriteString(" ")
 		formated.WriteString(FormatedExpresionAST(node.ReturnValue, option, indent))
 
 	case *ast.ExpressionStatement:
 		checkInjectComment(node.GetRange().Start.Line, &formated, option, indent)
+		formated.WriteString(indentPad)
 		formated.WriteString(FormatedExpresionAST(node.Expression, option, indent))
 
 	default:

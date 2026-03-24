@@ -177,7 +177,7 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 	stmt.Range.Start = p.curToken.Start
 
 	stmt.Expression = p.parseExpression(LOWEST)
-	stmt.Range.Start = stmt.Expression.GetRange().End
+	stmt.Range.End = stmt.Expression.GetRange().End
 
 	if p.peekTokenIs(token.SEMICOLON) {
 		stmt.Range.Start = p.curToken.End
@@ -270,8 +270,8 @@ func (p *Parser) parseBlockStatement() *ast.BlockStatement {
 		if curr != nil {
 			block.Statements = append(block.Statements, curr)
 		}
-		block.Range.End = p.curToken.End
 		p.nextToken()
+		block.Range.End = p.curToken.End
 	}
 
 	return block

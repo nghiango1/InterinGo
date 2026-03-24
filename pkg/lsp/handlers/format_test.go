@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"interingo/pkg/lexer"
 	"interingo/pkg/parser"
+	"interingo/pkg/share"
+	"os"
 	"testing"
 
 	protocol "github.com/tliron/glsp/protocol_3_16"
@@ -29,9 +31,11 @@ add(1, 2 * 3, 4 + 5);
 }
 
 func TestFunctionFormat(t *testing.T) {
-	input := `// 5
+	input := `	// 5
 let identity = fn(x) {
+		// 5
     return x;
+	// 5
 };
 identity(5);`
 	l := lexer.New(input)
@@ -48,3 +52,7 @@ identity(5);`
 	fmt.Println(FormatedAST(program, protocol.FormattingOptions{}, 0))
 }
 
+func TestMain(m *testing.M) {
+	share.SetDefaultLog()
+    os.Exit(m.Run())
+}
