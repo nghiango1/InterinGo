@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"encoding/json"
 	"errors"
 	"fmt"
 	"interingo/pkg/lsp/mappers"
@@ -141,8 +142,20 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	// Not format yet
 	format := ef.Unwrap().Text
 
+
+	var fo FormattingOptions
+	d, err := json.Marshal(params.Options)
+	if err != nil {
+		return nil, err
+	} 
+	err = json.Unmarshal(d, &fo)
+
+	if err != nil {
+		return nil, err
+	}
+
 	if len(ef.Parser.Errors) == 0 {
-		format = FormatedAST(ef.Parser.Program, params.Options, 0)
+		format = FormatedAST(ef.Parser.Program, fo, 0)
 	} else {
 		return nil, errors.New(ef.Parser.Errors[0].Message)
 	}

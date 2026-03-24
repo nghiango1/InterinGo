@@ -1,7 +1,6 @@
 package handlers
 
 import (
-	"encoding/json"
 	"fmt"
 	"interingo/pkg/ast"
 	"interingo/pkg/token"
@@ -10,7 +9,6 @@ import (
 	"strings"
 
 	_ "github.com/tliron/commonlog/simple"
-	protocol "github.com/tliron/glsp/protocol_3_16"
 )
 
 type FormattingOptions struct {
@@ -26,14 +24,7 @@ type FormattingOptions struct {
 	TrimFinalNewlines *bool `json:"trimFinalNewlines,omitempty"`
 }
 
-func indentPadding(option protocol.FormattingOptions, indent int) (string, error) {
-	var fo FormattingOptions
-	d, err := json.Marshal(option)
-	if err != nil {
-	} else {
-		err = json.Unmarshal(d, &fo)
-	}
-
+func indentPadding(fo FormattingOptions, indent int) (string, error) {
 	if fo.InsertSpaces != nil {
 		if *(fo.InsertSpaces) == true {
 			return strings.Repeat("\t", indent), nil
@@ -54,7 +45,7 @@ func indentPadding(option protocol.FormattingOptions, indent int) (string, error
 var comments []token.Token
 var curr_comments int
 
-func FormatedFunctionLiteral(node *ast.FunctionLiteral, option protocol.FormattingOptions, indent int) string {
+func FormatedFunctionLiteral(node *ast.FunctionLiteral, option FormattingOptions, indent int) string {
 	indentPad, err := indentPadding(option, indent)
 	if err != nil {
 		indentPad = strings.Repeat("    ", indent)
@@ -93,7 +84,7 @@ func FormatedFunctionLiteral(node *ast.FunctionLiteral, option protocol.Formatti
 	return formated.String()
 }
 
-func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, indent int) string {
+func FormatedExpresionAST(node ast.Node, option FormattingOptions, indent int) string {
 	var formated string
 	indentPad, err := indentPadding(option, indent)
 	if err != nil {
@@ -153,7 +144,7 @@ func FormatedExpresionAST(node ast.Node, option protocol.FormattingOptions, inde
 	return formated
 }
 
-func checkInjectComment(currentLine int, out io.Writer, option protocol.FormattingOptions, indent int) {
+func checkInjectComment(currentLine int, out io.Writer, option FormattingOptions, indent int) {
 	if curr_comments >= len(comments) {
 		return
 	}
@@ -171,7 +162,7 @@ func checkInjectComment(currentLine int, out io.Writer, option protocol.Formatti
 }
 
 // Format statement
-func FormatedAST(node ast.Node, option protocol.FormattingOptions, indent int) string {
+func FormatedAST(node ast.Node, option FormattingOptions, indent int) string {
 	var formated strings.Builder
 	indentPad, err := indentPadding(option, indent)
 	if err != nil {
