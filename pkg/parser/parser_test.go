@@ -58,7 +58,7 @@ func TestLetStatements(t *testing.T) {
 }
 
 func checkParserErrors(t *testing.T, p *Parser) {
-	errors := p.Errors()
+	errors := p.Errors
 	if len(errors) == 0 {
 		return
 	}
@@ -708,7 +708,7 @@ identity(5);
 	l := lexer.New(input)
 	p := New(l)
 	program := p.ParseProgram()
-	if len(p.errors) == 0 {
+	if len(p.Errors) == 0 {
 		t.Fatalf("parse can't find any error")
 	}
 	if len(program.Statements) == 0 {

@@ -68,8 +68,8 @@ func (l *Lexer) skipCurrentLine() string {
 	return l.input[pos:l.position]
 }
 
-func (l *Lexer) Position() token.Position {
-	return token.Position{
+func (l *Lexer) Position() share.Position {
+	return share.Position{
 		Line:      l.Line,
 		Character: l.Character - 1,
 	}
@@ -181,7 +181,7 @@ func (l *Lexer) NextToken() token.Token {
 		l.TokenCount[tok.Type] += 1
 	}
 
-	tok.End = token.Position{
+	tok.End = share.Position{
 		Line:      l.Line,
 		Character: l.Character,
 	}
@@ -212,6 +212,6 @@ func isLetter(ch byte) bool {
 	return ('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z') || ch == '_'
 }
 
-func newToken(tokenType token.TokenType, ch string, start token.Position) token.Token {
+func newToken(tokenType token.TokenType, ch string, start share.Position) token.Token {
 	return token.Token{Type: tokenType, Literal: ch, Start: start}
 }

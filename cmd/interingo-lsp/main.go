@@ -48,7 +48,6 @@ func initialize(context *glsp.Context, params *protocol.InitializeParams) (any, 
 	commonlog.NewInfoMessage(0, "Initializing server...")
 
 	capabilities := handler.CreateServerCapabilities()
-
 	capabilities.CompletionProvider = &protocol.CompletionOptions{}
 	capabilities.DocumentFormattingProvider = &protocol.DocumentFormattingOptions{}
 	capabilities.SemanticTokensProvider = &protocol.SemanticTokensOptions{

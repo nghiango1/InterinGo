@@ -66,6 +66,27 @@ func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protoco
 func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTextDocumentParams) error {
 	ef := store.Wrap(&params.TextDocument)
 	store.GetStore().Add(ef)
+
+	// Create diagnostic
+	var diagnostics []protocol.Diagnostic
+	for _, e := range ef.Parser.Errors {
+		serverity := protocol.DiagnosticSeverityError
+		diagnostics = append(diagnostics, protocol.Diagnostic{
+			Range: e.Range.ToProtocolRange(),
+			Severity: &serverity,
+			Code: nil,
+			CodeDescription: nil,
+			Source: nil,
+			Message : e.Message,
+			Tags: nil,
+			RelatedInformation: nil,
+			Data: nil,
+		})
+	}
+	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+		URI:         params.TextDocument.URI,
+		Diagnostics: diagnostics,
+	})
 	return nil
 }
 
@@ -106,10 +127,10 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	// Not format yet
 	format := ef.Unwrap().Text
 
-	if len(ef.Parser.Errors()) == 0 {
+	if len(ef.Parser.Errors) == 0 {
 		format = FormatedAST(ef.Parser.Program, params.Options, 0)
 	} else {
-		return nil, errors.New(ef.Parser.Errors()[0])
+		return nil, errors.New(ef.Parser.Errors[0].Message)
 	}
 
 	editAllFile := protocol.TextEdit{

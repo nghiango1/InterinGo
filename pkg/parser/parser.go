@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
+	"interingo/pkg/share"
 	"interingo/pkg/token"
 	"log/slog"
 	"strconv"
@@ -39,7 +40,7 @@ type Parser struct {
 	curToken       token.Token
 	peekToken      token.Token
 	DocumentTokens []DocumentToken
-	errors         []string
+	Errors         []ParserError
 	prefixParseFns map[token.TokenType]prefixParseFn
 	infixParseFns  map[token.TokenType]infixParseFn
 }
@@ -193,7 +194,13 @@ func (p *Parser) parseExpressionStatement() *ast.ExpressionStatement {
 
 func (p *Parser) noPrefixParseFnError(t token.TokenType) {
 	msg := fmt.Sprintf("no prefix parse function for %s found", t)
-	p.errors = append(p.errors, msg)
+	p.Errors = append(p.Errors, ParserError{
+		Message: msg,
+		Range: share.Range{
+			Start: p.peekToken.Start,
+			End:   p.peekToken.End,
+		},
+	})
 }
 
 func (p *Parser) parseExpression(precedence int) ast.Expression {
@@ -300,7 +307,7 @@ func (p *Parser) parseLetStatement() *ast.LetStatement {
 	stmt.Name = &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
-		Range: ast.Range{
+		Range: share.Range{
 			Start: p.curToken.Start,
 			End:   p.curToken.End,
 		},
@@ -458,7 +465,7 @@ func (p *Parser) parseIdentifier() ast.Expression {
 	return &ast.Identifier{
 		Token: p.curToken,
 		Value: p.curToken.Literal,
-		Range: ast.Range{
+		Range: share.Range{
 			Start: p.curToken.Start,
 			End:   p.curToken.End,
 		},
@@ -469,7 +476,7 @@ func (p *Parser) parseBoolean() ast.Expression {
 	return &ast.Boolean{
 		Token: p.curToken,
 		Value: p.curTokenIs(token.TRUE),
-		Range: ast.Range{
+		Range: share.Range{
 			Start: p.curToken.Start,
 			End:   p.curToken.End,
 		},
@@ -484,7 +491,12 @@ func (p *Parser) parseIntegerLiteral() ast.Expression {
 	if err != nil {
 		msg := fmt.Sprintf("could not parse %q as integer",
 			p.curToken.Literal)
-		p.errors = append(p.errors, msg)
+		p.Errors = append(p.Errors, ParserError{
+			Message: msg,
+			Range: share.Range{
+				Start: p.curToken.Start,
+				End:   p.curToken.End,
+			}})
 		return nil
 	}
 	lit.Value = value
@@ -522,11 +534,13 @@ func (p *Parser) parseInfixExpression(left ast.Expression) ast.Expression {
 	return expression
 }
 
-func (p *Parser) Errors() []string {
-	return p.errors
-}
-
 func (p *Parser) peekError(t token.TokenType) {
 	msg := fmt.Sprintf("Expected next token to be %s, got %s instead", t, p.peekToken.Type)
-	p.errors = append(p.errors, msg)
+	p.Errors = append(p.Errors, ParserError{
+		Message: msg,
+		Range: share.Range{
+			Start: p.peekToken.Start,
+			End:   p.peekToken.End,
+		},
+	})
 }
