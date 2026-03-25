@@ -4,97 +4,105 @@ import (
 	"fmt"
 	"io"
 	"log"
-	"interingo/pkg/ast"
-	"interingo/pkg/evaluator"
+	"strings"
+
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/service/core"
 	"interingo/pkg/share"
-	"strings"
 
 	"github.com/chzyer/readline"
 )
 
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
-var env *object.Environment = nil
-
-func Start(in io.Reader, out io.Writer) {
-	signalCapture(in, out)
+type Repl struct {
+	core core.Core
+	in   io.Reader
+	out  io.Writer
 }
 
-func Handle(line string, out io.Writer) {
-	if env == nil {
-		env = object.NewEnvironment()
+func NewRepl(in io.Reader, out io.Writer) *Repl {
+	return &Repl{
+		core: *core.NewCore(),
+		in:   in,
+		out:  out,
 	}
+}
 
+func (r *Repl) Start() {
+	r.signalCapture()
+}
+
+func (r *Repl) Handle(line string) {
 	switch {
 	case line == "help()":
-		usage(out)
+		usage(r.out)
 	case line == "exit()":
-		io.WriteString(out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
-		env = object.NewEnvironment()
+		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
+		r.core.Env = *object.NewEnvironment()
 	case line == "toggleVerbose()":
 		share.VerboseMode = !share.VerboseMode
 		if share.VerboseMode {
-			io.WriteString(out, "Verbose mode enable\n")
+			io.WriteString(r.out, "Verbose mode enable\n")
 		} else {
-			io.WriteString(out, "Verbose mode disable\n")
+			io.WriteString(r.out, "Verbose mode disable\n")
 		}
 	case line == "":
 	default:
-		codeHandle(line, out, env)
+		r.codeHandle(line)
 	}
 }
 
-func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Program, out io.Writer) {
+func (r *Repl) printVerboseInfomation(l *lexer.Lexer, p *parser.Parser) {
 	lexerVerbose := fmt.Sprintf("Lexer information:\n\tSkip whitespace = %d\n\tSkip comment line = %d\n\tToken found:\n", l.SkipedChar, l.SkipedLine)
-	io.WriteString(out, lexerVerbose)
+	io.WriteString(r.out, lexerVerbose)
 
 	for k, v := range l.TokenCount {
-		io.WriteString(out, fmt.Sprintf("\t\t%v: %d\n", k, v))
+		io.WriteString(r.out, fmt.Sprintf("\t\t%v: %d\n", k, v))
 	}
 
 	// TO DO: Print parser infomation, Print full AST tree presentation
-	parseVerbose := fmt.Sprintf("Parse infomation:\n\tProgram statement parsed:\n")
-	io.WriteString(out, parseVerbose)
-	for _, v := range program.Statements {
-		io.WriteString(out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
+	parseVerbose := "Parse infomation:\n\tProgram statement parsed:\n"
+	io.WriteString(r.out, parseVerbose)
+	for _, v := range p.Program.Statements {
+		io.WriteString(r.out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
 	}
 }
 
-func codeHandle(line string, out io.Writer, env *object.Environment) {
+func (r *Repl) codeHandle(line string) {
 	if line == "" {
 		return
 	}
-	l := lexer.New(line)
-	p := parser.New(l)
-	program := p.ParseProgram()
+
+	evaluated, err := r.core.Eval(core.EvaluateRequest{
+		Data: line,
+	})
+
+	if err != nil {
+		r.errorsHandler([]string{err.Error()})
+	}
 
 	if share.VerboseMode {
-		printVerboseInfomation(l, p, program, out)
+		r.printVerboseInfomation(l, p)
 	}
 
 	if len(p.Errors()) != 0 {
-		errorsHandler(p.Errors(), out)
+		errorsHandler(p.Errors(), r.out)
 		return
 	}
 
-	if share.VerboseMode {
-		io.WriteString(out, "Evaluation result:\n\n")
-	}
-
-	evaluated := evaluator.Eval(program, env)
 	if evaluated != nil {
-		io.WriteString(out, evaluated.Inspect())
-		io.WriteString(out, "\n")
+		io.WriteString(r.out, evaluated.Inspect())
+		io.WriteString(r.out, "\n")
 	}
 }
 
-func errorsHandler(errors []string, out io.Writer) {
-	io.WriteString(out, "Errors when parsing:\n")
+func (r *Repl) errorsHandler(errors []string) {
+	io.WriteString(r.out, "Errors when parsing:\n")
 	for _, msg := range errors {
-		io.WriteString(out, "\t"+msg+"\n")
+		io.WriteString(r.out, "\t"+msg+"\n")
 	}
 }
 
@@ -122,7 +130,7 @@ func filterInput(r rune) (rune, bool) {
 	return r, true
 }
 
-func signalCapture(in io.Reader, out io.Writer) {
+func (r *Repl) signalCapture() {
 	l, err := readline.NewEx(&readline.Config{
 		Prompt:          ">> ",
 		HistoryFile:     "/tmp/readline.tmp",
@@ -156,7 +164,7 @@ func signalCapture(in io.Reader, out io.Writer) {
 		if line == "exit()" {
 			break
 		} else {
-			Handle(line, out)
+			r.Handle(line)
 		}
 	}
 }
