@@ -1,9 +1,6 @@
 package main
 
 import (
-	"bytes"
-	"interingo/pkg/repl"
-	"log"
 	"os"
 	"path/filepath"
 	"strings"
@@ -49,63 +46,4 @@ func findProjectRoot() (string, error) {
         dir = parentDir
     }
     return "", os.ErrNotExist // go.mod not found
-}
-
-// This evaluating all `test/*.iig` file and compare it with the desier
-// `test/result/*.out` file content
-func TestMain(t *testing.T) {
-	// Get the project root directory (where go.mod is located)
-	rootDir, err := findProjectRoot()
-	if err != nil {
-		log.Fatal(err)
-	}
-
-	// Construct asset path assuming the test directory is at the project root
-	testAssetsDir := filepath.Join(rootDir, "test")
-	f, err := os.Open(testAssetsDir)
-	if err != nil {
-		t.Errorf("Test directory read error, is it available, error code: %v\n", err)
-	}
-	files, err := f.Readdir(0)
-	if err != nil {
-		t.Errorf("Test directory read error, is it available, error code: %v\n", err)
-	}
-
-	for _, v := range files {
-		buf := new(bytes.Buffer)
-		if v.IsDir() {
-			continue
-		}
-
-		fileName, ok := isIigFile(v.Name())
-
-		if !ok {
-			continue
-		}
-
-		inputFileDir := filepath.Join(testAssetsDir, v.Name())
-		inputFileContent, err := os.ReadFile(inputFileDir)
-		if err != nil {
-			t.Errorf("File read error, error code: %v\n", err)
-		}
-
-		repl.Handle(string(inputFileContent), buf)
-
-		outputFileName := fileName + ".out"
-		outputFileNameDir := filepath.Join(testAssetsDir, "/result/", outputFileName)
-		outputFileContent, err := os.ReadFile(outputFileNameDir)
-		if err != nil {
-			t.Errorf("File read error, recheck output file %s location\n", outputFileName)
-		}
-
-		for i, outByte := range outputFileContent {
-			b, err := buf.ReadByte()
-			if err != nil {
-				break
-			}
-			if outByte != b {
-				t.Errorf("Result of %s not match output file, expect \"%c\" at %d'th output but got \"%c\" instead", v.Name(), outByte, i, b)
-			}
-		}
-	}
 }

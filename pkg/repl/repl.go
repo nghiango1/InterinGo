@@ -1,16 +1,14 @@
 package repl
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
 	"strings"
 
-	"interingo/pkg/lexer"
 	"interingo/pkg/object"
-	"interingo/pkg/parser"
 	"interingo/pkg/service/core"
-	"interingo/pkg/share"
 
 	"github.com/chzyer/readline"
 )
@@ -43,8 +41,8 @@ func (r *Repl) Handle(line string) {
 		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
 		r.core.Env = *object.NewEnvironment()
 	case line == "toggleVerbose()":
-		share.VerboseMode = !share.VerboseMode
-		if share.VerboseMode {
+		r.core.Verbose = !r.core.Verbose
+		if r.core.Verbose {
 			io.WriteString(r.out, "Verbose mode enable\n")
 		} else {
 			io.WriteString(r.out, "Verbose mode disable\n")
@@ -55,20 +53,13 @@ func (r *Repl) Handle(line string) {
 	}
 }
 
-func (r *Repl) printVerboseInfomation(l *lexer.Lexer, p *parser.Parser) {
-	lexerVerbose := fmt.Sprintf("Lexer information:\n\tSkip whitespace = %d\n\tSkip comment line = %d\n\tToken found:\n", l.SkipedChar, l.SkipedLine)
-	io.WriteString(r.out, lexerVerbose)
-
-	for k, v := range l.TokenCount {
-		io.WriteString(r.out, fmt.Sprintf("\t\t%v: %d\n", k, v))
+func (r *Repl) printVerboseInfomation(info *core.VerboseInfo) {
+	data, err := json.MarshalIndent(info, "> ", "    ")
+	if err != nil {
+		return
 	}
-
-	// TO DO: Print parser infomation, Print full AST tree presentation
-	parseVerbose := "Parse infomation:\n\tProgram statement parsed:\n"
-	io.WriteString(r.out, parseVerbose)
-	for _, v := range p.Program.Statements {
-		io.WriteString(r.out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
-	}
+	r.out.Write(data)
+	io.WriteString(r.out, "\n")
 }
 
 func (r *Repl) codeHandle(line string) {
@@ -76,30 +67,32 @@ func (r *Repl) codeHandle(line string) {
 		return
 	}
 
-	evaluated, err := r.core.Eval(core.EvaluateRequest{
+	evaluateResult, error := r.core.Eval(core.EvaluateRequest{
 		Data: line,
 	})
 
-	if err != nil {
-		r.errorsHandler([]string{err.Error()})
+	if error != nil {
+		if e, ok := error.(*core.ParserErrorResponse); ok {
+			if r.core.Verbose {
+				r.printVerboseInfomation(e.Verbose)
+			}
+			r.parsingErrorsHandler(e.Errors)
+		} else {
+			io.WriteString(r.out, fmt.Sprintf("Unknown errors when handling code, got: %v\n", error))
+		}
 	}
 
-	if share.VerboseMode {
-		r.printVerboseInfomation(l, p)
-	}
+	if evaluateResult != nil {
+		if r.core.Verbose {
+			r.printVerboseInfomation(evaluateResult.Verbose)
+		}
 
-	if len(p.Errors()) != 0 {
-		errorsHandler(p.Errors(), r.out)
-		return
-	}
-
-	if evaluated != nil {
-		io.WriteString(r.out, evaluated.Inspect())
+		io.WriteString(r.out, evaluateResult.Output)
 		io.WriteString(r.out, "\n")
 	}
 }
 
-func (r *Repl) errorsHandler(errors []string) {
+func (r *Repl) parsingErrorsHandler(errors []string) {
 	io.WriteString(r.out, "Errors when parsing:\n")
 	for _, msg := range errors {
 		io.WriteString(r.out, "\t"+msg+"\n")

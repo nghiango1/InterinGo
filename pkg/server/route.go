@@ -1,11 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
-	"interingo/pkg/repl"
 	"interingo/pkg/service/common"
+	"interingo/pkg/service/core"
 	"io/fs"
 	"log"
 	"mime"
@@ -24,10 +23,11 @@ const WEBSITE_FILEPATH = "content/dist"
 
 //go:embed all:content
 var embedContent embed.FS
+var coreInstance *core.Core
 
 func EvaluateHandler(c *gin.Context) {
 	// Input validate
-	var req common.EvalRequest
+	var req core.EvaluateRequest
 	errs := c.BindJSON(&req)
 	if errs != nil {
 		fmt.Println("API error, can't parse form value")
@@ -35,15 +35,18 @@ func EvaluateHandler(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, errorResp)
 	}
 
-	// Handling eval
-	buf := bytes.Buffer{}
-	repl.Handle(req.Data, &buf)
-
-	// Return
-	resp := common.EvalResponseSuccess{
-		Output: buf.String(),
+	if coreInstance == nil {
+		c.JSON(http.StatusInternalServerError, common.NewErrorResponse(http.StatusInternalServerError))
+		return
 	}
-	c.JSON(http.StatusOK, resp)
+
+	// Handling eval
+	result, error := coreInstance.Eval(req)
+	if error != nil {
+		c.JSON(http.StatusBadRequest, error)
+	} else {
+		c.JSON(http.StatusOK, result)
+	}
 }
 
 // Any call which doesn't match `/api` route will be handle with static fileserver
@@ -113,6 +116,7 @@ func apiRoute(r *gin.Engine) {
 }
 
 func Route(r *gin.Engine) {
+	coreInstance = core.NewCore()
 	pageRoute(r)
 	apiRoute(r)
 }

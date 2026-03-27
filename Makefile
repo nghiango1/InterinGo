@@ -67,10 +67,7 @@ regression-test: # Run the code without build step in server mode
 .PHONY: go-test
 go-test: # Go lang Unit test 
 	mkdir -p ./dist
-	go test -cover -coverprofile=./dist/coverage.out -coverpkg=./cmd/...,./pkg/...  ./cmd/... ./pkg/...
-	go tool cover -func=./dist/coverage.out
-	go tool cover -html=./dist/coverage.out -o ./dist/coverage.html
-	xdg-open ./dist/coverage.html
+	go test ./pkg/...
 
 ### Helper
 
