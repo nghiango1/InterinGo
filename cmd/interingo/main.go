@@ -80,9 +80,11 @@ func main() {
 			Data: string(fileContent),
 		})
 		if result != nil {
-			fmt.Println("%v", result.Output)
+			if result.Output != nil {
+				fmt.Printf("%v\n", result.Output)
+			}
 		} else {
-			fmt.Println("%v", error.GetMessage())
+			fmt.Printf("%v\n", error.GetMessage())
 		}
 		return
 	}

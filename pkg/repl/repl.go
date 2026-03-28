@@ -87,8 +87,10 @@ func (r *Repl) codeHandle(line string) {
 			r.printVerboseInfomation(evaluateResult.Verbose)
 		}
 
-		io.WriteString(r.out, evaluateResult.Output)
-		io.WriteString(r.out, "\n")
+		if evaluateResult.Output != nil {
+			io.WriteString(r.out, *evaluateResult.Output)
+			io.WriteString(r.out, "\n")
+		}
 	}
 }
 

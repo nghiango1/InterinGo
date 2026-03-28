@@ -37,13 +37,18 @@ func (c *Core) Eval(req EvaluateRequest) (*EvaluateResponseSuccess, common.Error
 	}
 
 	evaluated := evaluator.Eval(program, &c.Env)
-	if evaluated == nil {
-		return nil, common.NewErrorResponse(500)
-	}
-	return &EvaluateResponseSuccess{
-		Output:  evaluated.Inspect(),
+
+	result := &EvaluateResponseSuccess{
+		Output:  nil,
 		Verbose: verbose,
-	}, nil
+	}
+
+	if evaluated != nil {
+		output := evaluated.Inspect()
+		result.Output = &output
+	}
+
+	return result, nil
 }
 
 func getVerboseInfomation(l *lexer.Lexer, p *parser.Parser) *VerboseInfo {

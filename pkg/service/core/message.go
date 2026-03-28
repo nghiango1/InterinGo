@@ -7,7 +7,7 @@ type EvaluateRequest struct {
 }
 
 type EvaluateResponseSuccess struct {
-	Output  string       `json:"output"`
+	Output  *string       `json:"output,omitempty"`
 	Verbose *VerboseInfo `json:"verbose,omitempty"`
 }
 
