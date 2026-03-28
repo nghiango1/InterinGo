@@ -36,7 +36,7 @@ embed-content: website/dist embed-content-clean # Put built website into embed d
 ### Container deploy helper
 .PHONY: docker-build
 docker-build: # Build the container image for services hosting
-	sudo docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
+	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
 
 .PHONY: docker-push
 docker-push: # Push the services hosting image into docker.io
@@ -45,7 +45,7 @@ docker-push: # Push the services hosting image into docker.io
 .PHONY: docker-nvim-build
 docker-nvim-build: embed-content # Build the image for nvim showcase
 	mkdir -p dist
-	sudo docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
+	docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
 
 .PHONY: docker-nvim-push
 docker-nvim-push: # Push the image for nvim showcase into docker.io
