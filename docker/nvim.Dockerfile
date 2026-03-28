@@ -16,8 +16,11 @@ COPY --parents ./pkg ./cmd Makefile /root/workspace
 # Along with builded website dist
 
 # Build step - which doesn't embed any document into the server
-RUN make embed-content
-RUN make go-build
+
+# Built the InterinGo program language
+RUN make interingo-build
+
+# Built the InterinGo - LSP for program language supported tool
 RUN make lsp-build
 
 FROM alpine:latest
@@ -33,4 +36,4 @@ WORKDIR /root/.config/nvim/
 COPY assets/init.lua .
 
 WORKDIR /app
-ENTRYPOINT nvim .
+ENTRYPOINT ["nvim", "."]
