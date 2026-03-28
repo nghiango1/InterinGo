@@ -1,4 +1,6 @@
-// This handle dirrectly ??
+// This handle how to evaluate the code
+// - Move over core language handling into this file
+// - REPL - Eval will using this instead
 
 package core
 
@@ -7,7 +9,6 @@ import (
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
-	"interingo/pkg/service/common"
 	"interingo/pkg/token"
 	"maps"
 )
@@ -23,7 +24,7 @@ func NewCore() *Core {
 	}
 }
 
-func (c *Core) Eval(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
+func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, *VerboseInfo) {
 	l := lexer.New(req.Data)
 	p := parser.New(l)
 	program := p.ParseProgram()
@@ -34,15 +35,14 @@ func (c *Core) Eval(req EvaluateRequest) (*EvaluateResponseSuccess, common.Error
 	}
 
 	if len(p.Errors()) != 0 {
-		error := NewParserErrorResponse("", p.Errors(), verbose)
-		return nil, error
+		error := &EvalResponseError{ParserErrors: p.Errors()}
+		return nil, error, verbose
 	}
 
 	evaluated := evaluator.Eval(program, &c.Env)
 
-	result := &EvaluateResponseSuccess{
-		Output:  nil,
-		Verbose: verbose,
+	result := &EvalResponseSuccess{
+		Output: nil,
 	}
 
 	if evaluated != nil {
@@ -50,7 +50,7 @@ func (c *Core) Eval(req EvaluateRequest) (*EvaluateResponseSuccess, common.Error
 		result.Output = &output
 	}
 
-	return result, nil
+	return result, nil, verbose
 }
 
 func getVerboseInfomation(l *lexer.Lexer, p *parser.Parser) *VerboseInfo {

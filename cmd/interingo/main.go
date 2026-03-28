@@ -3,9 +3,9 @@ package main
 import (
 	"flag"
 	"fmt"
+	"interingo/pkg/core"
 	"interingo/pkg/repl"
 	"interingo/pkg/server"
-	"interingo/pkg/service/core"
 	"interingo/pkg/share"
 	"os"
 	"os/user"
@@ -65,7 +65,9 @@ func main() {
 		panic(err)
 	}
 
+	c := core.NewCore()
 	if verboseMode {
+		c.Verbose = true
 		fmt.Println("Verbose mode enable")
 	}
 
@@ -75,16 +77,27 @@ func main() {
 			fmt.Println("File read error, recheck file location, error code:", err)
 			return
 		}
-		c := core.NewCore()
-		result, error := c.Eval(core.EvaluateRequest{
+		result, error, verbose := c.Eval(core.EvalRequest{
 			Data: string(fileContent),
 		})
+
+		if verbose != nil {
+			info, err := verbose.String()
+			if err != nil {
+				fmt.Printf("[ERROR] %v\n", err)
+			} else {
+				fmt.Printf("%v\n", info)
+			}
+		}
+
+		if error != nil {
+			fmt.Printf("%v\n", error.ParserErrors)
+		}
+
 		if result != nil {
 			if result.Output != nil {
-				fmt.Printf("%v\n", result.Output)
+				fmt.Printf("%v\n", *result.Output)
 			}
-		} else {
-			fmt.Printf("%v\n", error.GetMessage())
 		}
 		return
 	}
@@ -102,6 +115,6 @@ func main() {
 	}
 
 	fmt.Printf("Type `help()` in commands for common guide\n")
-	repl := repl.NewRepl(os.Stdin, os.Stdout)
+	repl := repl.NewRepl(c, os.Stdin, os.Stdout)
 	repl.Start()
 }

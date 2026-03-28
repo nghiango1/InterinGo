@@ -1,14 +1,16 @@
+// This handle read-input, evaluation, print-output, loop
+// Using readline to handle stdin-out
+
 package repl
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"log"
 	"strings"
 
+	"interingo/pkg/core"
 	"interingo/pkg/object"
-	"interingo/pkg/service/core"
 
 	"github.com/chzyer/readline"
 )
@@ -21,9 +23,13 @@ type Repl struct {
 	out  io.Writer
 }
 
-func NewRepl(in io.Reader, out io.Writer) *Repl {
+func NewRepl(c *core.Core, in io.Reader, out io.Writer) *Repl {
+	if c == nil {
+		c = core.NewCore()
+	}
+
 	return &Repl{
-		core: *core.NewCore(),
+		core: *c,
 		in:   in,
 		out:  out,
 	}
@@ -34,20 +40,20 @@ func (r *Repl) Start() {
 }
 
 func (r *Repl) Handle(line string) {
-	switch {
-	case line == "help()":
+	switch line {
+	case "help()":
 		usage(r.out)
-	case line == "exit()":
+	case "exit()":
 		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
 		r.core.Env = *object.NewEnvironment()
-	case line == "toggleVerbose()":
+	case "toggleVerbose()":
 		r.core.Verbose = !r.core.Verbose
 		if r.core.Verbose {
 			io.WriteString(r.out, "Verbose mode enable\n")
 		} else {
 			io.WriteString(r.out, "Verbose mode disable\n")
 		}
-	case line == "":
+	case "":
 	default:
 		r.codeHandle(line)
 	}
@@ -67,28 +73,23 @@ func (r *Repl) codeHandle(line string) {
 		return
 	}
 
-	evaluateResult, error := r.core.Eval(core.EvaluateRequest{
+	result, error, verbose := r.core.Eval(core.EvalRequest{
 		Data: line,
 	})
 
+	if verbose != nil {
+		r.printVerboseInfomation(verbose)
+	}
+
 	if error != nil {
-		if e, ok := error.(*core.ParserErrorResponse); ok {
-			if r.core.Verbose {
-				r.printVerboseInfomation(e.Verbose)
-			}
-			r.parsingErrorsHandler(e.Errors)
-		} else {
-			io.WriteString(r.out, fmt.Sprintf("Unknown errors when handling code, got: %v\n", error))
+		if len(error.ParserErrors) != 0 {
+			r.parsingErrorsHandler(error.ParserErrors)
 		}
 	}
 
-	if evaluateResult != nil {
-		if r.core.Verbose {
-			r.printVerboseInfomation(evaluateResult.Verbose)
-		}
-
-		if evaluateResult.Output != nil {
-			io.WriteString(r.out, *evaluateResult.Output)
+	if result != nil {
+		if result.Output != nil {
+			io.WriteString(r.out, *result.Output)
 			io.WriteString(r.out, "\n")
 		}
 	}
