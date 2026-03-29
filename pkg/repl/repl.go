@@ -48,7 +48,7 @@ func (r *Repl) Handle(input string) {
 		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
 		r.core.Env = *object.NewEnvironment()
 	case "toggleVerbose()":
-		r.core.Verbose = !r.core.Verbose
+		r.core.ToggleVerbose()
 		if r.core.Verbose {
 			io.WriteString(r.out, "Verbose mode enable\n")
 		} else {

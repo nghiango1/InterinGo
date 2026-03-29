@@ -47,15 +47,9 @@ func init() {
 	flag.StringVar(&fileLocation, "f", defaultFileLocation, fileLocationUsage+" (shorthand)")
 	flag.BoolVar(&verboseMode, "verbose", defaultVerboseMode, verboseUsage)
 	flag.BoolVar(&verboseMode, "v", defaultVerboseMode, verboseUsage+" (shorthand)")
-	flag.BoolVar(&hotloadMode, "hotload", defaultHotloadMode, hotloadUsage)
-	flag.BoolVar(&hotloadMode, "h", defaultHotloadMode, hotloadUsage+" (shorthand)")
 
 	flag.Parse()
 	share.VerboseMode = verboseMode
-	share.HotLoad = hotloadMode
-	if serverMode {
-		server.Init()
-	}
 }
 
 func main() {
@@ -87,7 +81,8 @@ func main() {
 			fmt.Println("Hotload mode enable - Pages can now populated in runtimes - Look out for readfile error")
 		}
 
-		server.Start(listenAddress)
+		s := server.NewServer()
+		s.Start(listenAddress)
 		return
 	}
 

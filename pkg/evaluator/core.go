@@ -8,6 +8,7 @@ import (
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/share"
 	"interingo/pkg/token"
 	"maps"
 )
@@ -19,7 +20,8 @@ type Core struct {
 
 func NewCore() *Core {
 	return &Core{
-		Env: *object.NewEnvironment(),
+		Env:     *object.NewEnvironment(),
+		Verbose: share.VerboseMode,
 	}
 }
 
@@ -50,6 +52,10 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 	}
 
 	return result, nil, verbose
+}
+
+func (c *Core) ToggleVerbose() {
+	c.Verbose = !c.Verbose
 }
 
 func getVerboseInfomation(l *lexer.Lexer, p *parser.Parser) *VerboseInfo {
