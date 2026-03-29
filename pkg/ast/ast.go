@@ -25,7 +25,7 @@ type Expression interface {
 type Program struct {
 	Statements []Statement   `json:"statements,omitempty"`
 	Comments   []token.Token `json:"comments,omitempty"`
-	Range      share.Range         `json:"range"`
+	Range      share.Range   `json:"range"`
 }
 
 func (p *Program) TokenLiteral() string {
@@ -58,7 +58,7 @@ type LetStatement struct {
 	Token token.Token // the token.LET token
 	Name  *Identifier `json:"name"`
 	Value Expression  `json:"value"`
-	Range share.Range       `json:"range"`
+	Range share.Range `json:"range"`
 }
 
 func (ls *LetStatement) statementNode()       {}
