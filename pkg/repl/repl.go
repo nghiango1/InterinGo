@@ -1,100 +1,105 @@
+// This handle read-input, evaluation, print-output, loop
+// Using readline to handle stdin/out only
+
 package repl
 
 import (
-	"fmt"
+	"encoding/json"
 	"io"
 	"log"
-	"interingo/pkg/ast"
+	"strings"
+
 	"interingo/pkg/evaluator"
-	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
-	"interingo/pkg/share"
-	"strings"
 
 	"github.com/chzyer/readline"
 )
 
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
-var env *object.Environment = nil
-
-func Start(in io.Reader, out io.Writer) {
-	signalCapture(in, out)
+type Repl struct {
+	core evaluator.Core
+	in   io.Reader
+	out  io.Writer
 }
 
-func Handle(line string, out io.Writer) {
-	if env == nil {
-		env = object.NewEnvironment()
+func NewRepl(evalCore *evaluator.Core, in io.Reader, out io.Writer) *Repl {
+	if evalCore == nil {
+		evalCore = evaluator.NewCore()
 	}
 
-	switch {
-	case line == "help()":
-		usage(out)
-	case line == "exit()":
-		io.WriteString(out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
-		env = object.NewEnvironment()
-	case line == "toggleVerbose()":
-		share.VerboseMode = !share.VerboseMode
-		if share.VerboseMode {
-			io.WriteString(out, "Verbose mode enable\n")
+	return &Repl{
+		core: *evalCore,
+		in:   in,
+		out:  out,
+	}
+}
+
+func (r *Repl) Start() {
+	r.signalCapture()
+}
+
+func (r *Repl) Handle(input string) {
+	switch input {
+	case "help()":
+		usage(r.out)
+	case "exit()":
+		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
+		r.core.Env = *object.NewEnvironment()
+	case "toggleVerbose()":
+		r.core.Verbose = !r.core.Verbose
+		if r.core.Verbose {
+			io.WriteString(r.out, "Verbose mode enable\n")
 		} else {
-			io.WriteString(out, "Verbose mode disable\n")
+			io.WriteString(r.out, "Verbose mode disable\n")
 		}
-	case line == "":
+	case "":
 	default:
-		codeHandle(line, out, env)
+		r.codeHandle(input)
 	}
 }
 
-func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Program, out io.Writer) {
-	lexerVerbose := fmt.Sprintf("Lexer information:\n\tSkip whitespace = %d\n\tSkip comment line = %d\n\tToken found:\n", l.SkipedChar, l.SkipedLine)
-	io.WriteString(out, lexerVerbose)
-
-	for k, v := range l.TokenCount {
-		io.WriteString(out, fmt.Sprintf("\t\t%v: %d\n", k, v))
+func (r *Repl) printVerboseInfomation(info *evaluator.VerboseInfo) {
+	data, err := json.MarshalIndent(info, "> ", "    ")
+	if err != nil {
+		return
 	}
-
-	// TO DO: Print parser infomation, Print full AST tree presentation
-	parseVerbose := fmt.Sprintf("Parse infomation:\n\tProgram statement parsed:\n")
-	io.WriteString(out, parseVerbose)
-	for _, v := range program.Statements {
-		io.WriteString(out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
-	}
+	r.out.Write(data)
+	io.WriteString(r.out, "\n")
 }
 
-func codeHandle(line string, out io.Writer, env *object.Environment) {
+func (r *Repl) codeHandle(line string) {
 	if line == "" {
 		return
 	}
-	l := lexer.New(line)
-	p := parser.New(l)
-	program := p.ParseProgram()
 
-	if share.VerboseMode {
-		printVerboseInfomation(l, p, program, out)
+	result, error, verbose := r.core.Eval(evaluator.EvalRequest{
+		Data: line,
+	})
+
+	if verbose != nil {
+		r.printVerboseInfomation(verbose)
 	}
 
-	if len(p.Errors) != 0 {
-		errorsHandler(p.Errors, out)
-		return
+	if error != nil {
+		if len(error.ParserErrors) != 0 {
+			r.parsingErrorsHandler(error.ParserErrors)
+		}
 	}
 
-	if share.VerboseMode {
-		io.WriteString(out, "Evaluation result:\n\n")
-	}
-
-	evaluated := evaluator.Eval(program, env)
-	if evaluated != nil {
-		io.WriteString(out, evaluated.Inspect())
-		io.WriteString(out, "\n")
+	if result != nil {
+		if result.Output != nil {
+			io.WriteString(r.out, *result.Output)
+			io.WriteString(r.out, "\n")
+		}
 	}
 }
 
-func errorsHandler(errors []parser.ParserError, out io.Writer) {
-	io.WriteString(out, "Errors when parsing:\n")
+func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
+	io.WriteString(r.out, "Errors when parsing:\n")
 	for _, e := range errors {
-		io.WriteString(out, "\t"+e.Message+"\n")
+		io.WriteString(r.out, "\t"+e.Message+"\n")
 	}
 }
 
@@ -122,7 +127,7 @@ func filterInput(r rune) (rune, bool) {
 	return r, true
 }
 
-func signalCapture(in io.Reader, out io.Writer) {
+func (r *Repl) signalCapture() {
 	l, err := readline.NewEx(&readline.Config{
 		Prompt:          ">> ",
 		HistoryFile:     "/tmp/readline.tmp",
@@ -156,7 +161,7 @@ func signalCapture(in io.Reader, out io.Writer) {
 		if line == "exit()" {
 			break
 		} else {
-			Handle(line, out)
+			r.Handle(line)
 		}
 	}
 }

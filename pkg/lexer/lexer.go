@@ -6,15 +6,15 @@ import (
 )
 
 type Lexer struct {
-	input        string
-	position     int                     // current position in input (points to current char)
-	readPosition int                     // current reading position in input (after current char)
-	ch           byte                    // current char under examination
-	SkipedChar   int                     // skiped white-space - for Verbose mode
-	SkipedLine   int                     // skiped comment line - for Verbose mode
-	TokenCount   map[token.TokenType]int // count all token - for Verbose mode
-	Line         int                     // current position in input (line - 0 index)
-	Character    int                     // current position in input (position in line - 0 index)
+	input             string
+	position          int                     // current position in input (points to current char)
+	readPosition      int                     // current reading position in input (after current char)
+	ch                byte                    // current char under examination
+	SkipedChar        int                     // skiped white-space - for Verbose mode
+	SkipedCommentLine int                     // skiped comment line - for Verbose mode
+	TokenCount        map[token.TokenType]int // count all token - for Verbose mode
+	Line              int                     // current position in input (line - 0 index)
+	Character         int                     // current position in input (position in line - 0 index)
 }
 
 func New(input string) *Lexer {
@@ -56,7 +56,7 @@ func (l *Lexer) skipWhitespace() {
 
 func (l *Lexer) skipCurrentLine() string {
 	if share.VerboseMode {
-		l.SkipedLine += 1
+		l.SkipedCommentLine += 1
 	}
 
 	pos := l.position

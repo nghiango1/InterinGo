@@ -1,11 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
-	"interingo/pkg/repl"
 	"interingo/pkg/service/common"
+	"interingo/pkg/service/core"
 	"io/fs"
 	"log"
 	"mime"
@@ -24,27 +23,6 @@ const WEBSITE_FILEPATH = "content/dist"
 
 //go:embed all:content
 var embedContent embed.FS
-
-func EvaluateHandler(c *gin.Context) {
-	// Input validate
-	var req common.EvalRequest
-	errs := c.BindJSON(&req)
-	if errs != nil {
-		fmt.Println("API error, can't parse form value")
-		errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-		c.JSON(http.StatusBadRequest, errorResp)
-	}
-
-	// Handling eval
-	buf := bytes.Buffer{}
-	repl.Handle(req.Data, &buf)
-
-	// Return
-	resp := common.EvalResponseSuccess{
-		Output: buf.String(),
-	}
-	c.JSON(http.StatusOK, resp)
-}
 
 // Any call which doesn't match `/api` route will be handle with static fileserver
 func pageRoute(r *gin.Engine) {
@@ -108,8 +86,33 @@ func pageRoute(r *gin.Engine) {
 	})
 }
 
+var serviceCore = core.NewServiceCore(nil)
+
 func apiRoute(r *gin.Engine) {
-	r.POST("/api/evaluate", EvaluateHandler)
+	r.POST("/api/evaluate", func(c *gin.Context) {
+		// Input validate
+		var req core.EvaluateRequest
+		err := c.BindJSON(&req)
+		if err != nil {
+			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
+			c.JSON(http.StatusBadRequest, errorResp)
+		}
+
+		if serviceCore == nil {
+			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
+			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
+		}
+
+		res, evalErr := serviceCore.EvaluateHandler(req)
+
+		// Return
+		if evalErr != nil {
+			c.JSON(evalErr.GetType(), evalErr)
+		} else if res != nil {
+			c.JSON(http.StatusOK, res)
+		}
+	})
 }
 
 func Route(r *gin.Engine) {

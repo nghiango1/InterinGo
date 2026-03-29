@@ -35,7 +35,7 @@ func init() {
 		serverUsage          = "Start as server mode"
 		verboseUsage         = "Start as verbose mode, InterinGo will print a lot more infomation for Lexer, Parse and Evaluation product"
 		listenAdrUsage       = "Listen address"
-		hotloadUsage		 = "Using with server mode, allow using os.ReadFile to populate md docs pages in runtime"
+		hotloadUsage         = "Using with server mode, allow using os.ReadFile to populate md docs pages in runtime"
 		fileLocationUsage    = "Using a file as input to parse, default as \"\" which mean not using file input"
 	)
 
@@ -64,7 +64,6 @@ func main() {
 		panic(err)
 	}
 
-
 	if verboseMode {
 		fmt.Println("Verbose mode enable")
 	}
@@ -74,8 +73,9 @@ func main() {
 		if err != nil {
 			fmt.Println("File read error, recheck file location, error code:", err)
 			return
-		} 
-		repl.Handle(string(fileContent), os.Stdout)
+		}
+		repl := repl.NewRepl(nil, os.Stdin, os.Stdout)
+		repl.Handle(string(fileContent))
 		return
 	}
 
@@ -92,5 +92,6 @@ func main() {
 	}
 
 	fmt.Printf("Type `help()` in commands for common guide\n")
-	repl.Start(os.Stdin, os.Stdout)
+	repl := repl.NewRepl(nil, os.Stdin, os.Stdout)
+	repl.Start()
 }
