@@ -1,50 +1,45 @@
-VERSION ?= $(shell git show -s --format='%cd%h' --date=format:'%y.%m.' HEAD)
-
 .PHONY: all
  all: help
 
 ### Build command
 
 .PHONY: build
-build: embed-dist embed-content go-build # Build all the code
+build: clean website/dist interingo-build interingo-service-build lsp-build # Build all the code: Website front-end, REPL, backend-service, lsp
 
-.PHONY: build-run
-build-run: build run # Build and run the code
-
-.PHONY: embed-dist
-embed-dist: # Build website static file, output into website/dist 
-	cd website/ && npm install && npm run build
-
-.PHONY: embed-content
-embed-content: # Build webpage then output it into embed directory for go compile
-	rm -rf pkg/server/content/**
-	@if [[ -e website/dist/ ]]; then \
-	  cp -r website/dist/ pkg/server/content/; \
-	else \
-	  touch pkg/server/content/.not_support; \
-	fi
-
-.PHONY: go-build
-go-build: # Build go binary file
+.PHONY: interingo-build
+interingo-build: embed-content-clean # Build Interingo REPL and API only, doesn't contain front-end
 	mkdir -p dist
 	go build -o dist/interingo cmd/interingo/main.go
 
-.PHONY: run clean server-clean repl-clean
-run: # Run the build file in server mode
-	./dist/interingo -s
+.PHONY: interingo-service-build
+interingo-service-build: embed-content # Build Interingo Backend services with front-end packed
+	go build -o dist/interingo cmd/interingo/main.go
 
 .PHONY: lsp-build
 lsp-build: # Build go binary file
 	mkdir -p dist
-	go build -o dist/interingo-lsp -ldflags "-X main.version=$(VERSION)" cmd/interingo-lsp/main.go
+	go build -o dist/interingo-lsp cmd/interingo-lsp/main.go
+
+### Front-end
+
+website/dist: # Build website static file, output into website/dist 
+	cd website/ && npm install && npm run build
+
+.PHONY: website/dist-force
+website/dist-force: # Force rebuild website static file, output into website/dist 
+	cd website/ && npm install && npm run build
+
+.PHONY: embed-content
+embed-content: website/dist embed-content-clean # Put built website into embed directory for go compile
+	cp -r website/dist/ pkg/server/content
 
 ### Container deploy helper
 .PHONY: docker-build
-docker-build: # Build the container image
+docker-build: # Build the container image for services hosting
 	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
 
 .PHONY: docker-push
-docker-push: # Push the image into docker.io
+docker-push: # Push the services hosting image into docker.io
 	docker push docker.io/nghiango1/interingo-service:latest
 
 .PHONY: docker-nvim-build
@@ -74,7 +69,22 @@ go-test: # Go lang Unit test
 	go tool cover -html=./dist/coverage.out -o ./dist/coverage.html
 	xdg-open ./dist/coverage.html
 
-### Helper
+### Helper / Clean-up
+
+.PHONY: website-clean
+website-clean: # Clean up website built
+	rm -rf website/dist/
+
+.PHONY: embed-content-clean
+embed-content-clean: # Clean up old webpage content, 
+	rm -rf pkg/server/content/**
+
+.PHONY: go-clean
+go-clean: # Clean up go built files 
+	rm -rf dist/
+
+.PHONY: clean
+clean: website-clean embed-content-clean go-clean # Clean up all built file
 
 .PHONY: help
 help: # Show this help
