@@ -1,8 +1,8 @@
 package evaluator
 
 import (
-	"interingo/pkg/object"
 	"interingo/pkg/lexer"
+	"interingo/pkg/object"
 	"interingo/pkg/parser"
 	"testing"
 )
@@ -39,7 +39,8 @@ func testEval(input string) object.Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
-	return Eval(program, env)
+	res, _ := Eval(program, env)
+	return res
 }
 
 func TestEvalBooleanExpression(t *testing.T) {

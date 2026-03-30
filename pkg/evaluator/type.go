@@ -25,6 +25,11 @@ func (resp *EvalResponseSuccess) String() string {
 
 type EvalResponseError struct {
 	ParserErrors []parser.ParserError `json:"parserErrors,omitempty"`
+	SignalExit   *SignalExitInfo      `json:"signalExit,omitempty"`
+}
+
+type SignalExitInfo struct {
+	ReturnSignal int `json:"returnSignal"`
 }
 
 type VerboseInfo struct {
