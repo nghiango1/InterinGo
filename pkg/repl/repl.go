@@ -10,7 +10,6 @@ import (
 	"strings"
 
 	"interingo/pkg/evaluator"
-	"interingo/pkg/object"
 	"interingo/pkg/parser"
 
 	"github.com/chzyer/readline"
@@ -44,9 +43,6 @@ func (r *Repl) Handle(input string) {
 	switch input {
 	case "help()":
 		usage(r.out)
-	case "exit()":
-		io.WriteString(r.out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
-		r.core.Env = *object.NewEnvironment()
 	case "toggleVerbose()":
 		r.core.ToggleVerbose()
 		if r.core.Verbose {
@@ -158,10 +154,6 @@ func (r *Repl) signalCapture() {
 		}
 
 		line = strings.TrimSpace(line)
-		if line == "exit()" {
-			break
-		} else {
-			r.Handle(line)
-		}
+		r.Handle(line)
 	}
 }

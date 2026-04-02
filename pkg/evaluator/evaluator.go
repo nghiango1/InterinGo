@@ -160,6 +160,29 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	return result
 }
 
+func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
+	numOfFuncParam := len(b.Parameters())
+	numOfArgs := len(args)
+	if numOfArgs != numOfFuncParam {
+		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
+	}
+
+	encloseEnv := object.NewEnclosedEnvironment(b.Env())
+	for i := 0; i < numOfFuncParam; i++ {
+		argValue := Eval(args[i], b.Env())
+		if isError(argValue) {
+			return argValue
+		}
+		encloseEnv.Set(b.Parameters()[i].Value, argValue)
+	}
+
+	result := b.Func()(encloseEnv)
+	if resultValue, ok := result.(*object.ReturnValue); ok {
+		return resultValue.Value
+	}
+	return result
+}
+
 func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 	callExpression, _ := node.(*ast.CallExpression)
 
@@ -169,12 +192,14 @@ func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 		return result
 	}
 
-	functionObject, ok := result.(*object.Function)
-	if !ok {
+	switch obj := result.(type) {
+	case *object.Function:
+		return evalFunctionObject(obj, callExpression.Arguments)
+	case object.BuiltIn:
+		return evalBuiltInObject(obj, callExpression.Arguments)
+	default:
 		return newError("%s is not callable", result.Type())
 	}
-
-	return evalFunctionObject(functionObject, callExpression.Arguments)
 }
 
 func evalMinusOperatorExpression(right object.Object) object.Object {

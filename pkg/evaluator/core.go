@@ -18,9 +18,18 @@ type Core struct {
 	Verbose bool
 }
 
+func loadBuiltIn(env *object.Environment) {
+	env.Set("exit", &object.SystemExit{
+		Environment: env,
+	})
+}
+
 func NewCore() *Core {
+	env := object.NewEnvironment()
+	loadBuiltIn(env)
+
 	return &Core{
-		Env:     *object.NewEnvironment(),
+		Env:     *env,
 		Verbose: share.VerboseMode,
 	}
 }
@@ -41,6 +50,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 	}
 
 	evaluated := Eval(program, &c.Env)
+	var err *EvalResponseError
 
 	result := &EvalResponseSuccess{
 		Output: nil,
@@ -51,7 +61,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 		result.Output = &output
 	}
 
-	return result, nil, verbose
+	return result, err, verbose
 }
 
 func (c *Core) ToggleVerbose() {
