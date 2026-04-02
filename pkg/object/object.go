@@ -38,7 +38,7 @@ type SystemExit struct {
 }
 
 func (b *SystemExit) Description() string { return "Exit the program" }
-func (b *SystemExit) Func(env *Environment) func(env *Environment) Object {
+func (b *SystemExit) Func() func(env *Environment) Object {
 	return func(env *Environment) Object {
 		code, ok := env.Get("code")
 		if !ok {

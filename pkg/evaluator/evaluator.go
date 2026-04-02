@@ -141,11 +141,11 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	numOfFuncParam := len(fo.Parameters)
 	numOfArgs := len(args)
 	if numOfArgs != numOfFuncParam {
-		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
+		return newError("Function take %d agrument but %d are given", numOfFuncParam, numOfArgs)
 	}
 
 	encloseEnv := object.NewEnclosedEnvironment(fo.Env)
-	for i := 0; i < numOfFuncParam; i++ {
+	for i := range numOfFuncParam {
 		argValue := Eval(args[i], fo.Env)
 		if isError(argValue) {
 			return argValue
@@ -168,7 +168,7 @@ func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
 	}
 
 	encloseEnv := object.NewEnclosedEnvironment(b.Env())
-	for i := 0; i < numOfFuncParam; i++ {
+	for i := range numOfFuncParam {
 		argValue := Eval(args[i], b.Env())
 		if isError(argValue) {
 			return argValue
