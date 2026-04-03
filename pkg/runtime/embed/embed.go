@@ -1,8 +1,6 @@
 package embed
 
 import (
-	"os"
-
 	"interingo/pkg/ast"
 	"interingo/pkg/object"
 )
@@ -12,19 +10,21 @@ type SystemExit struct {
 }
 
 func (b *SystemExit) Description() string { return "Exit the program" }
+
+// Embed return specific SystemExit object, which leave the Eval runtime
+// to correctly route to the actual Exit handler
 func (b *SystemExit) Func(env *object.Environment) object.Object {
 	code, ok := env.Get("code")
 	if !ok {
-		os.Exit(1)
+		return &object.SystemExit{Code: 1}
 	}
 
 	val, ok := code.(*object.Integer)
 	if !ok {
-		os.Exit(1)
+		return &object.SystemExit{Code: 1}
 	}
 
-	os.Exit(int(val.Value))
-	return &object.Null{}
+	return &object.SystemExit{Code: int(val.Value)}
 }
 func (b *SystemExit) Parameters() []*ast.Identifier {
 	return []*ast.Identifier{

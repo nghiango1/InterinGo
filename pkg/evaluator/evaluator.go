@@ -23,9 +23,9 @@ func newError(format string, a ...any) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func isError(obj object.Object) bool {
+func isErrorOrSystemExit(obj object.Object) bool {
 	if obj != nil {
-		if obj.Type() == object.ERROR_OBJ {
+		if obj.Type() == object.ERROR_OBJ || obj.Type() == object.SYSTEM_EXIT_OBJ {
 			return true
 		}
 	}
@@ -48,17 +48,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalCallExpression(node, env)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isErrorOrSystemExit(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isErrorOrSystemExit(right) {
 			return right
 		}
 		left := Eval(node.Left, env)
-		if isError(left) {
+		if isErrorOrSystemExit(left) {
 			return left
 		}
 		return evalInfixExpression(node.Operator, left, right)
@@ -70,7 +70,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalFunctionLiteral(node, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
-		if isError(val) {
+		if isErrorOrSystemExit(val) {
 			return val
 		}
 		env.Set(node.Name.Value, val)
@@ -89,6 +89,8 @@ func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 			return result.Value
 		case *object.Error:
 			return result
+		case *object.SystemExit:
+			return result
 		}
 	}
 	return result
@@ -100,7 +102,7 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 		result = Eval(statement, env)
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
+			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ || rt == object.SYSTEM_EXIT_OBJ {
 				return result
 			}
 		}
@@ -147,7 +149,7 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	encloseEnv := object.NewEnclosedEnvironment(fo.Env)
 	for i := range numOfFuncParam {
 		argValue := Eval(args[i], fo.Env)
-		if isError(argValue) {
+		if isErrorOrSystemExit(argValue) {
 			return argValue
 		}
 		encloseEnv.Set(fo.Parameters[i].Value, argValue)
@@ -170,7 +172,7 @@ func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
 	encloseEnv := object.NewEnclosedEnvironment(b.Env())
 	for i := range numOfFuncParam {
 		argValue := Eval(args[i], b.Env())
-		if isError(argValue) {
+		if isErrorOrSystemExit(argValue) {
 			return argValue
 		}
 		encloseEnv.Set(b.Parameters()[i].Value, argValue)
@@ -188,7 +190,7 @@ func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 
 	result := Eval(callExpression.Function, env)
 
-	if isError(result) {
+	if isErrorOrSystemExit(result) {
 		return result
 	}
 

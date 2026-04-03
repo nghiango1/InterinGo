@@ -17,6 +17,7 @@ const (
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
 	BUILT_IN_OBJ     = "BUILT_IN"
+	SYSTEM_EXIT_OBJ  = "SYSTEM_EXIT"
 )
 
 type Object interface {
@@ -34,6 +35,14 @@ type BuiltIn interface {
 	Parameters() []*ast.Identifier
 	Env() *Environment
 }
+
+// To stop the runtime, should atc like Error but have higher prioirty
+type SystemExit struct {
+	Code int
+}
+
+func (e *SystemExit) Type() ObjectType { return ERROR_OBJ }
+func (e *SystemExit) Inspect() string  { return fmt.Sprintf("SYSTEM_EXIT: %d", e.Code) }
 
 type Error struct {
 	Message string

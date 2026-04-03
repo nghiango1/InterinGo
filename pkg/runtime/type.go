@@ -25,6 +25,11 @@ func (resp *EvalResponseSuccess) String() string {
 
 type EvalResponseError struct {
 	ParserErrors []parser.ParserError `json:"parserErrors,omitempty"`
+	SystemExit *SystemExit
+}
+
+type SystemExit struct {
+	Code int
 }
 
 type VerboseInfo struct {

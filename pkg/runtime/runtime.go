@@ -9,6 +9,7 @@ import (
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/runtime/embed"
 	"interingo/pkg/runtime/native"
 	"interingo/pkg/share"
 	"interingo/pkg/token"
@@ -34,8 +35,9 @@ func (c *Core) loadNativeBuiltIn(env *object.Environment) {
 }
 
 func (c *Core) loadEmbedBuiltIn(env *object.Environment) {
-	// Should not be able to exit
-	// env.Set("exit", &embed.SystemExit{ Environment: env, })
+	env.Set("exit", &embed.SystemExit{
+		Environment: env,
+	})
 }
 
 func NewCore(t RuntimeType) *Core {
@@ -71,7 +73,16 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 	}
 
 	evaluated := evaluator.Eval(program, &c.Env)
-	var err *EvalResponseError
+
+	// Check if it is a system exit
+	if sysExit, ok := evaluated.(*object.SystemExit); ok {
+		err := &EvalResponseError{
+			SystemExit: &SystemExit{
+				Code: sysExit.Code,
+			},
+		}
+		return nil, err, verbose
+	}
 
 	result := &EvalResponseSuccess{
 		Output: nil,
@@ -82,7 +93,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 		result.Output = &output
 	}
 
-	return result, err, verbose
+	return result, nil, verbose
 }
 
 func (c *Core) ToggleVerbose() {

@@ -108,3 +108,68 @@ func TestCore_Eval_Verbose(t *testing.T) {
 		})
 	}
 }
+
+func TestCore_Eval_ParserErr(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		req EvalRequest
+	}{
+		{
+			"ParserError_LetStatements",
+			EvalRequest{Data: "let identity = fn(x) { return ; identity(identity(5));"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewCore(EMBED)
+			c.ToggleVerbose()
+			_, err, _ := c.Eval(tt.req)
+			if err == nil {
+				t.Errorf("Error is nil")
+			}
+		})
+	}
+}
+
+func TestCore_EvalSystemExit(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		req      EvalRequest
+		res      *EvalResponseSuccess
+		exitCode int
+	}{
+		{
+			"ExitStatements",
+			EvalRequest{Data: "let identity = fn(x) { return x; }; exit(2); identity(identity(5));"},
+			nil,
+			2,
+		},
+		{
+			"ExitStatements 2",
+			EvalRequest{Data: "let identity = fn(x) { return x; }; exit(identity); identity(identity(5));"},
+			nil,
+			1,
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := NewCore(EMBED)
+			c.ToggleVerbose()
+			got, err, _ := c.Eval(tt.req)
+			if !evalResponseSuccessCompare(got, tt.res) {
+				t.Errorf("Eval() = %v, want %v", got.String(), tt.res.String())
+			}
+			if err == nil {
+				t.Errorf("Error is nil")
+			}
+			if err.SystemExit == nil {
+				t.Errorf("Error return with SYSTEM_EXIT is nil")
+			}
+			if err.SystemExit.Code != tt.exitCode {
+				t.Errorf("Error return with SYSTEM_EXIT but code doesn't match. Want %d got %d", tt.exitCode, err.SystemExit.Code)
+			}
+		})
+	}
+}
