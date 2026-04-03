@@ -2,36 +2,36 @@ package core
 
 import (
 	"fmt"
-	"interingo/pkg/evaluator"
+	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
 )
 
 type ServiceCore struct {
-	evalCore *evaluator.Core
+	runtimeCore *runtime.Core
 }
 
-func NewServiceCore(evalCore *evaluator.Core) *ServiceCore {
+func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 	if evalCore == nil {
-		evalCore = evaluator.NewCore()
+		evalCore = runtime.NewCore()
 	}
 
 	return &ServiceCore{
-		evalCore: evalCore,
+		runtimeCore: evalCore,
 	}
 }
 
 // Return
 // Success -> EvaluateResponseSuccess
-// Error -> 400:Bad request 
+// Error -> 400:Bad request
 // Error -> 500:Internal server error
 func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
-	if c.evalCore == nil{
+	if c.runtimeCore == nil {
 		fmt.Println("[ERRPR] API error, evalCore didn't init yet")
 		return nil, common.NewErrorResponse(500)
 	}
 
 	// Handling eval
-	res, err, ver := c.evalCore.Eval(evaluator.EvalRequest{Data: req.Data})
+	res, err, ver := c.runtimeCore.Eval(runtime.EvalRequest{Data: req.Data})
 
 	if err != nil {
 		error := NewParserErrorResponse("", err.ParserErrors, ver)

@@ -1,13 +1,15 @@
-// This handle how to evaluate the code
+// This handle core runtime that evaluate the code
 // - Move over core language handling into this file
 // - REPL - Eval will using this instead
 
-package evaluator
+package runtime
 
 import (
+	"interingo/pkg/evaluator"
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/runtime/native"
 	"interingo/pkg/share"
 	"interingo/pkg/token"
 	"maps"
@@ -19,7 +21,7 @@ type Core struct {
 }
 
 func loadBuiltIn(env *object.Environment) {
-	env.Set("exit", &object.SystemExit{
+	env.Set("exit", &native.SystemExit{
 		Environment: env,
 	})
 }
@@ -49,7 +51,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 		return nil, error, verbose
 	}
 
-	evaluated := Eval(program, &c.Env)
+	evaluated := evaluator.Eval(program, &c.Env)
 	var err *EvalResponseError
 
 	result := &EvalResponseSuccess{

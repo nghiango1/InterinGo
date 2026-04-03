@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"fmt"
 	"interingo/pkg/ast"
-	"os"
 	"strings"
 )
 
@@ -25,6 +24,8 @@ type Object interface {
 	Inspect() string
 }
 
+// Runtime Builtin, object to inject extra runtime functionality
+// - Eg: Exit()
 type BuiltIn interface {
 	Object
 	Description() string
@@ -32,38 +33,6 @@ type BuiltIn interface {
 	Parameters() []*ast.Identifier
 	Env() *Environment
 }
-
-type SystemExit struct {
-	Environment *Environment
-}
-
-func (b *SystemExit) Description() string { return "Exit the program" }
-func (b *SystemExit) Func() func(env *Environment) Object {
-	return func(env *Environment) Object {
-		code, ok := env.Get("code")
-		if !ok {
-			os.Exit(0)
-		}
-
-		val, ok := code.(*Integer)
-		if !ok {
-			os.Exit(0)
-		}
-
-		os.Exit(int(val.Value))
-		return &Null{}
-	}
-}
-func (b *SystemExit) Parameters() []*ast.Identifier {
-	return []*ast.Identifier{
-		{
-			Value: "code",
-		},
-	}
-}
-func (b *SystemExit) Env() *Environment { return b.Environment }
-func (b *SystemExit) Type() ObjectType  { return BUILT_IN_OBJ }
-func (b *SystemExit) Inspect() string   { return "BuiltIn: " + b.Description() }
 
 type Error struct {
 	Message string

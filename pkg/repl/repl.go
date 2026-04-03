@@ -9,7 +9,7 @@ import (
 	"log"
 	"strings"
 
-	"interingo/pkg/evaluator"
+	"interingo/pkg/runtime"
 	"interingo/pkg/parser"
 
 	"github.com/chzyer/readline"
@@ -18,14 +18,14 @@ import (
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
 type Repl struct {
-	core evaluator.Core
+	core runtime.Core
 	in   io.Reader
 	out  io.Writer
 }
 
-func NewRepl(evalCore *evaluator.Core, in io.Reader, out io.Writer) *Repl {
+func NewRepl(evalCore *runtime.Core, in io.Reader, out io.Writer) *Repl {
 	if evalCore == nil {
-		evalCore = evaluator.NewCore()
+		evalCore = runtime.NewCore()
 	}
 
 	return &Repl{
@@ -56,7 +56,7 @@ func (r *Repl) Handle(input string) {
 	}
 }
 
-func (r *Repl) printVerboseInfomation(info *evaluator.VerboseInfo) {
+func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
 	data, err := json.MarshalIndent(info, "> ", "    ")
 	if err != nil {
 		return
@@ -70,7 +70,7 @@ func (r *Repl) codeHandle(line string) {
 		return
 	}
 
-	result, error, verbose := r.core.Eval(evaluator.EvalRequest{
+	result, error, verbose := r.core.Eval(runtime.EvalRequest{
 		Data: line,
 	})
 
