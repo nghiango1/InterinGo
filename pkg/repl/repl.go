@@ -5,12 +5,13 @@ package repl
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"log"
 	"strings"
 
-	"interingo/pkg/runtime"
 	"interingo/pkg/parser"
+	"interingo/pkg/runtime"
 
 	"github.com/chzyer/readline"
 )
@@ -18,18 +19,18 @@ import (
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
 type Repl struct {
-	core runtime.Core
+	core *runtime.Core
 	in   io.Reader
 	out  io.Writer
 }
 
 func NewRepl(evalCore *runtime.Core, in io.Reader, out io.Writer) *Repl {
 	if evalCore == nil {
-		evalCore = runtime.NewCore(runtime.NATIVE)
+		evalCore = runtime.NewCore(runtime.NATIVE, nil)
 	}
 
 	return &Repl{
-		core: *evalCore,
+		core: evalCore,
 		in:   in,
 		out:  out,
 	}
@@ -39,21 +40,16 @@ func (r *Repl) Start() {
 	r.signalCapture()
 }
 
-func (r *Repl) Handle(input string) {
+func (r *Repl) Handle(input string) error {
 	switch input {
 	case "help()":
 		usage(r.out)
-	case "toggleVerbose()":
-		r.core.ToggleVerbose()
-		if r.core.Verbose {
-			io.WriteString(r.out, "Verbose mode enable\n")
-		} else {
-			io.WriteString(r.out, "Verbose mode disable\n")
-		}
 	case "":
 	default:
-		r.codeHandle(input)
+		return r.codeHandle(input)
 	}
+
+	return nil
 }
 
 func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
@@ -65,9 +61,9 @@ func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
 	io.WriteString(r.out, "\n")
 }
 
-func (r *Repl) codeHandle(line string) {
+func (r *Repl) codeHandle(line string) error {
 	if line == "" {
-		return
+		return nil
 	}
 
 	result, error, verbose := r.core.Eval(runtime.EvalRequest{
@@ -81,15 +77,32 @@ func (r *Repl) codeHandle(line string) {
 	if error != nil {
 		if len(error.ParserErrors) != 0 {
 			r.parsingErrorsHandler(error.ParserErrors)
+			// Already handle
+			// return fmt.Errorf("Parser error")
+			return nil
 		}
+
+		if error.Error != nil {
+			return error.Error
+		}
+
+		if error.SystemExit != nil {
+			return fmt.Errorf("System exit called")
+		}
+
+		return fmt.Errorf("Unknown error")
 	}
 
-	if result != nil {
-		if result.Output != nil {
-			io.WriteString(r.out, *result.Output)
-			io.WriteString(r.out, "\n")
-		}
+	if result == nil {
+		return fmt.Errorf("Evaluation result not found error")
 	}
+
+	if result.Output != nil {
+		io.WriteString(r.out, *result.Output)
+		io.WriteString(r.out, "\n")
+	}
+
+	return nil
 }
 
 func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
@@ -154,6 +167,9 @@ func (r *Repl) signalCapture() {
 		}
 
 		line = strings.TrimSpace(line)
-		r.Handle(line)
+		err = r.Handle(line)
+		if err != nil {
+			panic(err)
+		}
 	}
 }

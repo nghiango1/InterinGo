@@ -5,6 +5,7 @@
 package runtime
 
 import (
+	"fmt"
 	"interingo/pkg/evaluator"
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
@@ -23,56 +24,92 @@ const (
 	NATIVE = RuntimeType("native")
 )
 
+type RuntimeState int
+
+const (
+	RUNTIME_UNKNOWN RuntimeState = iota // 0
+	RUNTIME_START
+	RUNTIME_END
+)
+
 type Core struct {
-	Env     object.Environment
-	Verbose bool
+	env              object.Environment
+	Verbose          bool
+	lifeCycleHandler LifeCycleHandler // Only work with embed type
+	state            RuntimeState
 }
 
-func (c *Core) loadNativeBuiltIn(env *object.Environment) {
-	env.Set("exit", &native.SystemExit{
-		Environment: env,
+func (c *Core) loadNativeBuiltIn() {
+	c.env.Set("exit", &native.SystemExit{
+		Environment: &c.env,
 	})
 }
 
-func (c *Core) loadEmbedBuiltIn(env *object.Environment) {
-	env.Set("exit", &embed.SystemExit{
-		Environment: env,
+func (c *Core) loadEmbedBuiltIn() {
+	c.env.Set("exit", &embed.SystemExit{
+		Environment: &c.env,
 	})
 }
 
-func NewCore(t RuntimeType) *Core {
+func (c *Core) State() RuntimeState {
+	return c.state
+}
+
+func NewCore(t RuntimeType, lifeCycleHandler LifeCycleHandler) *Core {
 	env := object.NewEnvironment()
 
 	c := &Core{
-		Env:     *env,
-		Verbose: share.VerboseMode,
+		env:              *env,
+		Verbose:          share.VerboseMode,
+		lifeCycleHandler: lifeCycleHandler,
+		state:            RUNTIME_START,
 	}
 
 	if t == NATIVE {
-		c.loadNativeBuiltIn(env)
+		c.loadNativeBuiltIn()
 	} else {
-		c.loadEmbedBuiltIn(env)
+		c.loadEmbedBuiltIn()
 	}
+
+	// Allow toggle verbose to update verbose flag of this runtime core
+	c.env.Set("toggleVerbose", &ToggleVerbose{
+		Core: c,
+	})
+	c.env.Set("getRuntimeInfo", &GetRuntimeInfo{
+		Core: c,
+	})
 
 	return c
 }
 
 func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, *VerboseInfo) {
+	if c.state == RUNTIME_END {
+		return nil, &EvalResponseError{
+			Error: fmt.Errorf("Runtime state already ended!"),
+		}, nil
+	}
+
 	l := lexer.New(req.Data)
 	p := parser.New(l)
 	program := p.ParseProgram()
 
-	var verbose *VerboseInfo
-	if c.Verbose {
-		verbose = getVerboseInfomation(l, p)
-	}
-
 	if len(p.Errors) != 0 {
 		error := &EvalResponseError{ParserErrors: p.Errors}
-		return nil, error, verbose
+		// Verbose should work even parser error
+		var verboseInfo *VerboseInfo
+		if c.Verbose {
+			verboseInfo = getVerboseInfomation(l, p)
+		}
+
+		return nil, error, verboseInfo
 	}
 
-	evaluated := evaluator.Eval(program, &c.Env)
+	evaluated := evaluator.Eval(program, &c.env)
+	// This here as Eval can change runtime verbose state
+	var verboseInfo *VerboseInfo
+	if c.Verbose {
+		verboseInfo = getVerboseInfomation(l, p)
+	}
 
 	// Check if it is a system exit
 	if sysExit, ok := evaluated.(*object.SystemExit); ok {
@@ -81,7 +118,11 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 				Code: sysExit.Code,
 			},
 		}
-		return nil, err, verbose
+		c.state = RUNTIME_END
+		if c.lifeCycleHandler != nil {
+			c.lifeCycleHandler.Exit()
+		}
+		return nil, err, verboseInfo
 	}
 
 	result := &EvalResponseSuccess{
@@ -93,7 +134,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 		result.Output = &output
 	}
 
-	return result, nil, verbose
+	return result, nil, verboseInfo
 }
 
 func (c *Core) ToggleVerbose() {

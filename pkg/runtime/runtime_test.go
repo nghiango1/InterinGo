@@ -1,7 +1,8 @@
-package runtime
+package runtime_test
 
 import (
 	"fmt"
+	"interingo/pkg/runtime"
 	"testing"
 )
 
@@ -10,7 +11,7 @@ func newString(s any) *string {
 	return &out
 }
 
-func evalResponseSuccessCompare(got *EvalResponseSuccess, want *EvalResponseSuccess) bool {
+func evalResponseSuccessCompare(got *runtime.EvalResponseSuccess, want *runtime.EvalResponseSuccess) bool {
 	if want == nil {
 		return got == nil
 	}
@@ -36,43 +37,43 @@ func TestCore_Eval(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		req   EvalRequest
-		want  *EvalResponseSuccess
-		want2 *EvalResponseError
-		want3 *VerboseInfo
+		req   runtime.EvalRequest
+		want  *runtime.EvalResponseSuccess
+		want2 *runtime.EvalResponseError
+		want3 *runtime.VerboseInfo
 	}{
 		{
 			"LetStatements",
-			EvalRequest{Data: "let identity = fn(x) { return x; }; identity(identity(5));"},
-			&EvalResponseSuccess{Output: newString(5)},
+			runtime.EvalRequest{Data: "let identity = fn(x) { return x; }; identity(identity(5));"},
+			&runtime.EvalResponseSuccess{Output: newString(5)},
 			nil,
 			nil,
 		},
 		{
 			"LetStatements",
-			EvalRequest{Data: "let identity = fn(x) { x; }; identity(5);"},
-			&EvalResponseSuccess{Output: newString(5)},
+			runtime.EvalRequest{Data: "let identity = fn(x) { x; }; identity(5);"},
+			&runtime.EvalResponseSuccess{Output: newString(5)},
 			nil,
 			nil,
 		},
 		{
 			"FunctionApplication",
-			EvalRequest{Data: "fn(x) { x; }(5)"},
-			&EvalResponseSuccess{Output: newString(5)},
+			runtime.EvalRequest{Data: "fn(x) { x; }(5)"},
+			&runtime.EvalResponseSuccess{Output: newString(5)},
 			nil,
 			nil,
 		},
 		{
 			"FunctionApplication",
-			EvalRequest{Data: "let double = fn(x) { x * 2; }; double(5);"},
-			&EvalResponseSuccess{Output: newString(10)},
+			runtime.EvalRequest{Data: "let double = fn(x) { x * 2; }; double(5);"},
+			&runtime.EvalResponseSuccess{Output: newString(10)},
 			nil,
 			nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore(NATIVE)
+			c := runtime.NewCore(runtime.NATIVE, nil)
 			got, _, _ := c.Eval(tt.req)
 			if !evalResponseSuccessCompare(got, tt.want) {
 				t.Errorf("Eval() = %v, want %v", got.String(), tt.want.String())
@@ -81,22 +82,22 @@ func TestCore_Eval(t *testing.T) {
 	}
 }
 
-func TestCore_Eval_Verbose(t *testing.T) {
+func TestCore_EvalForceVerbose(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		req  EvalRequest
-		want *EvalResponseSuccess
+		req  runtime.EvalRequest
+		want *runtime.EvalResponseSuccess
 	}{
 		{
 			"Verbose_LetStatements",
-			EvalRequest{Data: "let identity = fn(x) { return x; }; identity(identity(5));"},
-			&EvalResponseSuccess{Output: newString(5)},
+			runtime.EvalRequest{Data: "let identity = fn(x) { return x; }; identity(identity(5));"},
+			&runtime.EvalResponseSuccess{Output: newString(5)},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore(EMBED)
+			c := runtime.NewCore(runtime.EMBED, nil)
 			c.ToggleVerbose()
 			got, _, ver := c.Eval(tt.req)
 			if !evalResponseSuccessCompare(got, tt.want) {
@@ -109,20 +110,48 @@ func TestCore_Eval_Verbose(t *testing.T) {
 	}
 }
 
-func TestCore_Eval_ParserErr(t *testing.T) {
+func TestCore_EvalBuiltinVerbose(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		req EvalRequest
+		req  runtime.EvalRequest
+		want *runtime.EvalResponseSuccess
 	}{
 		{
-			"ParserError_LetStatements",
-			EvalRequest{Data: "let identity = fn(x) { return ; identity(identity(5));"},
+			"Verbose_LetStatements",
+			runtime.EvalRequest{Data: "toggleVerbose(); let identity = fn(x) { return x; }; identity(identity(5));"},
+			&runtime.EvalResponseSuccess{Output: newString(5)},
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore(EMBED)
+			c := runtime.NewCore(runtime.EMBED, nil)
+			got, _, ver := c.Eval(tt.req)
+			if !evalResponseSuccessCompare(got, tt.want) {
+				t.Errorf("Eval() = %v, want %v", got.String(), tt.want.String())
+			}
+			if ver == nil {
+				t.Errorf("Verbose is nil")
+			}
+		})
+	}
+}
+
+
+func TestCore_Eval_ParserErr(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		req runtime.EvalRequest
+	}{
+		{
+			"ParserError_LetStatements",
+			runtime.EvalRequest{Data: "let identity = fn(x) { return ; identity(identity(5));"},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			c := runtime.NewCore(runtime.EMBED, nil)
 			c.ToggleVerbose()
 			_, err, _ := c.Eval(tt.req)
 			if err == nil {
@@ -136,26 +165,29 @@ func TestCore_EvalSystemExit(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
 		// Named input parameters for target function.
-		req      EvalRequest
-		res      *EvalResponseSuccess
+		req      runtime.EvalRequest
+		res      *runtime.EvalResponseSuccess
 		exitCode int
+		state    runtime.RuntimeState
 	}{
 		{
 			"ExitStatements",
-			EvalRequest{Data: "let identity = fn(x) { return x; }; exit(2); identity(identity(5));"},
+			runtime.EvalRequest{Data: "let identity = fn(x) { return x; }; exit(2); identity(identity(5));"},
 			nil,
 			2,
+			runtime.RUNTIME_END,
 		},
 		{
 			"ExitStatements 2",
-			EvalRequest{Data: "let identity = fn(x) { return x; }; exit(identity); identity(identity(5));"},
+			runtime.EvalRequest{Data: "let identity = fn(x) { return x; }; exit(identity); identity(identity(5));"},
 			nil,
 			1,
+			runtime.RUNTIME_END,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore(EMBED)
+			c := runtime.NewCore(runtime.EMBED, nil)
 			c.ToggleVerbose()
 			got, err, _ := c.Eval(tt.req)
 			if !evalResponseSuccessCompare(got, tt.res) {
@@ -169,6 +201,17 @@ func TestCore_EvalSystemExit(t *testing.T) {
 			}
 			if err.SystemExit.Code != tt.exitCode {
 				t.Errorf("Error return with SYSTEM_EXIT but code doesn't match. Want %d got %d", tt.exitCode, err.SystemExit.Code)
+			}
+			if c.State() != tt.state {
+				t.Errorf("Runtime state doesn't match. Want %d got %d", tt.state, c.State())
+			}
+
+			_, err, _ = c.Eval(runtime.EvalRequest{Data: "1"})
+			if err == nil {
+				t.Errorf("Expect error when Runtime Eval after called Exit()")
+			}
+			if err.Error == nil {
+				t.Errorf("Expect error when Runtime Eval after called Exit()")
 			}
 		})
 	}

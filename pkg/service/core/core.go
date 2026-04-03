@@ -12,7 +12,7 @@ type ServiceCore struct {
 
 func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 	if evalCore == nil {
-		evalCore = runtime.NewCore(runtime.EMBED)
+		evalCore = runtime.NewCore(runtime.EMBED, nil)
 	}
 
 	return &ServiceCore{

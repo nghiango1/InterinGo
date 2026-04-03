@@ -24,6 +24,7 @@ func (resp *EvalResponseSuccess) String() string {
 }
 
 type EvalResponseError struct {
+	Error error
 	ParserErrors []parser.ParserError `json:"parserErrors,omitempty"`
 	SystemExit *SystemExit
 }
