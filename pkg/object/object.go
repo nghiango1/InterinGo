@@ -25,11 +25,12 @@ type Object interface {
 }
 
 // Runtime Builtin, object to inject extra runtime functionality
+// Should be implement and added when create a Runtime
 // - Eg: Exit()
 type BuiltIn interface {
 	Object
 	Description() string
-	Func() func(env *Environment) Object
+	Func(env *Environment) Object
 	Parameters() []*ast.Identifier
 	Env() *Environment
 }

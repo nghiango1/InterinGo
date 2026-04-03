@@ -176,7 +176,7 @@ func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
 		encloseEnv.Set(b.Parameters()[i].Value, argValue)
 	}
 
-	result := b.Func()(encloseEnv)
+	result := b.Func(encloseEnv)
 	if resultValue, ok := result.(*object.ReturnValue); ok {
 		return resultValue.Value
 	}

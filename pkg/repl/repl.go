@@ -25,7 +25,7 @@ type Repl struct {
 
 func NewRepl(evalCore *runtime.Core, in io.Reader, out io.Writer) *Repl {
 	if evalCore == nil {
-		evalCore = runtime.NewCore()
+		evalCore = runtime.NewCore(runtime.NATIVE)
 	}
 
 	return &Repl{

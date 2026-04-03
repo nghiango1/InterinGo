@@ -13,22 +13,21 @@ type SystemExit struct {
 }
 
 func (b *SystemExit) Description() string { return "Exit the program" }
-func (b *SystemExit) Func() func(env *object.Environment) object.Object {
-	return func(env *object.Environment) object.Object {
-		code, ok := env.Get("code")
-		if !ok {
-			os.Exit(0)
-		}
-
-		val, ok := code.(*object.Integer)
-		if !ok {
-			os.Exit(0)
-		}
-
-		os.Exit(int(val.Value))
-		return &object.Null{}
+func (b *SystemExit) Func(env *object.Environment) object.Object {
+	code, ok := env.Get("code")
+	if !ok {
+		os.Exit(1)
 	}
+
+	val, ok := code.(*object.Integer)
+	if !ok {
+		os.Exit(1)
+	}
+
+	os.Exit(int(val.Value))
+	return &object.Null{}
 }
+
 func (b *SystemExit) Parameters() []*ast.Identifier {
 	return []*ast.Identifier{
 		{

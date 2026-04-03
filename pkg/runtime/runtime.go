@@ -15,25 +15,44 @@ import (
 	"maps"
 )
 
+type RuntimeType string
+
+const (
+	EMBED  = RuntimeType("embed")
+	NATIVE = RuntimeType("native")
+)
+
 type Core struct {
 	Env     object.Environment
 	Verbose bool
 }
 
-func loadBuiltIn(env *object.Environment) {
+func (c *Core) loadNativeBuiltIn(env *object.Environment) {
 	env.Set("exit", &native.SystemExit{
 		Environment: env,
 	})
 }
 
-func NewCore() *Core {
-	env := object.NewEnvironment()
-	loadBuiltIn(env)
+func (c *Core) loadEmbedBuiltIn(env *object.Environment) {
+	// Should not be able to exit
+	// env.Set("exit", &embed.SystemExit{ Environment: env, })
+}
 
-	return &Core{
+func NewCore(t RuntimeType) *Core {
+	env := object.NewEnvironment()
+
+	c := &Core{
 		Env:     *env,
 		Verbose: share.VerboseMode,
 	}
+
+	if t == NATIVE {
+		c.loadNativeBuiltIn(env)
+	} else {
+		c.loadEmbedBuiltIn(env)
+	}
+
+	return c
 }
 
 func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, *VerboseInfo) {

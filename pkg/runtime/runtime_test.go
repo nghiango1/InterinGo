@@ -72,7 +72,7 @@ func TestCore_Eval(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore()
+			c := NewCore(NATIVE)
 			got, _, _ := c.Eval(tt.req)
 			if !evalResponseSuccessCompare(got, tt.want) {
 				t.Errorf("Eval() = %v, want %v", got.String(), tt.want.String())
@@ -96,7 +96,7 @@ func TestCore_Eval_Verbose(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := NewCore()
+			c := NewCore(EMBED)
 			c.ToggleVerbose()
 			got, _, ver := c.Eval(tt.req)
 			if !evalResponseSuccessCompare(got, tt.want) {
