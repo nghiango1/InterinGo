@@ -40,28 +40,7 @@ func (r *Repl) Start() {
 	r.signalCapture()
 }
 
-func (r *Repl) Handle(input string) error {
-	switch input {
-	case "help()":
-		usage(r.out)
-	case "":
-	default:
-		return r.codeHandle(input)
-	}
-
-	return nil
-}
-
-func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
-	data, err := json.MarshalIndent(info, "> ", "    ")
-	if err != nil {
-		return
-	}
-	r.out.Write(data)
-	io.WriteString(r.out, "\n")
-}
-
-func (r *Repl) codeHandle(line string) error {
+func (r *Repl) Handle(line string) error {
 	if line == "" {
 		return nil
 	}
@@ -105,6 +84,15 @@ func (r *Repl) codeHandle(line string) error {
 	return nil
 }
 
+func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
+	data, err := json.MarshalIndent(info, "> ", "    ")
+	if err != nil {
+		return
+	}
+	r.out.Write(data)
+	io.WriteString(r.out, "\n")
+}
+
 func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
 	io.WriteString(r.out, "Errors when parsing:\n")
 	for _, e := range errors {
@@ -112,17 +100,10 @@ func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
 	}
 }
 
-func usage(w io.Writer) {
-	io.WriteString(w, "Built-in commands:\n")
-	io.WriteString(w, "- toggleVerbose(): Toggle verbose mode - print more infomation about Lexer, Parse and Evaluator\n")
-	io.WriteString(w, "- help(): Print this help\n")
-	io.WriteString(w, "- exit(): End this REPL session\n")
-}
-
 var completer = readline.NewPrefixCompleter(
 	readline.PcItem("let"),
 	readline.PcItem("if ("),
-	readline.PcItem("exit()"),
+	readline.PcItem("exit("),
 	readline.PcItem("help()"),
 	readline.PcItem("toggleVerbose()"),
 )

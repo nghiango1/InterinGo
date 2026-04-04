@@ -26,10 +26,13 @@ func (b *SystemExit) Func(env *object.Environment) object.Object {
 
 	return &object.SystemExit{Code: int(val.Value)}
 }
-func (b *SystemExit) Parameters() []*ast.Identifier {
-	return []*ast.Identifier{
-		{
-			Value: "code",
+func (b *SystemExit) Parameters() object.Parameters {
+	return object.Parameters{
+		Default: []object.DefaultParameter{
+			{
+				Key:   &ast.Identifier{Value: "code"},
+				Value: &object.Integer{Value: 0},
+			},
 		},
 	}
 }

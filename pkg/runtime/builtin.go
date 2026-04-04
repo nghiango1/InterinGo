@@ -1,7 +1,6 @@
 package runtime
 
 import (
-	"interingo/pkg/ast"
 	"interingo/pkg/object"
 )
 
@@ -18,8 +17,11 @@ func (b *ToggleVerbose) Func(env *object.Environment) object.Object {
 	return &object.Boolean{Value: b.Core.Verbose}
 }
 
-func (b *ToggleVerbose) Parameters() []*ast.Identifier {
-	return []*ast.Identifier{}
+func (b *ToggleVerbose) WildcastParameters() bool {
+	return false
+}
+func (b *ToggleVerbose) Parameters() object.Parameters {
+	return object.Parameters{}
 }
 func (b *ToggleVerbose) Env() *object.Environment { return nil }
 func (b *ToggleVerbose) Type() object.ObjectType  { return object.BUILT_IN_OBJ }
@@ -37,8 +39,8 @@ func (b *GetRuntimeInfo) Func(env *object.Environment) object.Object {
 	return &object.Boolean{Value: true}
 }
 
-func (b *GetRuntimeInfo) Parameters() []*ast.Identifier {
-	return []*ast.Identifier{}
+func (b *GetRuntimeInfo) Parameters() object.Parameters {
+	return object.Parameters{}
 }
 func (b *GetRuntimeInfo) Env() *object.Environment { return nil }
 func (b *GetRuntimeInfo) Type() object.ObjectType  { return object.BUILT_IN_OBJ }

@@ -1,8 +1,9 @@
 package evaluator
 
 import (
-	"interingo/pkg/object"
+	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
+	"interingo/pkg/object"
 	"interingo/pkg/parser"
 	"testing"
 )
@@ -300,5 +301,145 @@ func TestFunctionApplication(t *testing.T) {
 	for _, tt := range tests {
 		result := testEval(tt.input)
 		testIntegerObject(t, result, tt.expected)
+	}
+}
+
+type builtinImpl struct {
+	parameters object.Parameters
+	env        *object.Environment
+}
+
+func (b *builtinImpl) Description() string                        { return "Mock implement" }
+func (b *builtinImpl) Env() *object.Environment                   { return b.env }
+func (b *builtinImpl) Func(env *object.Environment) object.Object { b.env = env; return NULL }
+func (b *builtinImpl) Inspect() string                            { return "BUILT_IN: " + b.Description() }
+func (b *builtinImpl) Type() object.ObjectType                    { return object.BUILT_IN_OBJ }
+func (b *builtinImpl) Parameters() object.Parameters              { return b.parameters }
+
+func Test_evalBuiltInObject(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		b    object.BuiltIn
+		args []ast.Expression
+		want map[string]object.Object
+	}{
+		{
+			"Standard",
+			&builtinImpl{parameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Default",
+			&builtinImpl{parameters: object.Parameters{
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "code"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Default 2",
+			&builtinImpl{parameters: object.Parameters{
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "code"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			nil,
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1000},
+			},
+		},
+		{
+			"Standard and Default",
+			&builtinImpl{parameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "default"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code":    &object.Integer{Value: 1},
+				"default": &object.Integer{Value: 1000},
+			},
+		},
+		{
+			"Standard and Default 2",
+			&builtinImpl{parameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "default"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code":    &object.Integer{Value: 1},
+				"default": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Rest",
+			&builtinImpl{parameters: object.Parameters{
+				Rest: true,
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				REST_ARGS: &object.Array{
+					Value: []object.Object{
+						&object.Integer{Value: 1},
+						&object.Integer{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			evalBuiltInObject(tt.b, tt.args)
+			// TODO: update the condition below to compare got with tt.want.
+			for k, v := range tt.want {
+				got, ok := tt.b.Env().Get(k)
+				if !ok {
+					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
+				}
+				if got.Inspect() != v.Inspect() && got.Type() != v.Type() {
+					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
+				}
+
+			}
+		})
 	}
 }

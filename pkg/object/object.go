@@ -16,6 +16,7 @@ const (
 	RETURN_VALUE_OBJ = "RETURN_VALUE"
 	ERROR_OBJ        = "ERROR"
 	FUNCTION_OBJ     = "FUNCTION"
+	ARRAY_OBJ        = "ARRAY"
 	BUILT_IN_OBJ     = "BUILT_IN"
 	SYSTEM_EXIT_OBJ  = "SYSTEM_EXIT"
 )
@@ -32,8 +33,19 @@ type BuiltIn interface {
 	Object
 	Description() string
 	Func(env *Environment) Object
-	Parameters() []*ast.Identifier
+	Parameters() Parameters
 	Env() *Environment
+}
+
+type Parameters struct {
+	Standard []*ast.Identifier
+	Default  []DefaultParameter
+	Rest     bool
+}
+
+type DefaultParameter struct {
+	Key   *ast.Identifier
+	Value Object
 }
 
 // To stop the runtime, should atc like Error but have higher prioirty
@@ -50,6 +62,24 @@ type Error struct {
 
 func (e *Error) Type() ObjectType { return ERROR_OBJ }
 func (e *Error) Inspect() string  { return "ERROR: " + e.Message }
+
+type Array struct {
+	Value []Object
+}
+
+func (a *Array) Type() ObjectType { return ARRAY_OBJ }
+func (a *Array) Inspect() string {
+	var res strings.Builder
+	res.WriteString("[")
+	for i, obj := range a.Value {
+		if i > 0 {
+			res.WriteString(", ")
+		}
+		res.WriteString(obj.Inspect())
+	}
+	res.WriteString("]")
+	return res.String()
+}
 
 type Integer struct {
 	Value int64

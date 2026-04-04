@@ -12,6 +12,10 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
+const (
+	REST_ARGS = "_RestArgs"
+)
+
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
 		return TRUE
@@ -163,19 +167,59 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 }
 
 func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
-	numOfFuncParam := len(b.Parameters())
+	numOfFuncParam := len(b.Parameters().Standard)
+	numOfDefaultParam := len(b.Parameters().Default)
+
 	numOfArgs := len(args)
-	if numOfArgs != numOfFuncParam {
-		return newError("Function take %d params but %d args are given", numOfArgs, numOfFuncParam)
+	if !(numOfArgs >= numOfFuncParam && numOfArgs <= numOfFuncParam+numOfDefaultParam || b.Parameters().Rest) {
+		return newError("Function take <%d params> + <%d default> params but <%d args> are given", numOfFuncParam, numOfDefaultParam, numOfArgs)
 	}
 
 	encloseEnv := object.NewEnclosedEnvironment(b.Env())
-	for i := range numOfFuncParam {
+
+	// While we support default params, args doesn't have any way to provide key binding
+	// This just here to support limited Exit() call vs Exit(code)
+	// First init env with the default value
+	for i := range len(b.Parameters().Default) {
+		currParam := b.Parameters().Default[i]
+		encloseEnv.Set(currParam.Key.Value, currParam.Value)
+	}
+
+	argIndex := 0
+	for i := range len(b.Parameters().Standard) {
+		argValue := Eval(args[argIndex], b.Env())
+		if isErrorOrSystemExit(argValue) {
+			return argValue
+		}
+		encloseEnv.Set(b.Parameters().Standard[i].Value, argValue)
+		argIndex += 1
+	}
+
+	// Next have the remain to fill deafult value
+	for i := range len(b.Parameters().Default) {
+		if argIndex >= len(args) {
+			break
+		}
+		currParam := b.Parameters().Default[i]
+		argValue := Eval(args[argIndex], b.Env())
+		if isErrorOrSystemExit(argValue) {
+			return argValue
+		}
+		encloseEnv.Set(currParam.Key.Value, argValue)
+		argIndex += 1
+	}
+
+	var restArgs []object.Object
+	// Next have to fill the rest in args into a env so that we can work with it
+	for i := argIndex; i < len(args); i++ {
 		argValue := Eval(args[i], b.Env())
 		if isErrorOrSystemExit(argValue) {
 			return argValue
 		}
-		encloseEnv.Set(b.Parameters()[i].Value, argValue)
+		argIndex += 1
+	}
+	if b.Parameters().Rest {
+		encloseEnv.Set(REST_ARGS, &object.Array{Value: restArgs})
 	}
 
 	result := b.Func(encloseEnv)
