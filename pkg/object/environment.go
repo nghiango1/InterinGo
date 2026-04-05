@@ -34,7 +34,7 @@ func (e *Environment) Set(name string, val Object) Object {
 	return val
 }
 
-func (e *Environment) GetAllBuiltinInfos() string {
+func (e *Environment) GetAllBuiltinInfos() map[string]BuiltIn {
 	// Reduce the need to convert the type again
 	infos := map[string]BuiltIn{}
 	// Make sure the keys reponse in specific order
@@ -45,17 +45,7 @@ func (e *Environment) GetAllBuiltinInfos() string {
 			infos[k] = bi
 		}
 	}
-	sort.Strings(keys)
-
-	var helpInfo strings.Builder
-
-	for i, k := range keys {
-		if i > 0 {
-			fmt.Fprintf(&helpInfo, "\n")
-		}
-		fmt.Fprintf(&helpInfo, "\t- %s(%s) : %s", k, FnParamsInspect(infos[k].Parameters()), infos[k].Description())
-	}
-	return helpInfo.String()
+	return infos
 }
 
 func (e *Environment) GetAllStoreData() string {
@@ -76,7 +66,7 @@ func (e *Environment) GetAllStoreData() string {
 		if i > 0 {
 			fmt.Fprintf(&helpInfo, "\n")
 		}
-		fmt.Fprintf(&helpInfo, "\t- %s (%s): %s", k, e.store[k].Type(),  e.store[k].Inspect())
+		fmt.Fprintf(&helpInfo, "\t- %s (%s): %s", k, e.store[k].Type(), e.store[k].Inspect())
 	}
 	return helpInfo.String()
 }

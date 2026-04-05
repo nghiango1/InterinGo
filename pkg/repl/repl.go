@@ -109,14 +109,6 @@ func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
 	}
 }
 
-var completer = readline.NewPrefixCompleter(
-	readline.PcItem("let"),
-	readline.PcItem("if ("),
-	readline.PcItem("exit("),
-	readline.PcItem("help()"),
-	readline.PcItem("toggleVerbose()"),
-)
-
 func filterInput(r rune) (rune, bool) {
 	switch r {
 	// block CtrlZ feature
@@ -127,6 +119,19 @@ func filterInput(r rune) (rune, bool) {
 }
 
 func (r *Repl) signalCapture() {
+	var completer = readline.NewPrefixCompleter(
+		readline.PcItem("let "),
+		readline.PcItem("if ("),
+	)
+
+	for k, v := range r.core.Env.GetAllBuiltinInfos() {
+		funcCall := "("
+		if len(v.Parameters().Standard) == 0 && len(v.Parameters().Default) == 0 && !v.Parameters().Rest {
+			funcCall += ")"
+		}
+		completer.Children = append(completer.Children, readline.PcItem(k + funcCall))
+	}
+
 	l, err := readline.NewEx(&readline.Config{
 		Prompt:          ">> ",
 		HistoryFile:     "/tmp/readline.tmp",

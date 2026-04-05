@@ -7,6 +7,8 @@ package runtime
 import (
 	"fmt"
 	"maps"
+	"sort"
+	"strings"
 
 	"interingo/pkg/evaluator"
 	"interingo/pkg/lexer"
@@ -162,7 +164,22 @@ func getVerboseInfomation(l *lexer.Lexer, p *parser.Parser) *VerboseInfo {
 // Return help infomation, which contain a single string to provide to the User
 func (c *Core) Help() string {
 	infos := c.Env.GetAllBuiltinInfos()
-	return infos
+	// Make sure the keys reponse in specific order
+	keys := []string{}
+	for k, _ := range infos {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	var helpInfo strings.Builder
+
+	for i, k := range keys {
+		if i > 0 {
+			fmt.Fprintf(&helpInfo, "\n")
+		}
+		fmt.Fprintf(&helpInfo, "\t- %s(%s) : %s", k, object.FnParamsInspect(infos[k].Parameters()), infos[k].Description())
+	}
+	return helpInfo.String()
 }
 
 // Return help infomation, which contain a single string to provide to the User

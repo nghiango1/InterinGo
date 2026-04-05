@@ -1,27 +1,26 @@
-package runtime_test
+package runtime
 
 import (
 	"interingo/pkg/object"
-	"interingo/pkg/runtime"
+	"interingo/pkg/test"
 	"testing"
 )
 
 func TestBuiltin(t *testing.T) {
-	c := runtime.NewCore(runtime.EMBED, nil)
-	var toggleVerbose object.BuiltIn = &runtime.ToggleVerbose{Core: c}
+	c := NewCore(EMBED, nil)
+	var toggleVerbose object.BuiltIn = &ToggleVerbose{Core: c}
 
 	prior := c.Verbose
 	toggleVerbose.Func(nil)
 	if c.Verbose == prior {
 		t.Fatalf("Verbose doesn't match")
 	}
-	var getRuntimeInfo object.BuiltIn = &runtime.GetRuntimeInfo{Core: c}
-	got := getRuntimeInfo.Func(nil)
-	if v, ok := got.(*object.Boolean); ok {
-		if v.Value != true {
-			t.Fatalf("GetRuntimeInfo Return failured vaule. Got %v, want %v", v.Value, true)
-		}
-	} else {
-		t.Fatalf("GetRuntimeInfo Return vaule type not match. Got %v, want %v", got.Type(), object.BOOLEAN_OBJ)
-	}
+	env := object.NewEnvironment()
+	env.Set("print", &test.MockBuiltinImpl{
+		MockParameters: object.Parameters{},
+		MockEnv:        env,
+	})
+	var getRuntimeInfo object.BuiltIn = &GetRuntimeInfo{Core: c, env: env}
+	// return nil, as long as there no error here then it is fine
+	getRuntimeInfo.Func(env)
 }

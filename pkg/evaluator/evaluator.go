@@ -166,7 +166,7 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	return result
 }
 
-func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
+func EvalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
 	numOfFuncParam := len(b.Parameters().Standard)
 	numOfDefaultParam := len(b.Parameters().Default)
 
@@ -243,7 +243,7 @@ func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 	case *object.Function:
 		return evalFunctionObject(obj, callExpression.Arguments)
 	case object.BuiltIn:
-		return evalBuiltInObject(obj, callExpression.Arguments)
+		return EvalBuiltInObject(obj, callExpression.Arguments)
 	default:
 		return newError("%s is not callable", result.Type())
 	}

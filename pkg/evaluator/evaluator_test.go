@@ -1,10 +1,12 @@
-package evaluator
+package evaluator_test
 
 import (
 	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
 	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/evaluator"
+	"interingo/pkg/test"
 	"testing"
 )
 
@@ -40,7 +42,7 @@ func testEval(input string) object.Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
-	return Eval(program, env)
+	return evaluator.Eval(program, env)
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
@@ -145,7 +147,7 @@ func TestIfElseExpressions(t *testing.T) {
 }
 
 func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != NULL {
+	if obj != evaluator.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
@@ -304,18 +306,6 @@ func TestFunctionApplication(t *testing.T) {
 	}
 }
 
-type builtinImpl struct {
-	parameters object.Parameters
-	env        *object.Environment
-}
-
-func (b *builtinImpl) Description() string                        { return "Mock implement" }
-func (b *builtinImpl) Env() *object.Environment                   { return b.env }
-func (b *builtinImpl) Func(env *object.Environment) object.Object { b.env = env; return NULL }
-func (b *builtinImpl) Inspect() string                            { return "BUILT_IN: " + b.Description() }
-func (b *builtinImpl) Type() object.ObjectType                    { return object.BUILT_IN_OBJ }
-func (b *builtinImpl) Parameters() object.Parameters              { return b.parameters }
-
 func Test_evalBuiltInObject(t *testing.T) {
 	tests := []struct {
 		name string // description of this test case
@@ -326,7 +316,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 	}{
 		{
 			"Standard",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Standard: []*ast.Identifier{{Value: "code"}},
 			}},
 			[]ast.Expression{
@@ -338,7 +328,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 		},
 		{
 			"Default",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Default: []object.DefaultParameter{
 					{
 						Key:   &ast.Identifier{Value: "code"},
@@ -355,7 +345,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 		},
 		{
 			"Default 2",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Default: []object.DefaultParameter{
 					{
 						Key:   &ast.Identifier{Value: "code"},
@@ -370,7 +360,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 		},
 		{
 			"Standard and Default",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Standard: []*ast.Identifier{{Value: "code"}},
 				Default: []object.DefaultParameter{
 					{
@@ -389,7 +379,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 		},
 		{
 			"Standard and Default 2",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Standard: []*ast.Identifier{{Value: "code"}},
 				Default: []object.DefaultParameter{
 					{
@@ -409,7 +399,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 		},
 		{
 			"Rest",
-			&builtinImpl{parameters: object.Parameters{
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
 				Rest: true,
 			}},
 			[]ast.Expression{
@@ -417,7 +407,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 				&ast.IntegerLiteral{Value: 1},
 			},
 			map[string]object.Object{
-				REST_ARGS: &object.Array{
+				evaluator.REST_ARGS: &object.Array{
 					Value: []object.Object{
 						&object.Integer{Value: 1},
 						&object.Integer{Value: 1},
@@ -428,7 +418,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			evalBuiltInObject(tt.b, tt.args)
+			evaluator.EvalBuiltInObject(tt.b, tt.args)
 			// TODO: update the condition below to compare got with tt.want.
 			for k, v := range tt.want {
 				got, ok := tt.b.Env().Get(k)
