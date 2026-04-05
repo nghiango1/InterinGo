@@ -26,3 +26,13 @@ func (e *Environment) Set(name string, val Object) Object {
 	e.store[name] = val
 	return val
 }
+
+func (e *Environment) GetAllBuiltin() map[string]BuiltIn {
+	res := map[string]BuiltIn{}
+	for k, v := range e.store {
+		if bi, ok := v.(BuiltIn); ok {
+			res[k] = bi
+		}
+	}
+	return res
+}

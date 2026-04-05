@@ -40,4 +40,4 @@ func (b *SystemExit) Parameters() object.Parameters {
 }
 func (b *SystemExit) Env() *object.Environment { return b.Environment }
 func (b *SystemExit) Type() object.ObjectType  { return object.BUILT_IN_OBJ }
-func (b *SystemExit) Inspect() string          { return "BuiltIn: " + b.Description() }
+func (b *SystemExit) Inspect() string          { return object.BuiltInInspect(b) }

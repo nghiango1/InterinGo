@@ -15,6 +15,8 @@ import (
 	"interingo/pkg/share"
 	"interingo/pkg/token"
 	"maps"
+	"sort"
+	"strings"
 )
 
 type RuntimeType string
@@ -76,6 +78,10 @@ func NewCore(t RuntimeType, lifeCycleHandler LifeCycleHandler) *Core {
 		Core: c,
 	})
 	c.Env.Set("getRuntimeInfo", &GetRuntimeInfo{
+		Core: c,
+	})
+	c.Env.Set("help", &Help{
+		env:  env,
 		Core: c,
 	})
 
@@ -151,4 +157,25 @@ func getVerboseInfomation(l *lexer.Lexer, p *parser.Parser) *VerboseInfo {
 
 	result.Parser.Ats = p.Program
 	return &result
+}
+
+// Return help infomation, which contain a single string to provide to the User
+func (c *Core) Help() string {
+	infos := c.Env.GetAllBuiltin()
+	var helpInfo strings.Builder
+
+	keys := []string{}
+	for k := range infos {
+		keys = append(keys, k)
+	}
+	sort.Strings(keys)
+
+	for i, k := range keys {
+		if i > 0 {
+			fmt.Fprintf(&helpInfo, "\n")
+		}
+		fmt.Fprintf(&helpInfo, "\t- %s(%s) : %s", k, object.FnParamsInspect(infos[k].Parameters()), infos[k].Description())
+	}
+
+	return helpInfo.String()
 }

@@ -44,4 +44,4 @@ func (b *Print) Parameters() object.Parameters {
 }
 func (b *Print) Env() *object.Environment { return b.env }
 func (b *Print) Type() object.ObjectType  { return object.BUILT_IN_OBJ }
-func (b *Print) Inspect() string          { return "BUILT_IN: " + b.Description() }
+func (b *Print) Inspect() string          { return object.BuiltInInspect(b) }
