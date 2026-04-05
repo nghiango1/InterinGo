@@ -27,6 +27,7 @@ func (b *ToggleVerbose) Type() object.ObjectType  { return object.BUILT_IN_OBJ }
 func (b *ToggleVerbose) Inspect() string          { return object.BuiltInInspect(b) }
 
 type GetRuntimeInfo struct {
+	env  *object.Environment
 	Core *Core
 }
 
@@ -35,13 +36,31 @@ func (b *GetRuntimeInfo) Description() string {
 }
 
 func (b *GetRuntimeInfo) Func(env *object.Environment) object.Object {
-	return &object.Boolean{Value: true}
+	printBuiltin, ok := env.Get("print")
+	if !ok {
+		return &object.Error{
+			Message: "Help rely's `print` builtin doesn't existed",
+		}
+	}
+	bi, ok := printBuiltin.(object.BuiltIn)
+	if !ok {
+		return &object.Error{
+			Message: fmt.Sprintf("Help rely's `print` builtin, but got %v print instead", printBuiltin.Type()),
+		}
+	}
+	// Construct Builtin - Helper
+	infos := b.Core.GetRuntimeInfo()
+	// Print the value
+	printEnv := object.NewEnclosedEnvironment(env)
+	printEnv.Set(evaluator.REST_ARGS, &object.Array{Value: []object.Object{&object.String{Value: infos}}})
+	bi.Func(printEnv)
+	return nil
 }
 
 func (b *GetRuntimeInfo) Parameters() object.Parameters {
 	return object.Parameters{}
 }
-func (b *GetRuntimeInfo) Env() *object.Environment { return nil }
+func (b *GetRuntimeInfo) Env() *object.Environment { return b.env }
 func (b *GetRuntimeInfo) Type() object.ObjectType  { return object.BUILT_IN_OBJ }
 func (b *GetRuntimeInfo) Inspect() string          { return object.BuiltInInspect(b) }
 

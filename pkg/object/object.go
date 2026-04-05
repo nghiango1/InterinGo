@@ -58,7 +58,7 @@ func BuiltInInspect(f BuiltIn) string {
 	out.WriteString("fn")
 	out.WriteString("(")
 	out.WriteString(FnParamsInspect(f.Parameters()))
-	out.WriteString(") : ")
+	out.WriteString(") //")
 	out.WriteString(f.Description())
 	return out.String()
 }
