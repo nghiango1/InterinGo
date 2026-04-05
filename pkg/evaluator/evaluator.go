@@ -216,6 +216,7 @@ func evalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
 		if isErrorOrSystemExit(argValue) {
 			return argValue
 		}
+		restArgs = append(restArgs, argValue)
 		argIndex += 1
 	}
 	if b.Parameters().Rest {

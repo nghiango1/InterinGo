@@ -33,21 +33,21 @@ const (
 )
 
 type Core struct {
-	env              object.Environment
+	Env              *object.Environment
 	Verbose          bool
 	lifeCycleHandler LifeCycleHandler // Only work with embed type
 	state            RuntimeState
 }
 
 func (c *Core) loadNativeBuiltIn() {
-	c.env.Set("exit", &native.SystemExit{
-		Environment: &c.env,
+	c.Env.Set("exit", &native.SystemExit{
+		Environment: c.Env,
 	})
 }
 
 func (c *Core) loadEmbedBuiltIn() {
-	c.env.Set("exit", &embed.SystemExit{
-		Environment: &c.env,
+	c.Env.Set("exit", &embed.SystemExit{
+		Environment: c.Env,
 	})
 }
 
@@ -59,7 +59,7 @@ func NewCore(t RuntimeType, lifeCycleHandler LifeCycleHandler) *Core {
 	env := object.NewEnvironment()
 
 	c := &Core{
-		env:              *env,
+		Env:              env,
 		Verbose:          share.VerboseMode,
 		lifeCycleHandler: lifeCycleHandler,
 		state:            RUNTIME_START,
@@ -72,10 +72,10 @@ func NewCore(t RuntimeType, lifeCycleHandler LifeCycleHandler) *Core {
 	}
 
 	// Allow toggle verbose to update verbose flag of this runtime core
-	c.env.Set("toggleVerbose", &ToggleVerbose{
+	c.Env.Set("toggleVerbose", &ToggleVerbose{
 		Core: c,
 	})
-	c.env.Set("getRuntimeInfo", &GetRuntimeInfo{
+	c.Env.Set("getRuntimeInfo", &GetRuntimeInfo{
 		Core: c,
 	})
 
@@ -104,7 +104,7 @@ func (c *Core) Eval(req EvalRequest) (*EvalResponseSuccess, *EvalResponseError, 
 		return nil, error, verboseInfo
 	}
 
-	evaluated := evaluator.Eval(program, &c.env)
+	evaluated := evaluator.Eval(program, c.Env)
 	// This here as Eval can change runtime verbose state
 	var verboseInfo *VerboseInfo
 	if c.Verbose {

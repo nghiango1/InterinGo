@@ -29,11 +29,20 @@ func NewRepl(evalCore *runtime.Core, in io.Reader, out io.Writer) *Repl {
 		evalCore = runtime.NewCore(runtime.NATIVE, nil)
 	}
 
-	return &Repl{
+	res := &Repl{
 		core: evalCore,
 		in:   in,
 		out:  out,
 	}
+
+	evalCore.Env.Set(
+		"print", &Print{
+			env: res.core.Env,
+			r:   res,
+		},
+	)
+
+	return res
 }
 
 func (r *Repl) Start() {

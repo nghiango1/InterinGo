@@ -435,7 +435,7 @@ func Test_evalBuiltInObject(t *testing.T) {
 				if !ok {
 					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
 				}
-				if got.Inspect() != v.Inspect() && got.Type() != v.Type() {
+				if got.Inspect() != v.Inspect() || got.Type() != v.Type() {
 					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
 				}
 
