@@ -6,22 +6,20 @@ import (
 )
 
 type Lexer struct {
-	input        string
-	position     int                     // current position in input (points to current char)
-	readPosition int                     // current reading position in input (after current char)
-	ch           byte                    // current char under examination
-	SkipedChar   int                     // skiped white-space - for Verbose mode
-	SkipedLine   int                     // skiped comment line - for Verbose mode
-	TokenCount   map[token.TokenType]int // count all token - for Verbose mode
-	Line         int                     // current position in input (line - 0 index)
-	Character    int                     // current position in input (position in line - 0 index)
+	input             string
+	position          int                     // current position in input (points to current char)
+	readPosition      int                     // current reading position in input (after current char)
+	ch                byte                    // current char under examination
+	SkipedChar        int                     // skiped white-space - for Verbose mode
+	SkipedCommentLine int                     // skiped comment line - for Verbose mode
+	TokenCount        map[token.TokenType]int // count all token - for Verbose mode
+	Line              int                     // current position in input (line - 0 index)
+	Character         int                     // current position in input (position in line - 0 index)
 }
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
-	if share.VerboseMode {
-		l.TokenCount = make(map[token.TokenType]int)
-	}
+	l.TokenCount = make(map[token.TokenType]int)
 	l.readChar()
 	return l
 }
@@ -47,17 +45,13 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' {
-		if share.VerboseMode {
-			l.SkipedChar += 1
-		}
+		l.SkipedChar += 1
 		l.readChar()
 	}
 }
 
 func (l *Lexer) skipCurrentLine() string {
-	if share.VerboseMode {
-		l.SkipedLine += 1
-	}
+	l.SkipedCommentLine += 1
 
 	pos := l.position
 	// Read until end of line or stop when reach EOF
@@ -156,9 +150,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Start = start
 			tok.End = l.Position()
 
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
+			l.TokenCount[tok.Type] += 1
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readDigit()
@@ -166,9 +158,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Start = start
 			tok.End = l.Position()
 
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
+			l.TokenCount[tok.Type] += 1
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, string(l.ch), start)
@@ -176,9 +166,7 @@ func (l *Lexer) NextToken() token.Token {
 	}
 	l.readChar()
 
-	if share.VerboseMode {
-		l.TokenCount[tok.Type] += 1
-	}
+	l.TokenCount[tok.Type] += 1
 
 	tok.End = share.Position{
 		Line:      l.Line,

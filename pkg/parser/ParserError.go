@@ -5,6 +5,6 @@ import (
 )
 
 type ParserError struct {
-	Message string
-	Range   share.Range
+	Message string      `json:"message"`
+	Range   share.Range `json:"range"`
 }

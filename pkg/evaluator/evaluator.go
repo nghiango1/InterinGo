@@ -12,6 +12,10 @@ var (
 	FALSE = &object.Boolean{Value: false}
 )
 
+const (
+	REST_ARGS = "_RestArgs"
+)
+
 func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	if input {
 		return TRUE
@@ -19,13 +23,13 @@ func nativeBoolToBooleanObject(input bool) *object.Boolean {
 	return FALSE
 }
 
-func newError(format string, a ...interface{}) *object.Error {
+func newError(format string, a ...any) *object.Error {
 	return &object.Error{Message: fmt.Sprintf(format, a...)}
 }
 
-func isError(obj object.Object) bool {
+func isErrorOrSystemExit(obj object.Object) bool {
 	if obj != nil {
-		if obj.Type() == object.ERROR_OBJ {
+		if obj.Type() == object.ERROR_OBJ || obj.Type() == object.SYSTEM_EXIT_OBJ {
 			return true
 		}
 	}
@@ -48,17 +52,17 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalCallExpression(node, env)
 	case *ast.PrefixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isErrorOrSystemExit(right) {
 			return right
 		}
 		return evalPrefixExpression(node.Operator, right)
 	case *ast.InfixExpression:
 		right := Eval(node.Right, env)
-		if isError(right) {
+		if isErrorOrSystemExit(right) {
 			return right
 		}
 		left := Eval(node.Left, env)
-		if isError(left) {
+		if isErrorOrSystemExit(left) {
 			return left
 		}
 		return evalInfixExpression(node.Operator, left, right)
@@ -70,7 +74,7 @@ func Eval(node ast.Node, env *object.Environment) object.Object {
 		return evalFunctionLiteral(node, env)
 	case *ast.LetStatement:
 		val := Eval(node.Value, env)
-		if isError(val) {
+		if isErrorOrSystemExit(val) {
 			return val
 		}
 		env.Set(node.Name.Value, val)
@@ -89,6 +93,8 @@ func evalProgram(stmts []ast.Statement, env *object.Environment) object.Object {
 			return result.Value
 		case *object.Error:
 			return result
+		case *object.SystemExit:
+			return result
 		}
 	}
 	return result
@@ -100,7 +106,7 @@ func evalBlockStatement(block *ast.BlockStatement, env *object.Environment) obje
 		result = Eval(statement, env)
 		if result != nil {
 			rt := result.Type()
-			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ {
+			if rt == object.RETURN_VALUE_OBJ || rt == object.ERROR_OBJ || rt == object.SYSTEM_EXIT_OBJ {
 				return result
 			}
 		}
@@ -141,13 +147,13 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	numOfFuncParam := len(fo.Parameters)
 	numOfArgs := len(args)
 	if numOfArgs != numOfFuncParam {
-		return newError("Function take %d agrument but %d are given", numOfArgs, numOfFuncParam)
+		return newError("Function take %d params but %d args are given", numOfFuncParam, numOfArgs)
 	}
 
 	encloseEnv := object.NewEnclosedEnvironment(fo.Env)
-	for i := 0; i < numOfFuncParam; i++ {
+	for i := range numOfFuncParam {
 		argValue := Eval(args[i], fo.Env)
-		if isError(argValue) {
+		if isErrorOrSystemExit(argValue) {
 			return argValue
 		}
 		encloseEnv.Set(fo.Parameters[i].Value, argValue)
@@ -160,21 +166,87 @@ func evalFunctionObject(fo *object.Function, args []ast.Expression) object.Objec
 	return result
 }
 
+func EvalBuiltInObject(b object.BuiltIn, args []ast.Expression) object.Object {
+	numOfFuncParam := len(b.Parameters().Standard)
+	numOfDefaultParam := len(b.Parameters().Default)
+
+	numOfArgs := len(args)
+	if !(numOfArgs >= numOfFuncParam && numOfArgs <= numOfFuncParam+numOfDefaultParam || b.Parameters().Rest) {
+		return newError("Function take <%d params> + <%d default> params but <%d args> are given", numOfFuncParam, numOfDefaultParam, numOfArgs)
+	}
+
+	encloseEnv := object.NewEnclosedEnvironment(b.Env())
+
+	// While we support default params, args doesn't have any way to provide key binding
+	// This just here to support limited Exit() call vs Exit(code)
+	// First init env with the default value
+	for i := range len(b.Parameters().Default) {
+		currParam := b.Parameters().Default[i]
+		encloseEnv.Set(currParam.Key.Value, currParam.Value)
+	}
+
+	argIndex := 0
+	for i := range len(b.Parameters().Standard) {
+		argValue := Eval(args[argIndex], b.Env())
+		if isErrorOrSystemExit(argValue) {
+			return argValue
+		}
+		encloseEnv.Set(b.Parameters().Standard[i].Value, argValue)
+		argIndex += 1
+	}
+
+	// Next have the remain to fill deafult value
+	for i := range len(b.Parameters().Default) {
+		if argIndex >= len(args) {
+			break
+		}
+		currParam := b.Parameters().Default[i]
+		argValue := Eval(args[argIndex], b.Env())
+		if isErrorOrSystemExit(argValue) {
+			return argValue
+		}
+		encloseEnv.Set(currParam.Key.Value, argValue)
+		argIndex += 1
+	}
+
+	var restArgs []object.Object
+	// Next have to fill the rest in args into a env so that we can work with it
+	for i := argIndex; i < len(args); i++ {
+		argValue := Eval(args[i], b.Env())
+		if isErrorOrSystemExit(argValue) {
+			return argValue
+		}
+		restArgs = append(restArgs, argValue)
+		argIndex += 1
+	}
+	if b.Parameters().Rest {
+		encloseEnv.Set(REST_ARGS, &object.Array{Value: restArgs})
+	}
+
+	result := b.Func(encloseEnv)
+	if resultValue, ok := result.(*object.ReturnValue); ok {
+		return resultValue.Value
+	}
+	return result
+}
+
 func evalCallExpression(node ast.Node, env *object.Environment) object.Object {
 	callExpression, _ := node.(*ast.CallExpression)
 
 	result := Eval(callExpression.Function, env)
 
-	if isError(result) {
+	if isErrorOrSystemExit(result) {
 		return result
 	}
 
-	functionObject, ok := result.(*object.Function)
-	if !ok {
+	switch obj := result.(type) {
+	case *object.Function:
+		return evalFunctionObject(obj, callExpression.Arguments)
+	case object.BuiltIn:
+		return EvalBuiltInObject(obj, callExpression.Arguments)
+	default:
 		return newError("%s is not callable", result.Type())
 	}
-
-	return evalFunctionObject(functionObject, callExpression.Arguments)
 }
 
 func evalMinusOperatorExpression(right object.Object) object.Object {

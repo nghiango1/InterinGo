@@ -235,6 +235,15 @@ func (p *Parser) parseCallExpression(function ast.Expression) ast.Expression {
 
 	for !p.peekTokenIs(token.RPAREN) {
 		p.nextToken() // Skip the '(' and ',' token
+		if p.curToken.Type == token.EOF {
+			p.Errors = append(p.Errors, ParserError{
+				Message: "Expect call expression, but not found closing `)`",
+				Range: share.Range{
+					Start: p.curToken.Start,
+					End:   p.curToken.End,
+				}})
+			return nil
+		}
 		exp.Arguments = append(exp.Arguments, p.parseExpression(LOWEST))
 		if p.peekTokenIs(token.COMMA) {
 			p.nextToken()

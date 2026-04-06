@@ -620,6 +620,16 @@ func TestFunctionLiteralParsing(t *testing.T) {
 	testInfixExpression(t, bodyStmt.Expression, "x", "+", "y")
 }
 
+func TestCallExpressionErrorParsing(t *testing.T) {
+	input := "add(1, 2"
+	l := lexer.New(input)
+	p := New(l)
+	p.ParseProgram()
+	if len(p.Errors) != 1 {
+		t.Fatalf("Expect to detect parser error")
+	}
+}
+
 func TestCallExpressionParsing(t *testing.T) {
 	input := "add(1, 2 * 3, 4 + 5);"
 	l := lexer.New(input)
@@ -727,3 +737,4 @@ func TestMain(m *testing.M) {
 	share.SetDefaultLog(slog.LevelDebug)
 	os.Exit(m.Run())
 }
+

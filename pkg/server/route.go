@@ -1,11 +1,10 @@
 package server
 
 import (
-	"bytes"
 	"embed"
 	"fmt"
-	"interingo/pkg/repl"
 	"interingo/pkg/service/common"
+	"interingo/pkg/service/core"
 	"io/fs"
 	"log"
 	"mime"
@@ -25,29 +24,8 @@ const WEBSITE_FILEPATH = "content/dist"
 //go:embed all:content
 var embedContent embed.FS
 
-func EvaluateHandler(c *gin.Context) {
-	// Input validate
-	var req common.EvalRequest
-	errs := c.BindJSON(&req)
-	if errs != nil {
-		fmt.Println("API error, can't parse form value")
-		errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-		c.JSON(http.StatusBadRequest, errorResp)
-	}
-
-	// Handling eval
-	buf := bytes.Buffer{}
-	repl.Handle(req.Data, &buf)
-
-	// Return
-	resp := common.EvalResponseSuccess{
-		Output: buf.String(),
-	}
-	c.JSON(http.StatusOK, resp)
-}
-
 // Any call which doesn't match `/api` route will be handle with static fileserver
-func pageRoute(r *gin.Engine) {
+func pageRoute(s *Server) {
 	fsys, err := fs.Sub(embedContent, WEBSITE_FILEPATH)
 	if err != nil {
 		log.Fatalln("Failed to embed folder, got error: ", err)
@@ -68,7 +46,7 @@ func pageRoute(r *gin.Engine) {
 		c.Data(status, mimeType, data)
 	}
 
-	r.Use(func(c *gin.Context) {
+	s.ginEngine.Use(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
 			c.Next()
 			return
@@ -108,11 +86,34 @@ func pageRoute(r *gin.Engine) {
 	})
 }
 
-func apiRoute(r *gin.Engine) {
-	r.POST("/api/evaluate", EvaluateHandler)
+func apiRoute(s *Server) {
+	s.ginEngine.POST("/api/evaluate", func(c *gin.Context) {
+		// Input validate
+		var req core.EvaluateRequest
+		err := c.BindJSON(&req)
+		if err != nil {
+			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
+			c.JSON(http.StatusBadRequest, errorResp)
+		}
+
+		if s.serviceCore == nil {
+			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
+			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
+		}
+
+		res, evalErr := s.serviceCore.EvaluateHandler(req)
+
+		// Return
+		if evalErr != nil {
+			c.JSON(evalErr.GetType(), evalErr)
+		} else if res != nil {
+			c.JSON(http.StatusOK, res)
+		}
+	})
 }
 
-func Route(r *gin.Engine) {
-	pageRoute(r)
-	apiRoute(r)
+func Route(s *Server) {
+	pageRoute(s)
+	apiRoute(s)
 }

@@ -35,11 +35,10 @@ COPY --from=website-build-env --parents /root/workspace/website/dist .
 WORKDIR /root/workspace
 
 # Build step
-RUN make embed-content
-RUN make go-build
+RUN make interingo-service-build
 
 FROM alpine:latest
 WORKDIR /app
 COPY --from=build-env /root/workspace/dist/ /app
 EXPOSE 8080
-ENTRYPOINT /app/interingo -s
+ENTRYPOINT ["/app/interingo", "-s"]

@@ -89,7 +89,8 @@ func TestMain(t *testing.T) {
 			t.Errorf("File read error, error code: %v\n", err)
 		}
 
-		repl.Handle(string(inputFileContent), buf)
+		repl := repl.NewRepl(nil, os.Stdin, buf)
+		repl.Handle(string(inputFileContent))
 
 		outputFileName := fileName + ".out"
 		outputFileNameDir := filepath.Join(testAssetsDir, "/result/", outputFileName)

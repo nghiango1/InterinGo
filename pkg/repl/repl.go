@@ -1,117 +1,113 @@
+// This handle read-input, evaluation, print-output, loop
+// Using readline to handle stdin/out only
+
 package repl
 
 import (
+	"encoding/json"
 	"fmt"
 	"io"
 	"log"
-	"interingo/pkg/ast"
-	"interingo/pkg/evaluator"
-	"interingo/pkg/lexer"
-	"interingo/pkg/object"
-	"interingo/pkg/parser"
-	"interingo/pkg/share"
 	"strings"
+
+	"interingo/pkg/parser"
+	"interingo/pkg/runtime"
 
 	"github.com/chzyer/readline"
 )
 
 const EVAL_UNDEFINE = "Seem eval function not implemented yet"
 
-var env *object.Environment = nil
-
-func Start(in io.Reader, out io.Writer) {
-	signalCapture(in, out)
+type Repl struct {
+	core *runtime.Core
+	in   io.Reader
+	out  io.Writer
 }
 
-func Handle(line string, out io.Writer) {
-	if env == nil {
-		env = object.NewEnvironment()
+func NewRepl(evalCore *runtime.Core, in io.Reader, out io.Writer) *Repl {
+	if evalCore == nil {
+		evalCore = runtime.NewCore(runtime.NATIVE, nil)
 	}
 
-	switch {
-	case line == "help()":
-		usage(out)
-	case line == "exit()":
-		io.WriteString(out, "exit() only work in REPL CLI session, but let me reset all variable for you\n")
-		env = object.NewEnvironment()
-	case line == "toggleVerbose()":
-		share.VerboseMode = !share.VerboseMode
-		if share.VerboseMode {
-			io.WriteString(out, "Verbose mode enable\n")
-		} else {
-			io.WriteString(out, "Verbose mode disable\n")
-		}
-	case line == "":
-	default:
-		codeHandle(line, out, env)
+	res := &Repl{
+		core: evalCore,
+		in:   in,
+		out:  out,
 	}
+
+	evalCore.Env.Set(
+		"print", &Print{
+			env: res.core.Env,
+			r:   res,
+		},
+	)
+
+	return res
 }
 
-func printVerboseInfomation(l *lexer.Lexer, p *parser.Parser, program *ast.Program, out io.Writer) {
-	lexerVerbose := fmt.Sprintf("Lexer information:\n\tSkip whitespace = %d\n\tSkip comment line = %d\n\tToken found:\n", l.SkipedChar, l.SkipedLine)
-	io.WriteString(out, lexerVerbose)
-
-	for k, v := range l.TokenCount {
-		io.WriteString(out, fmt.Sprintf("\t\t%v: %d\n", k, v))
-	}
-
-	// TO DO: Print parser infomation, Print full AST tree presentation
-	parseVerbose := fmt.Sprintf("Parse infomation:\n\tProgram statement parsed:\n")
-	io.WriteString(out, parseVerbose)
-	for _, v := range program.Statements {
-		io.WriteString(out, fmt.Sprintf("\t\t%T: %v\n", v, v.String()))
-	}
+func (r *Repl) Start() {
+	r.signalCapture()
 }
 
-func codeHandle(line string, out io.Writer, env *object.Environment) {
+func (r *Repl) Handle(line string) error {
 	if line == "" {
-		return
-	}
-	l := lexer.New(line)
-	p := parser.New(l)
-	program := p.ParseProgram()
-
-	if share.VerboseMode {
-		printVerboseInfomation(l, p, program, out)
+		return nil
 	}
 
-	if len(p.Errors) != 0 {
-		errorsHandler(p.Errors, out)
-		return
+	result, error, verbose := r.core.Eval(runtime.EvalRequest{
+		Data: line,
+	})
+
+	if verbose != nil {
+		r.printVerboseInfomation(verbose)
 	}
 
-	if share.VerboseMode {
-		io.WriteString(out, "Evaluation result:\n\n")
+	if error != nil {
+		if len(error.ParserErrors) != 0 {
+			r.parsingErrorsHandler(error.ParserErrors)
+			// Already handle
+			// return fmt.Errorf("Parser error")
+			return nil
+		}
+
+		if error.Error != nil {
+			return error.Error
+		}
+
+		if error.SystemExit != nil {
+			return fmt.Errorf("System exit called")
+		}
+
+		return fmt.Errorf("Unknown error")
 	}
 
-	evaluated := evaluator.Eval(program, env)
-	if evaluated != nil {
-		io.WriteString(out, evaluated.Inspect())
-		io.WriteString(out, "\n")
+	if result == nil {
+		return fmt.Errorf("Evaluation result not found error")
 	}
+
+	if result.Output != nil {
+		io.WriteString(r.out, *result.Output)
+		io.WriteString(r.out, "\n")
+	}
+
+	return nil
 }
 
-func errorsHandler(errors []parser.ParserError, out io.Writer) {
-	io.WriteString(out, "Errors when parsing:\n")
+func (r *Repl) printVerboseInfomation(info *runtime.VerboseInfo) {
+	data, err := json.MarshalIndent(info, "> ", "    ")
+	if err != nil {
+		return
+	}
+	r.out.Write(data)
+	io.WriteString(r.out, "\n")
+}
+
+func (r *Repl) parsingErrorsHandler(errors []parser.ParserError) {
+	io.WriteString(r.out, "Errors when parsing:\n")
 	for _, e := range errors {
-		io.WriteString(out, "\t"+e.Message+"\n")
+		io.WriteString(r.out, "\t"+e.Message+"\n")
 	}
 }
-
-func usage(w io.Writer) {
-	io.WriteString(w, "Built-in commands:\n")
-	io.WriteString(w, "- toggleVerbose(): Toggle verbose mode - print more infomation about Lexer, Parse and Evaluator\n")
-	io.WriteString(w, "- help(): Print this help\n")
-	io.WriteString(w, "- exit(): End this REPL session\n")
-}
-
-var completer = readline.NewPrefixCompleter(
-	readline.PcItem("let"),
-	readline.PcItem("if ("),
-	readline.PcItem("exit()"),
-	readline.PcItem("help()"),
-	readline.PcItem("toggleVerbose()"),
-)
 
 func filterInput(r rune) (rune, bool) {
 	switch r {
@@ -122,7 +118,20 @@ func filterInput(r rune) (rune, bool) {
 	return r, true
 }
 
-func signalCapture(in io.Reader, out io.Writer) {
+func (r *Repl) signalCapture() {
+	var completer = readline.NewPrefixCompleter(
+		readline.PcItem("let "),
+		readline.PcItem("if ("),
+	)
+
+	for k, v := range r.core.Env.GetAllBuiltinInfos() {
+		funcCall := "("
+		if len(v.Parameters().Standard) == 0 && len(v.Parameters().Default) == 0 && !v.Parameters().Rest {
+			funcCall += ")"
+		}
+		completer.Children = append(completer.Children, readline.PcItem(k + funcCall))
+	}
+
 	l, err := readline.NewEx(&readline.Config{
 		Prompt:          ">> ",
 		HistoryFile:     "/tmp/readline.tmp",
@@ -153,10 +162,9 @@ func signalCapture(in io.Reader, out io.Writer) {
 		}
 
 		line = strings.TrimSpace(line)
-		if line == "exit()" {
-			break
-		} else {
-			Handle(line, out)
+		err = r.Handle(line)
+		if err != nil {
+			panic(err)
 		}
 	}
 }

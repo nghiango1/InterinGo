@@ -1,9 +1,12 @@
-package evaluator
+package evaluator_test
 
 import (
-	"interingo/pkg/object"
+	"interingo/pkg/ast"
 	"interingo/pkg/lexer"
+	"interingo/pkg/object"
 	"interingo/pkg/parser"
+	"interingo/pkg/evaluator"
+	"interingo/pkg/test"
 	"testing"
 )
 
@@ -39,7 +42,7 @@ func testEval(input string) object.Object {
 	p := parser.New(l)
 	program := p.ParseProgram()
 	env := object.NewEnvironment()
-	return Eval(program, env)
+	return evaluator.Eval(program, env)
 }
 
 func TestEvalBooleanExpression(t *testing.T) {
@@ -144,7 +147,7 @@ func TestIfElseExpressions(t *testing.T) {
 }
 
 func testNullObject(t *testing.T, obj object.Object) bool {
-	if obj != NULL {
+	if obj != evaluator.NULL {
 		t.Errorf("object is not NULL. got=%T (%+v)", obj, obj)
 		return false
 	}
@@ -300,5 +303,133 @@ func TestFunctionApplication(t *testing.T) {
 	for _, tt := range tests {
 		result := testEval(tt.input)
 		testIntegerObject(t, result, tt.expected)
+	}
+}
+
+func Test_evalBuiltInObject(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		b    object.BuiltIn
+		args []ast.Expression
+		want map[string]object.Object
+	}{
+		{
+			"Standard",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Default",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "code"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Default 2",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "code"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			nil,
+			map[string]object.Object{
+				"code": &object.Integer{Value: 1000},
+			},
+		},
+		{
+			"Standard and Default",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "default"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code":    &object.Integer{Value: 1},
+				"default": &object.Integer{Value: 1000},
+			},
+		},
+		{
+			"Standard and Default 2",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Standard: []*ast.Identifier{{Value: "code"}},
+				Default: []object.DefaultParameter{
+					{
+						Key:   &ast.Identifier{Value: "default"},
+						Value: &object.Integer{Value: 1000},
+					},
+				},
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				"code":    &object.Integer{Value: 1},
+				"default": &object.Integer{Value: 1},
+			},
+		},
+		{
+			"Rest",
+			&test.MockBuiltinImpl{MockParameters: object.Parameters{
+				Rest: true,
+			}},
+			[]ast.Expression{
+				&ast.IntegerLiteral{Value: 1},
+				&ast.IntegerLiteral{Value: 1},
+			},
+			map[string]object.Object{
+				evaluator.REST_ARGS: &object.Array{
+					Value: []object.Object{
+						&object.Integer{Value: 1},
+						&object.Integer{Value: 1},
+					},
+				},
+			},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			evaluator.EvalBuiltInObject(tt.b, tt.args)
+			// TODO: update the condition below to compare got with tt.want.
+			for k, v := range tt.want {
+				got, ok := tt.b.Env().Get(k)
+				if !ok {
+					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
+				}
+				if got.Inspect() != v.Inspect() || got.Type() != v.Type() {
+					t.Errorf("evalBuiltInObject() = %v, want %v", got, tt.want)
+				}
+
+			}
+		})
 	}
 }

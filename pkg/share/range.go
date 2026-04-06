@@ -19,8 +19,8 @@ type Position struct {
 }
 
 type Range struct {
-	Start Position
-	End   Position
+	Start Position `json:"start"`
+	End   Position `json:"end"`
 }
 
 // Support glsp
