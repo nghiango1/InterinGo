@@ -19,9 +19,7 @@ type Lexer struct {
 
 func New(input string) *Lexer {
 	l := &Lexer{input: input}
-	if share.VerboseMode {
-		l.TokenCount = make(map[token.TokenType]int)
-	}
+	l.TokenCount = make(map[token.TokenType]int)
 	l.readChar()
 	return l
 }
@@ -47,17 +45,13 @@ func (l *Lexer) readChar() {
 
 func (l *Lexer) skipWhitespace() {
 	for l.ch == ' ' || l.ch == '\t' {
-		if share.VerboseMode {
-			l.SkipedChar += 1
-		}
+		l.SkipedChar += 1
 		l.readChar()
 	}
 }
 
 func (l *Lexer) skipCurrentLine() string {
-	if share.VerboseMode {
-		l.SkipedCommentLine += 1
-	}
+	l.SkipedCommentLine += 1
 
 	pos := l.position
 	// Read until end of line or stop when reach EOF
@@ -156,9 +150,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Start = start
 			tok.End = l.Position()
 
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
+			l.TokenCount[tok.Type] += 1
 			return tok
 		} else if isDigit(l.ch) {
 			tok.Literal = l.readDigit()
@@ -166,9 +158,7 @@ func (l *Lexer) NextToken() token.Token {
 			tok.Start = start
 			tok.End = l.Position()
 
-			if share.VerboseMode {
-				l.TokenCount[tok.Type] += 1
-			}
+			l.TokenCount[tok.Type] += 1
 			return tok
 		} else {
 			tok = newToken(token.ILLEGAL, string(l.ch), start)
@@ -176,9 +166,7 @@ func (l *Lexer) NextToken() token.Token {
 	}
 	l.readChar()
 
-	if share.VerboseMode {
-		l.TokenCount[tok.Type] += 1
-	}
+	l.TokenCount[tok.Type] += 1
 
 	tok.End = share.Position{
 		Line:      l.Line,
