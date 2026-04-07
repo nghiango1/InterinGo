@@ -66,7 +66,7 @@ func HandleTextDocumentSemanticTokensFull(context *glsp.Context, params *protoco
 
 func getDiagnostic(errs []parser.ParserError) []protocol.Diagnostic {
 	// Create diagnostic
-	var diagnostics []protocol.Diagnostic
+	var diagnostics []protocol.Diagnostic = make([]protocol.Diagnostic, 0)
 
 	for _, e := range errs {
 		serverity := protocol.DiagnosticSeverityError
@@ -89,12 +89,10 @@ func HandleTextDocumentDidOpen(context *glsp.Context, params *protocol.DidOpenTe
 	ef := store.Wrap(&params.TextDocument)
 	store.GetStore().Add(ef)
 	found := getDiagnostic(ef.Parser.Errors)
-	if len(found) != 0 {
-		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-			URI:         params.TextDocument.URI,
-			Diagnostics: found,
-		})
-	}
+	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+		URI:         params.TextDocument.URI,
+		Diagnostics: found,
+	})
 	return nil
 }
 
@@ -120,12 +118,10 @@ func HandleTextDocumentDidChange(context *glsp.Context, params *protocol.DidChan
 	}
 
 	found := getDiagnostic(textDocObj.Parser.Errors)
-	if len(found) != 0 {
-		context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
-			URI:         params.TextDocument.URI,
-			Diagnostics: found,
-		})
-	}
+	context.Notify(protocol.ServerTextDocumentPublishDiagnostics, protocol.PublishDiagnosticsParams{
+		URI:         params.TextDocument.URI,
+		Diagnostics: found,
+	})
 	return nil
 }
 
@@ -142,12 +138,11 @@ func HandleDocumentFormatting(context *glsp.Context, params *protocol.DocumentFo
 	// Not format yet
 	format := ef.Unwrap().Text
 
-
 	var fo FormattingOptions
 	d, err := json.Marshal(params.Options)
 	if err != nil {
 		return nil, err
-	} 
+	}
 	err = json.Unmarshal(d, &fo)
 
 	if err != nil {
