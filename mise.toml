@@ -1,0 +1,6 @@
+[tools]
+node = '25'
+go = '1.26.1'
+
+[env]
+NODE_ENV = 'development'
