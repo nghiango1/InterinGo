@@ -10,17 +10,34 @@
 	<meta charset="UTF-8" />
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="x-ua-compatible" content="ie=edge" />
-	<title>InterinGo language</title>
+	<title>InterinGo — Interpreter built in Go</title>
 	<link rel="icon" type="image/x-icon" />
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+	<link
+		rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
+		integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
+		crossorigin="anonymous"
+		referrerpolicy="no-referrer"
+	/>
 	<link rel="stylesheet" href="/public/prism.css" />
 	<script src="/public/htmx.min.js"></script>
 	<script src="/public/custom.js"></script>
 	<script src="/public/prism.js"></script>
 	<link rel="icon" href={favicon} />
+
+	<link rel="preconnect" href="https://fonts.googleapis.com" />
+	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
+	<link
+		href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Space+Grotesk:wght@400;500;700&display=swap"
+		rel="stylesheet"
+	/>
 </svelte:head>
 
-<div id="app" class="scrollbar min-w-80 dark:bg-[#050510]">
+<div
+	id="app"
+	class="min-h-screen dark:bg-stone-950 dark:text-stone-100"
+	style="font-family: 'JetBrains Mono', monospace;"
+>
 	<main>
 		<Header />
 
