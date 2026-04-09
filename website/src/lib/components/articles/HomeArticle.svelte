@@ -1,10 +1,10 @@
 <script lang="ts">
 	import CommandPrompt from '../CommandPrompt.svelte';
 	import CodeBlock from './CodeBlock.svelte';
+	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
 
-	let command = $state('');
 	function setCommand(input: string) {
-		command = input;
+		state.command = input;
 	}
 
 	const snippets = [
@@ -46,13 +46,13 @@
 	];
 </script>
 
-<article class="prose max-w-none dark:prose-invert">
-	<section class="mx-auto max-w-6xl px-6 py-16">
-		<div class="grid grid-cols-1 items-start gap-12 xl:grid-cols-2">
+<article class="mx-auto prose max-w-6xl px-6 py-16 dark:prose-invert">
+	<section class="">
+		<div class={"grid grid-cols-1 items-start gap-12" + (state.stick ? "" : " xl:grid-cols-2")}>
 			<div>
-				<p class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600">
+				<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600">
 					interpreter · built in go
-				</p>
+				</span>
 
 				<h1
 					class="mb-6 text-5xl leading-none font-bold tracking-tight lg:text-6xl dark:text-stone-100"
@@ -61,7 +61,7 @@
 				</h1>
 
 				<p
-					class="mb-8 max-w-md text-sm leading-relaxed text-stone-400"
+					class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
 					style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 				>
 					A hand-crafted interpreter language built to challenge advanced compiler and evaluator
@@ -70,32 +70,39 @@
 
 				<div class="mb-10 flex flex-wrap gap-2">
 					{#each ['variables', 'functions', 'closures', 'control flow', 'error handling', 'built-ins'] as feat}
-						<span class="rounded border border-stone-800 px-2.5 py-1 text-[11px] text-stone-500">
+						<span
+							class="rounded border border-stone-800 px-2.5 py-1 text-[11px] dark:text-stone-500"
+						>
 							{feat}
 						</span>
 					{/each}
 				</div>
 
-				<!-- ── DIVIDER ── -->
-				<div class="mx-auto max-w-6xl px-6">
+				<div class={"my-2" + (state.stick ? "" : " xl:hidden")}>
+					<CommandPrompt />
+				</div>
+
+				<div class="mx-auto max-w-6xl">
 					<div class="border-t border-stone-800"></div>
 				</div>
 
-				<!-- ── SNIPPETS ── -->
-				<section class="mx-auto max-w-6xl px-6 py-16">
+				<section class="mx-auto max-w-6xl py-16">
 					<div class="mb-8 flex items-end justify-between">
 						<div>
-							<p class="mb-1 text-[10px] tracking-[0.2em] text-stone-600 uppercase">
-								Examples - Try the snippets below in order.
-							</p>
-							<h2 class="text-xl font-bold dark:text-stone-100">Click &amp; run</h2>
+							<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600">
+								Examples
+							</span>
+							<h2 class="not-prose text-xl font-bold dark:text-stone-100">Click &amp; run</h2>
 						</div>
-						<p class="max-w-xs text-right text-xs leading-relaxed text-stone-600">
-							Clicking a snippet loads its code into the REPL input above.
-						</p>
 					</div>
+					<p class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+						Clicking a snippet loads its code into the REPL input above.
+					</p>
+					<p class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400">
+						Try the snippets below in order.
+					</p>
 
-					<div class="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+					<div class="grid grid-cols-1 gap-3">
 						{#each snippets as snippet}
 							<CodeBlock
 								code={snippet.code}
@@ -105,22 +112,12 @@
 							/>
 						{/each}
 					</div>
-
-					<!-- Inline note about shared state -->
-					<div class="mt-6 rounded-lg border border-stone-800/60 bg-stone-900/40 px-4 py-3">
-						<p class="text-xs leading-relaxed text-stone-500">
-							<span class="font-semibold text-stone-400">Note:</span>
-							After running the Variable snippet, <code class="text-emerald-500">x = 8</code> is
-							bound in the session. The Function snippet uses it:
-							<code class="text-emerald-500">add(4, x)</code>
-							→
-							<code class="text-emerald-500">12</code>.
-						</p>
-					</div>
 				</section>
 			</div>
 
-				<CommandPrompt bind:command />
+			<div class={"h-full not-xl:hidden" + (state.stick ? " hidden" : "")}>
+				<CommandPrompt />
+			</div>
 		</div>
 	</section>
 
@@ -220,10 +217,17 @@
 		description={'let bindings & return'}
 		{setCommand}
 	/>
-	<q>
-		Also, current REPL session is shared with only one backend, so we can reuse our variables even
-		the page is reload. With above code, we currently have <code>x = 8</code>
-	</q>
+	<!-- Inline note about shared state -->
+	<div class="mt-6">
+		<p class="text-xs leading-relaxed dark:text-stone-500">
+			<span class="font-semibold dark:text-stone-400">Note:</span>
+			After running the Variable snippet, <code class="text-emerald-500">x = 8</code> is bound in
+			the REPL session. The Function snippet uses it:
+			<code class="text-emerald-500">add(4, x)</code>
+			→
+			<code class="text-emerald-500">12</code>.
+		</p>
+	</div>
 	<CodeBlock
 		name={'Function'}
 		code={'let add = fn (x,y) { x + y }; return add(4,x);'}

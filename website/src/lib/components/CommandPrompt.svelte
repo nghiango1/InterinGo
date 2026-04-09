@@ -3,38 +3,30 @@
 	import Control from '$lib/components/command_prompt/Control.svelte';
 	import { postEvaluate } from '$lib/controller/repl';
 	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
+	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
 
-	let { command = $bindable('') }: { command?: string } = $props();
-
-	let isEval = $state(false);
-	let stick = $state(false);
-	let hide = $state(false);
-	let wrap = $state(false);
-
-	const STARTED_LINE = '// Let start with help() command';
-	let lines: string[] = $state([STARTED_LINE]);
-
+	// svelte-ignore non_reactive_update
 	let replOutput: HTMLElement;
 
 	$effect(() => {
-		if (lines.length && replOutput) {
+		if (state.lines.length && replOutput) {
 			replOutput.scrollTop = replOutput.scrollHeight;
 		}
 	});
 
 	function addCommand() {
-		lines.push(`>> ${command}`);
+		state.lines.push(`>> ${state.command}`);
 	}
 
 	function copyEvalResult(resp: EvalResponseSuccess) {
-		lines.push(resp.output);
+		state.lines.push(resp.output);
 	}
 
 	async function evaluate() {
-		if (!command.trim() || isEval) return;
-		isEval = true;
+		if (!state.command.trim() || state.isEval) return;
+		state.isEval = true;
 
-		const req: EvalRequest = { data: command };
+		const req: EvalRequest = { data: state.command };
 		addCommand();
 
 		const [status, resp] = await postEvaluate(req);
@@ -43,7 +35,7 @@
 			copyEvalResult(resp as EvalResponseSuccess);
 		}
 
-		isEval = false;
+		state.isEval = false;
 	}
 
 	function handleKeydown(e: KeyboardEvent) {
@@ -51,7 +43,7 @@
 	}
 </script>
 
-<div class={stick ? 'fixed' : 'sticky' + ' top-0 left-0 z-10'}>
+<div class={'top-0 left-0 z-10 ' + (state.stick ? '' : 'sticky')}>
 	<div
 		class="flex flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900"
 	>
@@ -68,41 +60,41 @@
 
 			<div class="flex items-center gap-1">
 				<Control
-					state={wrap}
+					state={state.wrap}
 					label="wrap"
 					toggle={() => {
-						wrap = !wrap;
+						state.wrap = !state.wrap;
 					}}
 				/>
 				<Control
-					state={stick}
+					state={state.stick}
 					label="stick"
 					toggle={() => {
-						stick = !stick;
+						state.stick = !state.stick;
 					}}
 				/>
 				<Control
-					state={hide}
+					state={state.hide}
 					label="hide"
 					toggle={() => {
-						hide = !hide;
+						state.hide = !state.hide;
 					}}
 				/>
 			</div>
 		</div>
 
-		{#if hide}
+		{#if state.hide}
 			<!-- Minimized: show only last line -->
 			<div class="border-b border-stone-700/60 bg-stone-950/50 px-4 py-1.5">
-				<Line line={lines[lines.length - 1]} />
+				<Line line={state.lines[state.lines.length - 1]} />
 			</div>
 		{:else}
 			<pre
 				bind:this={replOutput}
 				class={[
-					'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose dark:bg-stone-450 m-0 h-52 resize-y overflow-auto px-4 py-3',
-					wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
-				].join(' ')}>{#each lines as line}<Line {line} />{/each}</pre>
+					'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose dark:bg-stone-450 m-0 h-52 resize-y overflow-auto px-4 py-3 ',
+					state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
+				].join(' ')}>{#each state.lines as line}<Line {line} />{/each}</pre>
 		{/if}
 
 		<!-- Input row -->
@@ -121,30 +113,24 @@
 				enterkeyhint="go"
 				spellcheck={false}
 				placeholder="help()"
-				bind:value={command}
+				bind:value={state.command}
 				onkeydown={handleKeydown}
-				disabled={isEval}
+				disabled={state.isEval}
 			/>
 			<button
 				class={[
 					'rounded-lg border px-4 py-1.5 font-mono text-xs transition-all',
-					isEval
+					state.isEval
 						? 'cursor-not-allowed border-stone-700 text-stone-600'
 						: 'border-stone-600 hover:bg-stone-700 hover:text-stone-200 active:scale-95 dark:bg-stone-800 dark:text-stone-200'
 				].join(' ')}
 				id="repl-send"
 				type="button"
-				disabled={isEval}
+				disabled={state.isEval}
 				onclick={evaluate}
 			>
-				{isEval ? '...' : 'Run'}
+				{state.isEval ? '...' : 'Run'}
 			</button>
 		</div>
-	</div>
-
-	<div>
-		<p class="mt-3 text-[11px] leading-relaxed dark:text-stone-300">
-			Session is shared with one backend — variables persist across snippets even after reload.
-		</p>
 	</div>
 </div>
