@@ -43,9 +43,9 @@
 	}
 </script>
 
-<div class={'top-0 left-0 z-10 ' + (state.stick ? '' : 'sticky')}>
+<div class={'top-0 left-0 z-10 py-2 ' + (state.stick ? '' : 'sticky')}>
 	<div
-		class="flex flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900"
+		class="flex flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900 h-[80vh]"
 	>
 		<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
 			<div class="flex items-center gap-1.5">
@@ -92,7 +92,7 @@
 			<pre
 				bind:this={replOutput}
 				class={[
-					'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose dark:bg-stone-450 m-0 h-52 resize-y overflow-auto px-4 py-3 ',
+					'flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose dark:bg-stone-450 m-0 h-52 resize-y overflow-auto px-4 py-3 ',
 					state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
 				].join(' ')}>{#each state.lines as line}<Line {line} />{/each}</pre>
 		{/if}
