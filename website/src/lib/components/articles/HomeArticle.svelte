@@ -145,11 +145,12 @@
 							<h2 class="not-prose text-xl font-bold dark:text-stone-100">Click &amp; run</h2>
 						</div>
 					</div>
-					<p class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-						Clicking a snippet loads its code into the REPL input above.
-					</p>
-					<p class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400">
-						Try the snippets below in order.
+					<p
+						class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+						style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
+					>
+						Clicking a snippet will loads its code into the REPL input above. Try the snippets below
+						in order.
 					</p>
 
 					<div class="grid grid-cols-1 gap-3">
@@ -180,32 +181,27 @@
 	<section class="mx-auto max-w-6xl px-6 py-16">
 		<div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
 			<div>
-				<p class="mb-1 text-[10px] tracking-[0.2em] text-stone-600 uppercase">About</p>
-				<h2 class="mb-4 text-xl font-bold text-stone-100">Why InterinGo?</h2>
+				<div class="mb-8 flex items-end justify-between">
+					<div>
+						<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600"> About </span>
+						<h2 class="not-prose text-xl font-bold dark:text-stone-100">Why InterinGo?</h2>
+					</div>
+				</div>
 				<p
-					class="mb-4 text-sm leading-relaxed text-stone-400"
-					style="font-family: 'Instrument Serif', serif; font-size: 1rem;"
+					class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+					style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 				>
-					Building an interpreter from scratch in Go forces you to deeply understand lexing,
-					parsing, AST construction, and tree-walking evaluation. This is that journey, made public.
-				</p>
-				<p
-					class="text-sm leading-relaxed text-stone-500"
-					style="font-family: 'Instrument Serif', serif; font-size: 1rem;"
-				>
-					The online REPL is a live preview against a single shared backend. For the full experience
-					and offline use, download the binary.
+					It hard! To chalenge my self and prove that I can handle more advanged topics. Building an
+					interpreter from scratch in Go forces me to deeply understand lexing, parsing, AST
+					construction, and tree-walking evaluation. Also this was a course at my University.
 				</p>
 			</div>
 
-			<!-- Download CTA -->
-			<div class="flex flex-col justify-center rounded-xl border border-stone-800 bg-stone-900 p-8">
-				<p class="mb-2 text-[10px] tracking-[0.2em] text-stone-600 uppercase">Offline use</p>
-				<h3 class="mb-3 text-lg font-bold text-stone-100">Download the REPL binary</h3>
-				<p class="mb-6 text-xs leading-relaxed text-stone-500">
-					The online REPL won't be available forever. Download the build and run InterinGo locally
-					with full language support.
-				</p>
+			<div
+				class="flex h-fit flex-col justify-center rounded-xl border border-stone-800 bg-stone-900 p-8"
+			>
+				<span class="mb-4 text-xs tracking-[0.2em] text-stone-400 uppercase">Offline use</span>
+				<h3 class="not-prose mb-3 text-lg font-bold text-stone-100">Download the REPL binary</h3>
 				<a
 					href="/download"
 					class="flex w-fit items-center gap-2 rounded-lg border border-stone-600 bg-stone-800 px-5 py-2.5 text-sm text-stone-200 transition-all hover:border-stone-400 hover:bg-stone-700 hover:text-white active:scale-95"
@@ -266,7 +262,6 @@
 		description={'let bindings & return'}
 		{setCommand}
 	/>
-	<!-- Inline note about shared cpState -->
 	<div class="mt-6">
 		<p class="text-xs leading-relaxed dark:text-stone-500">
 			<span class="font-semibold dark:text-stone-400">Note:</span>
