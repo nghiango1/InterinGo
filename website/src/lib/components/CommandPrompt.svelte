@@ -5,6 +5,7 @@
 	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
 	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
 
+	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
 	// svelte-ignore non_reactive_update
 	let replOutput: HTMLElement;
 
@@ -43,94 +44,94 @@
 	}
 </script>
 
-<div class={'top-0 left-0 z-10 py-2 ' + (state.stick ? '' : 'sticky')}>
-	<div
-		class="flex flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900 h-[80vh]"
-	>
-		<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
-			<div class="flex items-center gap-1.5">
-				<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
-				<div class="h-3 w-3 rounded-full bg-yellow-500/80"></div>
-				<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
-			</div>
-
-			<span class="flex-1 truncate font-mono text-xs tracking-wide dark:text-stone-400"
-				>interingo — repl v0.1</span
-			>
-
-			<div class="flex items-center gap-1">
-				<Control
-					state={state.wrap}
-					label="wrap"
-					toggle={() => {
-						state.wrap = !state.wrap;
-					}}
-				/>
-				<Control
-					state={state.stick}
-					label="stick"
-					toggle={() => {
-						state.stick = !state.stick;
-					}}
-				/>
-				<Control
-					state={state.hide}
-					label="hide"
-					toggle={() => {
-						state.hide = !state.hide;
-					}}
-				/>
-			</div>
+<div
+	class={'flex flex-1 flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900' +
+		' ' +
+		(state.hide && !forceNotHide ? '' : 'h-full min-h-72')}
+>
+	<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
+		<div class="flex items-center gap-1.5">
+			<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
+			<div class="h-3 w-3 rounded-full bg-yellow-500/80"></div>
+			<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
 		</div>
 
-		{#if state.hide}
-			<!-- Minimized: show only last line -->
-			<div class="border-b border-stone-700/60 bg-stone-950/50 px-4 py-1.5">
-				<Line line={state.lines[state.lines.length - 1]} />
-			</div>
-		{:else}
-			<pre
-				bind:this={replOutput}
-				class={[
-					'flex-1 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose dark:bg-stone-450 m-0 h-52 resize-y overflow-auto px-4 py-3 ',
-					state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
-				].join(' ')}>{#each state.lines as line}<Line {line} />{/each}</pre>
-		{/if}
+		<span class="flex-1 truncate font-mono text-xs tracking-wide dark:text-stone-400"
+			>interingo — repl v0.1</span
+		>
 
-		<!-- Input row -->
-		<div class="flex items-center gap-3 border-t border-stone-700 px-4 py-2.5 dark:bg-stone-800">
-			<label for="repl-input" class="hidden font-mono text-xs sm:block dark:text-stone-500">
-				Custom command:
-			</label>
-			<input
-				id="repl-input"
-				class="flex-1 border-b border-stone-700 bg-transparent font-mono text-sm placeholder-stone-600 transition-colors focus:border-stone-400 focus:outline-none dark:text-stone-100"
-				type="text"
-				name="repl-input"
-				autocomplete="off"
-				autocorrect="off"
-				autocapitalize="off"
-				enterkeyhint="go"
-				spellcheck={false}
-				placeholder="help()"
-				bind:value={state.command}
-				onkeydown={handleKeydown}
-				disabled={state.isEval}
+		<div class="flex items-center gap-1">
+			<Control
+				state={state.wrap}
+				label="wrap"
+				toggle={() => {
+					state.wrap = !state.wrap;
+				}}
 			/>
-			<button
-				class={[
-					'rounded-lg border px-4 py-1.5 font-mono text-xs transition-all',
-					state.isEval
-						? 'cursor-not-allowed border-stone-700 text-stone-600'
-						: 'border-stone-600 hover:bg-stone-700 hover:text-stone-200 active:scale-95 dark:bg-stone-800 dark:text-stone-200'
-				].join(' ')}
-				id="repl-send"
-				type="button"
-				disabled={state.isEval}
-				onclick={evaluate}
-			>
-				{state.isEval ? '...' : 'Run'}
-			</button>
+			<Control
+				state={state.stick}
+				label="stick"
+				toggle={() => {
+					state.stick = !state.stick;
+				}}
+			/>
+			<Control
+				state={state.hide}
+				label="hide"
+				toggle={() => {
+					state.hide = !state.hide;
+				}}
+			/>
 		</div>
+	</div>
+
+	{#if state.hide && !forceNotHide}
+		<!-- Minimized: show only last line -->
+		<div class="border-b border-stone-700/60 bg-white px-4 py-1.5 dark:bg-stone-900">
+			<Line line={state.lines[state.lines.length - 1]} />
+		</div>
+	{:else}
+		<pre
+			bind:this={replOutput}
+			class={[
+				'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose m-0 flex-1 resize-y overflow-auto bg-white px-4 py-3 dark:bg-stone-900 ',
+				state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
+			].join(' ')}>{#each state.lines as line}<Line {line} />{/each}</pre>
+	{/if}
+
+	<!-- Input row -->
+	<div class="flex items-center gap-3 border-t border-stone-700 px-4 py-2.5 dark:bg-stone-800">
+		<label for="repl-input" class="hidden font-mono text-xs sm:block dark:text-stone-500">
+			Custom command:
+		</label>
+		<input
+			id="repl-input"
+			class="flex-1 border-b border-stone-700 bg-transparent font-mono text-sm placeholder-stone-600 transition-colors focus:border-stone-400 focus:outline-none dark:text-stone-100"
+			type="text"
+			name="repl-input"
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			enterkeyhint="go"
+			spellcheck={false}
+			placeholder="help()"
+			bind:value={state.command}
+			onkeydown={handleKeydown}
+			disabled={state.isEval}
+		/>
+		<button
+			class={[
+				'rounded-lg border px-4 py-1.5 font-mono text-xs transition-all',
+				state.isEval
+					? 'cursor-not-allowed border-stone-700 text-stone-600'
+					: 'border-stone-600 hover:bg-stone-700 hover:text-stone-200 active:scale-95 dark:bg-stone-800 dark:text-stone-200'
+			].join(' ')}
+			id="repl-send"
+			type="button"
+			disabled={state.isEval}
+			onclick={evaluate}
+		>
+			{state.isEval ? '...' : 'Run'}
+		</button>
 	</div>
 </div>

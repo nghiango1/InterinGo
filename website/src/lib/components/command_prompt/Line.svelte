@@ -19,7 +19,7 @@
 		type === 'command' && 'dark:text-stone-100',
 		type === 'output' && 'text-emerald-400',
 		type === 'error' && 'text-red-400',
-		type === 'comment' && 'text-stone-500 italic'
+		type === 'comment' && 'text-stone-600 dark:text-stone-400 italic'
 	]
 		.filter(Boolean)
 		.join(' ')}

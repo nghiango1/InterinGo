@@ -1,10 +1,11 @@
 <script lang="ts">
 	import CommandPrompt from '../CommandPrompt.svelte';
 	import CodeBlock from './CodeBlock.svelte';
-	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
+	import { commandPromptState as cpState } from '$lib/components/CommandPromptState.svelte';
+	import { onMount } from 'svelte';
 
 	function setCommand(input: string) {
-		state.command = input;
+		cpState.command = input;
 	}
 
 	const snippets = [
@@ -44,12 +45,51 @@
 			description: 'Built-in commands'
 		}
 	];
+
+	let intersecting = $state(false);
+	let container: HTMLElement;
+
+	onMount(() => {
+		if (typeof IntersectionObserver !== 'undefined') {
+			const rootMargin = `0px 0px 0px 0px`;
+
+			const observer = new IntersectionObserver(
+				(entries) => {
+					intersecting = entries[0].isIntersecting;
+				},
+				{
+					rootMargin
+				}
+			);
+
+			observer.observe(container);
+			return () => observer.unobserve(container);
+		}
+
+		function handler() {
+			const bcr = container.getBoundingClientRect();
+			intersecting =
+				bcr.bottom > 0 &&
+				bcr.right > 0 &&
+				bcr.top < window.innerHeight &&
+				bcr.left < window.innerWidth;
+
+			if (intersecting) {
+				window.removeEventListener('scroll', handler);
+			}
+		}
+
+		window.addEventListener('scroll', handler);
+		return () => window.removeEventListener('scroll', handler);
+	});
 </script>
 
 <article class="mx-auto prose max-w-6xl px-6 py-16 dark:prose-invert">
 	<section class="">
-		<div class={"grid grid-cols-1 items-start gap-12" + (state.stick ? "" : " xl:grid-cols-2")}>
-			<div>
+		<div
+			class={'grid grid-cols-1 items-start gap-12' + ' ' + (cpState.stick ? '' : 'xl:grid-cols-2')}
+		>
+			<div class="w-full">
 				<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600">
 					interpreter · built in go
 				</span>
@@ -78,8 +118,18 @@
 					{/each}
 				</div>
 
-				<div class={"my-2" + (state.stick ? "" : " xl:hidden")}>
-					<CommandPrompt />
+				<div
+					class={'my-2 flex h-96' + ' ' + (cpState.stick ? '' : 'xl:hidden')}
+					bind:this={container}
+				>
+					{#if intersecting}
+						<CommandPrompt forceNotHide={true} />
+					{/if}
+				</div>
+				<div class="fixed top-0 right-[10%] my-2 h-0 w-[80dvw]">
+					{#if !intersecting && cpState.stick}
+						<CommandPrompt />
+					{/if}
 				</div>
 
 				<div class="mx-auto max-w-6xl">
@@ -115,21 +165,20 @@
 				</section>
 			</div>
 
-			<div class={"h-full not-xl:hidden" + (state.stick ? " hidden" : "")}>
-				<CommandPrompt />
+			<div class={'h-full not-xl:hidden' + (cpState.stick ? ' hidden' : '')}>
+				<div class={'top-0 left-0 z-10 py-2' + (cpState.stick ? '' : ' sticky h-[80dvh]')}>
+					<CommandPrompt forceNotHide={true} />
+				</div>
 			</div>
 		</div>
 	</section>
 
-	<!-- ── DIVIDER ── -->
 	<div class="mx-auto max-w-6xl px-6">
 		<div class="border-t border-stone-800"></div>
 	</div>
 
-	<!-- ── ABOUT + DOWNLOAD ── -->
 	<section class="mx-auto max-w-6xl px-6 py-16">
 		<div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
-			<!-- About -->
 			<div>
 				<p class="mb-1 text-[10px] tracking-[0.2em] text-stone-600 uppercase">About</p>
 				<h2 class="mb-4 text-xl font-bold text-stone-100">Why InterinGo?</h2>
@@ -190,7 +239,7 @@
 	<p>
 		As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-prompt
 		can be annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still
-		show evaluation result in minimized state (or uncheck sticky box eh... wanna use that?).
+		show evaluation result in minimized cpState (or uncheck sticky box eh... wanna use that?).
 	</p>
 	<h2>Examples</h2>
 	<p>
@@ -217,7 +266,7 @@
 		description={'let bindings & return'}
 		{setCommand}
 	/>
-	<!-- Inline note about shared state -->
+	<!-- Inline note about shared cpState -->
 	<div class="mt-6">
 		<p class="text-xs leading-relaxed dark:text-stone-500">
 			<span class="font-semibold dark:text-stone-400">Note:</span>
