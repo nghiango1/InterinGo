@@ -13,8 +13,8 @@
 					>v0.1</span
 				>
 			</a>
-			<div class="flex items-center gap-6 text-xs dark:text-stone-500">
-				<a href="/docs" class="transition-colors hover:text-stone-300">Docs</a>
+			<div class="flex items-center gap-6 text-xs dark:text-stone-300">
+				<a href="/docs" class="transition-colors hover:text-blue-300">Docs</a>
 				<a
 					href="/download"
 					class="rounded-lg border border-stone-700 px-3 py-1.5 transition-all hover:border-stone-500 hover:bg-stone-700 hover:text-stone-100 dark:bg-stone-800 dark:text-stone-300"

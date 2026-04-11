@@ -10,43 +10,51 @@
 
 	const snippets = [
 		{
+			id: 'comparison',
 			label: 'Comparison',
 			code: '1 > 2',
 			description:
 				'Basic comparison operators: As you see, the output will be "false" because 1 is less than 2'
 		},
 		{
+			id: 'calculation',
 			label: 'Calculation',
 			code: '4 * (4 / 2) * (3 + 2) + 1',
 			description: 'Nested arithmetic expressions'
 		},
 		{
+			id: 'control_flow',
 			label: 'Control flow',
 			code: 'if (1 > 2) { return 10 } else { return 3 }',
 			description: 'if / else branching'
 		},
 		{
+			id: 'variable',
 			label: 'Variable',
 			code: 'let x = 2 * 2 * 2; return x;',
 			description: 'let bindings & return'
 		},
 		{
+			id: 'function',
 			label: 'Function',
 			code: 'let add = fn (x,y) { return x + y };',
 			description: 'First-class functions'
 		},
 		{
+			id: 'function_call',
 			label: 'Function call',
 			code: 'add(4,x);',
 			description:
 				'Calling add function with x = 8 from last code block, add(4, x) = add(4, 8) = 12 is expected'
 		},
 		{
+			id: 'error',
 			label: 'Error',
 			code: 'let x = 2/0',
 			description: 'Division by zero error'
 		},
 		{
+			id: 'built_in',
 			label: 'Built-in',
 			code: 'help()',
 			description:
@@ -115,12 +123,13 @@
 				</p>
 
 				<div class="mb-10 flex flex-wrap gap-2">
-					{#each ['variables', 'functions', 'closures', 'control flow', 'error handling', 'built-ins'] as feat}
-						<span
+					{#each snippets as feat}
+						<a
 							class="rounded border border-stone-800 px-2.5 py-1 text-[11px] dark:text-stone-500"
+							href={'#' + feat.id}
 						>
-							{feat}
-						</span>
+							{feat.label}
+						</a>
 					{/each}
 				</div>
 
@@ -159,6 +168,7 @@
 					<div class="grid grid-cols-1 gap-3">
 						{#each snippets as snippet}
 							<CodeBlock
+								id={snippet.id}
 								code={snippet.code}
 								name={snippet.label}
 								description={snippet.description}
@@ -231,18 +241,20 @@
 		position: absolute;
 
 		right: -1rem; /* tweak this */
-		top: -1rem; /* tweak this */
+		top: -2rem; /* tweak this */
 
 		font-family: 'JetBrains Mono', monospace;
 		font-size: 9rem;
 		line-height: 1;
 
 		color: var(--color-stone-400);
+		@media (prefers-color-scheme: dark) {
+			color: var(--color-stone-600);
+		}
 		opacity: 0.15; /* softer background effect */
 
 		pointer-events: none;
 		user-select: none;
-		z-index: -1;
 		content: '\{ \}';
 	}
 </style>
