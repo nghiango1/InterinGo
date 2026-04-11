@@ -19,7 +19,7 @@
 <button
 	{id}
 	onclick={() => setCommand(code)}
-	class={'group flex flex-col overflow-hidden rounded-xl border border-stone-800 text-left transition-all hover:border-stone-600 hover:bg-stone-800/80 hover:text-stone-300 active:scale-[0.98] dark:bg-stone-900' +
+	class={'xl:scroll-mt-10 group flex flex-col overflow-hidden rounded-xl border border-stone-800 text-left transition-all hover:border-stone-600 hover:bg-stone-800/80 hover:text-stone-300 active:scale-[0.98] dark:bg-stone-900' +
 		' ' +
 		(commandPromptState.hide ? 'scroll-mt-40' : 'scroll-mt-96')}
 >

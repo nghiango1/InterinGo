@@ -118,7 +118,7 @@
 			class={[
 				'rounded-lg border px-4 py-1.5 font-mono text-xs transition-all',
 				state.isEval
-					? 'cursor-not-allowed border-stone-700 text-stone-600'
+					? 'cursor-not-allowed border-stone-700 text-stone-600 dark:text-stone-300'
 					: 'border-stone-600 hover:bg-stone-700 hover:text-stone-200 active:scale-95 dark:bg-stone-800 dark:text-stone-200'
 			].join(' ')}
 			id="repl-send"
