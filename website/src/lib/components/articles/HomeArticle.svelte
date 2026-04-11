@@ -92,7 +92,7 @@
 	});
 </script>
 
-<article class="mx-auto prose max-w-6xl px-6 py-16 dark:prose-invert">
+<article class="mx-auto prose max-w-6xl px-6 dark:prose-invert">
 	<section class="">
 		<div class={'grid grid-cols-1 items-start gap-12 xl:grid-cols-2'}>
 			<div class="w-full">
@@ -101,13 +101,13 @@
 				</span>
 
 				<h1
-					class="mb-6 text-5xl leading-none font-bold tracking-tight lg:text-6xl dark:text-stone-100"
+					class="ig-hero relative mb-6 text-5xl leading-none font-bold tracking-tight lg:text-6xl dark:text-stone-100"
 				>
 					Interin<span class="text-stone-600">Go</span>
 				</h1>
 
 				<p
-					class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+					class="mb-8 max-w-md leading-relaxed text-stone-600 dark:text-stone-400"
 					style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 				>
 					A hand-crafted interpreter language built to challenge advanced compiler and evaluator
@@ -149,7 +149,7 @@
 						</div>
 					</div>
 					<p
-						class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+						class="mb-8 max-w-md leading-relaxed text-stone-600 dark:text-stone-400"
 						style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 					>
 						Clicking a snippet will loads its code into the REPL input above. Try the snippets below
@@ -169,7 +169,7 @@
 				</section>
 			</div>
 
-			<div class={'h-full not-xl:hidden pb-16 pt-2'}>
+			<div class={'h-full pt-2 pb-16 not-xl:hidden'}>
 				<div class={'sticky top-0 left-0 z-10 h-[80dvh]'}>
 					<CommandPrompt forceNotHide={true} />
 				</div>
@@ -188,10 +188,10 @@
 				<h2 class="not-prose text-xl font-bold dark:text-stone-100">Why InterinGo?</h2>
 			</div>
 		</div>
-		<div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
+		<div class="grid grid-cols-1 gap-2 not-sm:gap-12 lg:grid-cols-2">
 			<div>
 				<p
-					class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+					class="mb-2 max-w-md leading-relaxed text-stone-600 not-sm:mb-8 dark:text-stone-400"
 					style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 				>
 					It hard! To chalenge my self and prove that I can handle more advanged topics. Building an
@@ -200,22 +200,24 @@
 				</p>
 			</div>
 
-			<div
-				class="flex h-fit flex-col justify-center rounded-xl border border-stone-800 bg-stone-900 p-8"
-			>
-				<span class="mb-4 text-xs tracking-[0.2em] text-stone-400 uppercase">Offline use</span>
-				<h3 class="not-prose mb-3 text-lg font-bold text-stone-100">Download the REPL binary</h3>
-				<a
-					href="/download"
-					class="flex w-fit items-center gap-2 rounded-lg border border-stone-600 bg-stone-800 px-5 py-2.5 text-sm text-stone-200 transition-all hover:border-stone-400 hover:bg-stone-700 hover:text-white active:scale-95"
+			<div class="my-auto">
+				<div
+					class="flex h-fit flex-col justify-center rounded-xl border border-stone-800 bg-stone-900 p-8"
 				>
-					<span>↓</span>
-					<span>Download binary</span>
-				</a>
+					<span class="mb-4 text-xs tracking-[0.2em] text-stone-400 uppercase">Offline use</span>
+					<h3 class="not-prose mb-3 text-lg font-bold text-stone-100">Download the REPL binary</h3>
+					<a
+						href="/download"
+						class="flex w-fit items-center gap-2 rounded-lg border border-stone-600 bg-stone-800 px-5 py-2.5 text-stone-200 transition-all hover:border-stone-400 hover:bg-stone-700 hover:text-white active:scale-95"
+					>
+						<span>↓</span>
+						<span class="">Download</span>
+					</a>
+				</div>
 			</div>
 		</div>
 		<p
-			class="mb-8 text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+			class="mb-2 leading-relaxed text-stone-600 not-sm:mb-8 dark:text-stone-400"
 			style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
 		>
 			Of course, these examples isn't all of what InterinGo can do, but this home page is just for
@@ -223,3 +225,24 @@
 		</p>
 	</section>
 </article>
+
+<style>
+	.ig-hero::before {
+		position: absolute;
+
+		right: -1rem; /* tweak this */
+		top: -1rem; /* tweak this */
+
+		font-family: 'JetBrains Mono', monospace;
+		font-size: 9rem;
+		line-height: 1;
+
+		color: var(--color-stone-400);
+		opacity: 0.15; /* softer background effect */
+
+		pointer-events: none;
+		user-select: none;
+		z-index: -1;
+		content: '\{ \}';
+	}
+</style>
