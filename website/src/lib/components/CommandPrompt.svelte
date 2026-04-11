@@ -3,13 +3,19 @@
 	import Control from '$lib/components/command_prompt/Control.svelte';
 	import { postEvaluate } from '$lib/controller/repl';
 	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
-	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
+	import { commandPromptState as state, connect } from '$lib/components/CommandPromptState.svelte';
 
 	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
 	// svelte-ignore non_reactive_update
 	let replOutput: HTMLElement;
 
+	import { onMount } from 'svelte';
+	onMount(() => {
+		connect();
+	});
+
 	$effect(() => {
+		state.hide; // Turn hide on and off should also have scroll effect
 		if (state.lines.length && replOutput) {
 			replOutput.scrollTop = replOutput.scrollHeight;
 		}
@@ -20,7 +26,7 @@
 	}
 
 	function copyEvalResult(resp: EvalResponseSuccess) {
-		state.lines.push(resp.output);
+		if (resp.output != null) state.lines.push(resp.output);
 	}
 
 	async function evaluate() {

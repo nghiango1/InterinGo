@@ -10,7 +10,7 @@ export interface EvalRequest {
 }
 
 export interface EvalResponseSuccess {
-    output: string;
+    output?: string;
 }
 
 export type EvalResponse = EvalResponseSuccess | ErrorResponse;

@@ -16,6 +16,7 @@ import (
 )
 
 const API_ROUTE = "/api"
+const WS_ROUTE = "/ws"
 
 // This is enforce by build script, which copy over website built static file
 // into `content/dist`
@@ -48,6 +49,10 @@ func pageRoute(s *Server) {
 
 	s.ginEngine.Use(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
+			c.Next()
+			return
+		}
+		if strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
 			c.Next()
 			return
 		}
