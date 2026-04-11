@@ -63,31 +63,26 @@
 		<div class="flex items-center gap-1">
 			<Control
 				state={state.wrap}
-				label="wrap"
+				label={state.wrap ? 'normal' : 'wrap'}
 				toggle={() => {
 					state.wrap = !state.wrap;
 				}}
 			/>
-			<Control
-				state={state.stick}
-				label="stick"
-				toggle={() => {
-					state.stick = !state.stick;
-				}}
-			/>
-			<Control
-				state={state.hide}
-				label="hide"
-				toggle={() => {
-					state.hide = !state.hide;
-				}}
-			/>
+			{#if !forceNotHide}
+				<Control
+					state={state.hide}
+					label={state.hide ? 'expand' : 'hide'}
+					toggle={() => {
+						state.hide = !state.hide;
+					}}
+				/>
+			{/if}
 		</div>
 	</div>
 
 	{#if state.hide && !forceNotHide}
 		<!-- Minimized: show only last line -->
-		<div class="border-b border-stone-700/60 bg-white px-4 py-1.5 dark:bg-stone-900">
+		<div class="bg-white px-4 py-1.5 dark:bg-stone-900">
 			<Line line={state.lines[state.lines.length - 1]} />
 		</div>
 	{:else}

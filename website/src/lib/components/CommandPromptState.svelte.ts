@@ -5,8 +5,7 @@ const STARTED_LINE = '// Let start with help() command';
 export let commandPromptState = $state({
 	command : "",
 	isEval : false,
-	stick : false,
-	hide : false,
+	hide : true,
 	wrap : false,
 	lines : [SESSION_SHARE_NOTICE, SESSION_SHARE_NOTICE_2, STARTED_LINE]
 });

@@ -12,7 +12,8 @@
 		{
 			label: 'Comparison',
 			code: '1 > 2',
-			description: 'Basic comparison operators'
+			description:
+				'Basic comparison operators: As you see, the output will be "false" because 1 is less than 2'
 		},
 		{
 			label: 'Calculation',
@@ -31,8 +32,14 @@
 		},
 		{
 			label: 'Function',
-			code: 'let add = fn (x,y) { x + y }; return add(4,x);',
+			code: 'let add = fn (x,y) { return x + y };',
 			description: 'First-class functions'
+		},
+		{
+			label: 'Function call',
+			code: 'add(4,x);',
+			description:
+				'Calling add function with x = 8 from last code block, add(4, x) = add(4, 8) = 12 is expected'
 		},
 		{
 			label: 'Error',
@@ -42,7 +49,8 @@
 		{
 			label: 'Built-in',
 			code: 'help()',
-			description: 'Built-in commands'
+			description:
+				'Built-in commands. In-case you didnt see the input box placeholder just yet, `help()` will list all built-in command'
 		}
 	];
 
@@ -86,9 +94,7 @@
 
 <article class="mx-auto prose max-w-6xl px-6 py-16 dark:prose-invert">
 	<section class="">
-		<div
-			class={'grid grid-cols-1 items-start gap-12' + ' ' + (cpState.stick ? '' : 'xl:grid-cols-2')}
-		>
+		<div class={'grid grid-cols-1 items-start gap-12 xl:grid-cols-2'}>
 			<div class="w-full">
 				<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600">
 					interpreter · built in go
@@ -118,16 +124,13 @@
 					{/each}
 				</div>
 
-				<div
-					class={'my-2 flex h-96' + ' ' + (cpState.stick ? '' : 'xl:hidden')}
-					bind:this={container}
-				>
+				<div class={'my-2 flex h-96 xl:hidden'} bind:this={container}>
 					{#if intersecting}
 						<CommandPrompt forceNotHide={true} />
 					{/if}
 				</div>
-				<div class="fixed top-0 right-[10%] my-2 h-0 w-[80dvw]">
-					{#if !intersecting && cpState.stick}
+				<div class="fixed top-0 right-[10%] my-2 h-0 w-[80dvw] xl:hidden">
+					{#if !intersecting}
 						<CommandPrompt />
 					{/if}
 				</div>
@@ -166,8 +169,8 @@
 				</section>
 			</div>
 
-			<div class={'h-full not-xl:hidden' + (cpState.stick ? ' hidden' : '')}>
-				<div class={'top-0 left-0 z-10 py-2' + (cpState.stick ? '' : ' sticky h-[80dvh]')}>
+			<div class={'h-full not-xl:hidden pb-16 pt-2'}>
+				<div class={'sticky top-0 left-0 z-10 h-[80dvh]'}>
 					<CommandPrompt forceNotHide={true} />
 				</div>
 			</div>
@@ -179,14 +182,14 @@
 	</div>
 
 	<section class="mx-auto max-w-6xl px-6 py-16">
+		<div class="mb-8 flex items-end justify-between">
+			<div>
+				<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600"> About </span>
+				<h2 class="not-prose text-xl font-bold dark:text-stone-100">Why InterinGo?</h2>
+			</div>
+		</div>
 		<div class="grid grid-cols-1 gap-12 lg:grid-cols-2">
 			<div>
-				<div class="mb-8 flex items-end justify-between">
-					<div>
-						<span class="mb-4 text-xs tracking-[0.2em] uppercase dark:text-stone-600"> About </span>
-						<h2 class="not-prose text-xl font-bold dark:text-stone-100">Why InterinGo?</h2>
-					</div>
-				</div>
 				<p
 					class="mb-8 max-w-md text-sm leading-relaxed text-stone-600 dark:text-stone-400"
 					style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
@@ -211,85 +214,12 @@
 				</a>
 			</div>
 		</div>
-	</section>
-
-	<p>
-		"interprester-in-go" or InterinGo (for short) is a new interpreter language by <a
-			href="https://www.linkedin.com/in/nghia-ngo-duc">me</a
-		> to chalenge my self with more advanged topics. The command-prompt window is the directed way to
-		interact with InterinGo REPL, which have been broughted to web so you can try it now without the need
-		to download any binary.
-	</p>
-	<p>
-		To make sure you not get lost with how to use the language, here is a sample craft code to try
-		out in REPL command prompt. Click on Click and run to copy the code into Command prompt and have
-		REPL run the code. The input box will reflect the code being used, while the command prompt will
-		show the evaluation result.
-	</p>
-	<CodeBlock
-		name={'Comparation'}
-		code={'1 > 2'}
-		description={'Basic comparison operators'}
-		{setCommand}
-	/>
-	<p>
-		As you see, the output will be <code>false</code> because 1 is less than 2. Also, the command-prompt
-		can be annoy in smaller screen, try using Hide checkbox to minimize it, don't be too worry, it still
-		show evaluation result in minimized cpState (or uncheck sticky box eh... wanna use that?).
-	</p>
-	<h2>Examples</h2>
-	<p>
-		Of course, these examples isn't all of what InterinGo can do, but this home page is just for
-		showing InterinGo REPL to the world, let have some readding in <a href="/docs">document</a> to
-		learning more about it. The online online REPL won't be there thought, so let head on and
-		downloading REPL build file <a href="https://github.com/nghiango1/hello/releases">here </a>
-	</p>
-	<CodeBlock
-		name={'Complex calculation'}
-		code={'4 * (4 / 2) * (3 + 2) + 1'}
-		description={'Nested arithmetic expressions'}
-		{setCommand}
-	/>
-	<CodeBlock
-		name={'Control flow'}
-		code={'if (1 > 2) { return 10 } else { return 3 }'}
-		description={'if / else branching'}
-		{setCommand}
-	/>
-	<CodeBlock
-		name={'Variable'}
-		code={'let x = 2 * 2 * 2; return x;'}
-		description={'let bindings & return'}
-		{setCommand}
-	/>
-	<div class="mt-6">
-		<p class="text-xs leading-relaxed dark:text-stone-500">
-			<span class="font-semibold dark:text-stone-400">Note:</span>
-			After running the Variable snippet, <code class="text-emerald-500">x = 8</code> is bound in
-			the REPL session. The Function snippet uses it:
-			<code class="text-emerald-500">add(4, x)</code>
-			→
-			<code class="text-emerald-500">12</code>.
+		<p
+			class="mb-8 text-sm leading-relaxed text-stone-600 dark:text-stone-400"
+			style="font-family: 'Instrument Serif', serif; font-size: 1.1rem;"
+		>
+			Of course, these examples isn't all of what InterinGo can do, but this home page is just for
+			showing InterinGo REPL to the world, let have some readding in <a href="/docs">document</a>.
 		</p>
-	</div>
-	<CodeBlock
-		name={'Function'}
-		code={'let add = fn (x,y) { x + y }; return add(4,x);'}
-		description={'First-class functions'}
-		{setCommand}
-	/>
-	<p>Error throwing is here too</p>
-	<CodeBlock
-		name={'Error'}
-		code={'let x = 2/0'}
-		description={'Division by zero error'}
-		{setCommand}
-	/>
-	<p>In-case use didn't see the input box placeholder just yet, try this too</p>
-	<CodeBlock
-		name={'Built-in command'}
-		code={'help()'}
-		description={'Built-in commands'}
-		{setCommand}
-	/>
+	</section>
 </article>
