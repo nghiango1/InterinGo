@@ -15,7 +15,7 @@ export const POST: RequestHandler = async ({ request }) => {
 		data = await request.json();
 	} catch (e) {
 		const error: EvalResponse = {
-			type: BAD_REQUEST.toString(),
+			type: BAD_REQUEST,
 			code: BAD_REQUEST.toString(),
 			message: 'Input not a valid JSON'
 		};

@@ -1,8 +1,38 @@
 // JSON schema will be better to handle this
 export interface ErrorResponse {
-    type: string;
+    type: number;
     code: string;
     message: string;
+}
+
+// Example
+//{
+//  "type":400,
+//  "code":"parser_error",
+//  "message":"Parse error: provided code was invalid,",
+//  "error":[
+//     {"message":"Expect call expression, but not found closing `)`","range":{"start":{"Line":0,"Character":5},"end":{"Line":0,"Character":7}}}
+//   ]
+// }
+export interface ParserErrorResponse extends ErrorResponse {
+    type: 400;
+    code: "parser_error";
+    error: ParserError[];
+}
+
+interface ParserError {
+    message: string;
+    range: Range;
+}
+
+interface Range {
+    start: Position;
+    end: Position;
+}
+
+interface Position {
+    start: number;
+    end: number;
 }
 
 export interface EvalRequest {
@@ -13,7 +43,9 @@ export interface EvalResponseSuccess {
     output?: string;
 }
 
-export type EvalResponse = EvalResponseSuccess | ErrorResponse;
+export type EvalErrorResponse = ErrorResponse | ParserErrorResponse;
+
+export type EvalResponse = EvalResponseSuccess | EvalErrorResponse;
 
 export async function evaluateServer(req: EvalRequest, base?: string): Promise<EvalResponse> {
     const response = await fetch(new URL('/api/evaluate', base), {
@@ -30,7 +62,7 @@ export async function evaluateServer(req: EvalRequest, base?: string): Promise<E
     } catch (e) {
         return {
             code: "internal_error",
-            type: "internal_error",
+            type: 500,
             message: 'Internal server error'
         };
     }
