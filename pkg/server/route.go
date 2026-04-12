@@ -11,6 +11,7 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
@@ -118,6 +119,12 @@ func apiRoute(s *Server) {
 	})
 }
 
+const (
+	pongWait = 70 * time.Second
+	// Client will ping, server don't expect to check health
+	// pingPeriod = 60 * time.Second
+)
+
 func (s *Server) handleWebSocket(c *gin.Context) {
 	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
@@ -125,6 +132,12 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		return
 	}
 	defer conn.Close()
+
+	conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
 
 	for {
 		messageType, message, err := conn.ReadMessage()

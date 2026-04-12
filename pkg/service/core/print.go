@@ -8,6 +8,8 @@ import (
 
 	"interingo/pkg/evaluator"
 	"interingo/pkg/object"
+
+	"github.com/gorilla/websocket"
 )
 
 type PrintMessageEventData struct {
@@ -15,13 +17,31 @@ type PrintMessageEventData struct {
 }
 
 func (c *ServiceCore) Print(mes string) {
+	c.muConn.Lock()
+	defer c.muConn.Unlock()
+
 	if c.conn == nil {
 		log.Printf("ERROR: Try to print without any client connection")
 		return
 	}
-	c.conn.WriteJSON(PrintMessageEventData{
+
+	if c.conn == nil {
+		log.Printf("ERROR: Try to print without any client connection")
+		return
+	}
+
+	err := c.conn.WriteJSON(PrintMessageEventData{
 		Message: mes,
 	})
+
+	// Clean up c.conn
+	if err != nil {
+		if websocket.IsCloseError(err) {
+			c.conn = nil
+		} else {
+			log.Printf("ERROR: Got err when send print to client: ", err.Error())
+		}
+	}
 }
 
 type PrintBuiltin struct {

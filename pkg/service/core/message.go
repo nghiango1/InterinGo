@@ -40,3 +40,13 @@ func NewParserErrorResponse(message string, errors []parser.ParserError, verbose
 func (e *ParserErrorResponse) GetType() int       { return e.Type }
 func (e *ParserErrorResponse) GetCode() string    { return e.Code }
 func (e *ParserErrorResponse) GetMessage() string { return e.Message }
+
+// Share common interface of common.ErrorResponseInterface
+type EvalErrorResponse struct {
+	Message string `json:"message"`
+	Verbose *runtime.VerboseInfo `json:"verbose"`
+}
+
+func (e *EvalErrorResponse) GetType() int       { return 400 }
+func (e *EvalErrorResponse) GetCode() string    { return "eval_error" }
+func (e *EvalErrorResponse) GetMessage() string { return e.Message }

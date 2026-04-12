@@ -51,6 +51,9 @@ export default defineConfig(async ({ mode }) => {
 			open: true,
 			host: true,
 			proxy: {
+				'/api': {
+					target: env.BACKEND_SERVER_URL,
+				},
 				'/ws': {
 					target: env.BACKEND_SERVER_URL,
 					ws: true,
