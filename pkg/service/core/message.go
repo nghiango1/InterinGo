@@ -3,6 +3,7 @@ package core
 import (
 	"interingo/pkg/parser"
 	"interingo/pkg/runtime"
+	"strings"
 )
 
 type EvaluateRequest struct {
@@ -24,8 +25,12 @@ type ParserErrorResponse struct {
 }
 
 func NewParserErrorResponse(message string, errors []parser.ParserError, verbose *runtime.VerboseInfo) *ParserErrorResponse {
+	// Make sure Parser errors is clear at start, this help with UI display
+	// Could have better way, this work for now
 	if message == "" {
-		message = "Parse error: provided code was invalid,"
+		message = "PARSER ERROR: provided code was invalid,"
+	} else if strings.HasPrefix(message, "PARSE ERROR") {
+		message = "PARSER ERROR: " + message
 	}
 
 	return &ParserErrorResponse{
@@ -43,7 +48,7 @@ func (e *ParserErrorResponse) GetMessage() string { return e.Message }
 
 // Share common interface of common.ErrorResponseInterface
 type EvalErrorResponse struct {
-	Message string `json:"message"`
+	Message string               `json:"message"`
 	Verbose *runtime.VerboseInfo `json:"verbose"`
 }
 
