@@ -4,10 +4,13 @@ import (
 	"fmt"
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
+
+	"github.com/gorilla/websocket"
 )
 
 type ServiceCore struct {
 	runtimeCore *runtime.Core
+	conn        *websocket.Conn
 }
 
 func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
@@ -15,9 +18,18 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 		evalCore = runtime.NewCore(runtime.EMBED, nil)
 	}
 
-	return &ServiceCore{
+	res := &ServiceCore{
 		runtimeCore: evalCore,
 	}
+
+	evalCore.Env.Set(
+		"print", &PrintBuiltin{
+			env:  res.runtimeCore.Env,
+			core: res,
+		},
+	)
+
+	return res
 }
 
 // Return
