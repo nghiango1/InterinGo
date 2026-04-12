@@ -31,7 +31,7 @@
 
 	function handleEvalError(resp: EvalErrorResponse) {
 		let output = resp.message;
-		if ((resp.code = 'parser_error')) {
+		if ((resp.code == 'parser_error')) {
 			const parserErrors = (resp as ParserErrorResponse).error;
 			for (let i = 0; i < parserErrors.length; i++) {
 				output += `\n\t${parserErrors[i].message}`;

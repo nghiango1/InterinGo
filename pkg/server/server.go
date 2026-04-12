@@ -1,6 +1,8 @@
 package server
 
 import (
+	"bytes"
+	"encoding/json"
 	"interingo/pkg/service/core"
 	"log"
 	"net/http"
@@ -32,8 +34,54 @@ func NewServer() *Server {
 	}
 }
 
+type BodyWriter struct {
+	gin.ResponseWriter
+	body *bytes.Buffer
+}
+
+func (w BodyWriter) Write(b []byte) (int, error) {
+	return w.body.Write(b)
+}
+
+// Middleware so that we can handle or mask non related data to be return to
+// client
+func messageBodyEnforce(c *gin.Context) {
+	wb := &BodyWriter{
+		body:           &bytes.Buffer{},
+		ResponseWriter: c.Writer,
+	}
+	c.Writer = wb
+
+	c.Next()
+
+	data := wb.body.String()
+
+	obj := make(map[string]interface{})
+	json.Unmarshal([]byte(data), &obj)
+
+	// Make sure that error response have correct number of field
+	switch c.Writer.Status() {
+	case 400:
+		obj["type"] = c.Writer.Status()
+		if obj["code"] == nil {
+			obj["type"] = "bad_request"
+		}
+	case 500:
+		// Not leak server information
+		obj["code"] = "internal_error"
+		obj["message"] = "Internal server error"
+	}
+
+	updatedBody, _ := json.Marshal(obj)
+
+	wb.ResponseWriter.WriteString(string(updatedBody))
+	wb.body.Reset()
+}
+
 func (s *Server) Start(listenAdrr string) {
 	log.Println("Started listening on", listenAdrr)
+
+	s.ginEngine.Use(messageBodyEnforce)
 
 	// Create a Gin router with default middleware (logger and recovery)
 	// Now start handing data

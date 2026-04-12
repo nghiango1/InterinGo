@@ -61,10 +61,7 @@ func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuc
 			error := NewParserErrorResponse(message, err.ParserErrors, ver)
 			return nil, error
 		} else if err.Error != nil {
-			return nil, &EvalErrorResponse{
-				Message: message,
-				Verbose: ver,
-			}
+			return nil, NewEvalErrorResponse(message, ver)
 		} else {
 			return nil, common.NewErrorResponse(500) // Unknown error
 		}
