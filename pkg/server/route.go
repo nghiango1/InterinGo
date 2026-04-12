@@ -118,7 +118,37 @@ func apiRoute(s *Server) {
 	})
 }
 
+func (s *Server) handleWebSocket(c *gin.Context) {
+	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	for {
+		messageType, message, err := conn.ReadMessage()
+
+		if err != nil {
+			log.Printf("Read error: %v", err)
+			break
+		}
+		log.Printf("Received: %s", message)
+
+		s.serviceCore.WebsocketHandler(conn, messageType, message)
+
+		// We not expect to return anything back to client
+		// if err := conn.WriteMessage(messageType, message); err != nil {
+		// 	log.Printf("Write error: %v", err)
+		// 	break
+		// }
+	}
+}
+
 func Route(s *Server) {
 	pageRoute(s)
 	apiRoute(s)
+
+	// setup websocket
+	s.ginEngine.GET("/ws", s.handleWebSocket)
 }
