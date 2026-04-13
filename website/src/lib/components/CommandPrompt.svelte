@@ -1,137 +1,153 @@
 <script lang="ts">
-	import Line from './command_prompt/Line.svelte';
+	import Line from '$lib/components/command_prompt/Line.svelte';
+	import Control from '$lib/components/command_prompt/Control.svelte';
 	import { postEvaluate } from '$lib/controller/repl';
-	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
+	import {
+		type EvalErrorResponse,
+		type EvalRequest,
+		type EvalResponseSuccess,
+		type ParserErrorResponse
+	} from '$lib/server/repl';
+	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
 
-	let {
-		command
-	} : {
-		command : string
-	} = $props()
-
-	let isEval = $state(false);
-	let stick = $state(false);
-	let hide = $state(false);
-	// For even more freeform use tailwind break-all 
-	let wrap = $state(false);
-
-	const STARTED_LINE = 'Let start with help() command';
-	let lines: string[] = $state([STARTED_LINE]);
-
-	function updateStick() {
-		stick != stick;
-	}
-
-	// Bind to the command prompt output element
+	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
 	// svelte-ignore non_reactive_update
 	let replOutput: HTMLElement;
 
-	// Which we have to use effect until I found better solution
 	$effect(() => {
-		// Access lines.length to create a reactive dependency
-		if (lines.length && replOutput) {
+		state.hide; // Turn hide on and off should also have scroll effect
+		if (state.lines.length && replOutput) {
 			replOutput.scrollTop = replOutput.scrollHeight;
 		}
 	});
 
 	function addCommand() {
-		lines.push(`>> ${command}`);
+		state.lines.push(`>> ${state.command}`);
 	}
 
-	function copyEvalResult(resp: EvalResponseSuccess) {
-		lines.push(resp.output);
+	function handleEvalResult(resp: EvalResponseSuccess) {
+		if (resp.output != null) state.lines.push(resp.output);
+	}
+
+	function handleEvalError(resp: EvalErrorResponse) {
+		let output = resp.message;
+		if ((resp.code == 'parser_error')) {
+			const parserErrors = (resp as ParserErrorResponse).error;
+			for (let i = 0; i < parserErrors.length; i++) {
+				output += `\n\t${parserErrors[i].message}`;
+			}
+		}
+		state.lines.push(output);
 	}
 
 	async function evaluate() {
-		isEval = true;
-		const req: EvalRequest = {
-			data: command
-		};
+		if (!state.command.trim() || state.isEval) return;
+		state.isEval = true;
+
+		const req: EvalRequest = { data: state.command };
 		addCommand();
 
 		const [status, resp] = await postEvaluate(req);
 
-		if (status == 200) {
-			copyEvalResult((resp as EvalResponseSuccess));
-			// command = '';
+		if (status === 200) {
+			handleEvalResult(resp as EvalResponseSuccess);
+		} else {
+			handleEvalError(resp as EvalErrorResponse);
 		}
-		isEval = false;
+
+		state.isEval = false;
+	}
+
+	function handleKeydown(e: KeyboardEvent) {
+		if (e.key === 'Enter') evaluate();
 	}
 </script>
 
-<input type="checkbox" id="hiddenstick" class="peer/hiddenstick hidden" bind:checked={stick} />
-<div class={(stick ? 'sticky' : 'top-4') + 'block xl:w-5/12'}>
-	<div
-		class="sticky top-4 flex flex-col gap-1 before:absolute before:-inset-4 before:-top-4 before:-z-10 before:rounded-b-lg before:bg-white/30 before:object-none before:backdrop-blur-sm after:absolute after:-inset-2 after:-top-2 after:-z-10 after:rounded-b-lg after:bg-white/30 after:object-none after:blur-sm dark:text-[#d1d5db] before:dark:bg-[#050510]/30 after:dark:bg-[#050510]/30"
-	>
-		<div class="overflow-hidden rounded-t-lg border-2 border-blue-500 dark:border-white">
-			<div class="flex gap-2 border-b-2 bg-blue-200 p-1 dark:bg-[#090d1a]">
-				<h2 class="m-auto block flex-1 overflow-clip whitespace-nowrap">Command-prompt window</h2>
-				<input id="wrap" class="peer/wrap m-auto" type="checkbox" name="wrap" bind:checked={wrap} />
-				<label
-					for="wrap"
-					class="m-auto flex flex-row gap-2 rounded-lg object-none peer-checked:bg-gray-200 peer-checked/wrap:font-bold"
-				>
-					Wrap
-				</label>
-				<input
-					id="stick"
-					class="peer/stick m-auto"
-					type="checkbox"
-					name="stick"
-					oninput={updateStick}
-					checked={true}
+<div
+	class={'flex flex-1 flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900' +
+		' ' +
+		(state.hide && !forceNotHide ? '' : 'h-full min-h-72')}
+>
+	<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
+		<div class="flex items-center gap-1.5">
+			<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
+			<div class="h-3 w-3 rounded-full bg-yellow-500/80"></div>
+			<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
+		</div>
+
+		<span class="flex-1 truncate font-mono text-xs tracking-wide dark:text-stone-400"
+			>interingo — repl v0.1</span
+		>
+
+		<div class="flex items-center gap-1">
+			<Control
+				state={state.wrap}
+				label={state.wrap ? 'normal' : 'wrap'}
+				toggle={() => {
+					state.wrap = !state.wrap;
+				}}
+			/>
+			{#if !forceNotHide}
+				<Control
+					state={state.hide}
+					label={state.hide ? 'expand' : 'hide'}
+					toggle={() => {
+						state.hide = !state.hide;
+					}}
 				/>
-				<label
-					for="stick"
-					class="m-auto flex flex-row gap-2 rounded-lg peer-checked:bg-gray-200 peer-checked/stick:font-bold"
-				>
-					Stick
-				</label>
-				<input id="hide" class="m-auto" type="checkbox" name="hide" bind:checked={hide} />
-				<label
-					for="hide"
-					class="m-auto flex flex-row gap-2 rounded-lg peer-checked:bg-gray-200 peer-checked/hide:font-bold"
-				>
-					Hide
-				</label>
-			</div>
-			{#if hide}
-				<pre id="repl-result" class="block max-h-6 overflow-auto px-2"><Line line={lines[lines.length -1]} /></pre>
-			{:else}
-				<pre
-					id="repl-output"
-					bind:this={replOutput}
-					class={'scrollbar flex h-56 resize-y overflow-auto rounded-lg p-2 whitespace-pre outline-blue-200 ' +
-						(wrap ? 'whitespace-pre-wrap' : '')}>{#each lines as line}<Line {line} />{/each}</pre>
 			{/if}
 		</div>
-		<form class="flex h-fit flex-row gap-4 outline-blue-200 dark:outline-white" method="POST">
-			<label for="repl-input" class="hidden sm:my-auto sm:block">Custom command:</label>
-			<input
-				class="my-auto flex-1 border-b border-gray-500 bg-transparent pl-2 font-mono focus:outline-none"
-				type="text"
-				name="repl-input"
-				aria-autocomplete="both"
-				aria-labelledby="docsearch-label"
-				id="repl-input"
-				autocomplete="off"
-				autocorrect="off"
-				autocapitalize="off"
-				enterkeyhint="go"
-				spellcheck="false"
-				placeholder="help()"
-				bind:value={command}
-			/>
-			<button
-				class="activate:dark:bg-blue-900 my-auto block rounded-lg border-2 bg-blue-200 p-1 active:bg-blue-200 dark:bg-[#090d1a]"
-				id="repl-send"
-				type="submit"
-				disabled={isEval}
-				onclick={evaluate}
-			>
-				Run
-			</button>
-		</form>
+	</div>
+
+	{#if state.hide && !forceNotHide}
+		<!-- Minimized: show only last line -->
+		<pre
+			class={[
+				'not-prose m-0 flex-1 resize-y overflow-auto bg-white px-4 py-3 dark:bg-stone-900 ',
+				state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
+			].join(' ')}><Line line={state.lines[state.lines.length - 1]} /></pre>
+	{:else}
+		<pre
+			bind:this={replOutput}
+			class={[
+				'scrollbar-thin scrollbar-track-transparent scrollbar-thumb-stone-700 not-prose m-0 flex-1 resize-y overflow-auto bg-white px-4 py-3 dark:bg-stone-900 ',
+				state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
+			].join(' ')}>{#each state.lines as line}<Line {line} />{/each}</pre>
+	{/if}
+
+	<!-- Input row -->
+	<div class="flex items-center gap-3 border-t border-stone-700 px-4 py-2.5 dark:bg-stone-800">
+		<label for="repl-input" class="hidden font-mono text-xs sm:block dark:text-stone-500">
+			Custom command:
+		</label>
+		<input
+			id="repl-input"
+			class="flex-1 border-b border-stone-700 bg-transparent font-mono text-sm placeholder-stone-600 transition-colors focus:border-stone-400 focus:outline-none dark:text-stone-100"
+			type="text"
+			name="repl-input"
+			autocomplete="off"
+			autocorrect="off"
+			autocapitalize="off"
+			enterkeyhint="go"
+			spellcheck={false}
+			placeholder="help()"
+			bind:value={state.command}
+			onkeydown={handleKeydown}
+			disabled={state.isEval}
+		/>
+		<button
+			class={[
+				'rounded-lg border px-4 py-1.5 font-mono text-xs transition-all',
+				state.isEval
+					? 'cursor-not-allowed border-stone-700 text-stone-600 dark:text-stone-300'
+					: 'border-stone-600 hover:bg-stone-700 hover:text-stone-200 active:scale-95 dark:bg-stone-800 dark:text-stone-200'
+			].join(' ')}
+			id="repl-send"
+			type="button"
+			disabled={state.isEval}
+			onclick={evaluate}
+		>
+			{state.isEval ? '...' : 'Run'}
+		</button>
 	</div>
 </div>

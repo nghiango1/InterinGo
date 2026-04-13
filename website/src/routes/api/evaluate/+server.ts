@@ -1,12 +1,10 @@
 import type { RequestHandler } from './$types';
 import {
 	evaluateMock,
-	evaluateServer,
 	type EvalRequest,
 	type EvalResponse
 } from '$lib/server/repl';
 import { json } from '@sveltejs/kit';
-import { env } from '$env/dynamic/private';
 
 const BAD_REQUEST = 400;
 const HTTP_STATUS_OK = 200;
@@ -17,7 +15,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		data = await request.json();
 	} catch (e) {
 		const error: EvalResponse = {
-			status: BAD_REQUEST,
+			type: BAD_REQUEST,
+			code: BAD_REQUEST.toString(),
 			message: 'Input not a valid JSON'
 		};
 
@@ -28,12 +27,6 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	let output: EvalResponse;
 
-	if (env.BACKEND_SERVER_URL) {
-		console.log('[INFO] Send eval request to', env.BACKEND_SERVER_URL);
-		output = await evaluateServer(data, env.BACKEND_SERVER_URL);
-	} else {
-		output = evaluateMock(data);
-	}
-
+	output = evaluateMock(data);
 	return json(output, { status: HTTP_STATUS_OK });
 };

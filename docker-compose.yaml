@@ -1,6 +1,6 @@
 services:
   service:
-    image: interingo:latest
+    image: interingo-service:latest
     build:
       context: .
       dockerfile: docker/service.Dockerfile

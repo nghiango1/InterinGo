@@ -1,16 +1,43 @@
 <script lang="ts">
-	import ShortInfo from '$lib/components/ShortInfo.svelte';
-	
 </script>
-<footer
-	class="prose flex max-w-none flex-col gap-4 border-t-2 border-t-blue-200 pt-2 sm:flex-row-reverse sm:pt-8 dark:prose-invert"
->
-	<div class="flex flex-col sm:ml-auto sm:text-right">
-		<h2 class="font-bold">Menu</h2>
-		<a class="text-blue-500 underline" href="/">home</a>
-		<a class="text-blue-500 underline" href="/info">about</a>
-		<a class="text-blue-500 underline" href="/404">404</a>
-	</div>
 
-	<ShortInfo />
+<footer class="border-t border-stone-800 px-6 py-8">
+	<div class="mx-auto flex max-w-6xl items-center justify-between">
+		<span class="text-stone-700 dark:text-stone-300"> Nghia Ngo </span>
+		<div class="flex gap-6 text-stone-700">
+			<a
+				class="flex items-center gap-2 transition-colors hover:text-blue-500 dark:text-stone-300"
+				href="/"
+			>
+				<i class="fa-solid fa-house"></i>
+				<span class="hidden sm:inline">Home</span>
+			</a>
+
+			<a
+				class="flex items-center gap-2 transition-colors hover:text-blue-500 dark:text-stone-300"
+				href="/docs"
+			>
+				<i class="fa-solid fa-book"></i>
+				<span class="hidden sm:inline">Docs</span>
+			</a>
+
+			<a
+				class="flex items-center gap-2 transition-colors hover:text-blue-500 dark:text-stone-300"
+				href="https://github.com/nghiango1"
+				target="_blank"
+			>
+				<i class="fa-brands fa-github"></i>
+				<span class="hidden sm:inline">GitHub</span>
+			</a>
+
+			<a
+				class="flex items-center gap-2 transition-colors hover:text-blue-500 dark:text-stone-300"
+				href="https://www.linkedin.com/in/nghia-ngo-duc"
+				target="_blank"
+			>
+				<i class="fa-brands fa-linkedin"></i>
+				<span class="hidden sm:inline">LinkedIn</span>
+			</a>
+		</div>
+	</div>
 </footer>

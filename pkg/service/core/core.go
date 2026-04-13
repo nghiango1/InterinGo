@@ -4,10 +4,15 @@ import (
 	"fmt"
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
+	"sync"
+
+	"github.com/gorilla/websocket"
 )
 
 type ServiceCore struct {
 	runtimeCore *runtime.Core
+	muConn      sync.Mutex
+	conn        *websocket.Conn
 }
 
 func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
@@ -15,9 +20,18 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 		evalCore = runtime.NewCore(runtime.EMBED, nil)
 	}
 
-	return &ServiceCore{
+	res := &ServiceCore{
 		runtimeCore: evalCore,
 	}
+
+	evalCore.Env.Set(
+		"print", &PrintBuiltin{
+			env:  res.runtimeCore.Env,
+			core: res,
+		},
+	)
+
+	return res
 }
 
 // Return
@@ -34,8 +48,23 @@ func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuc
 	res, err, ver := c.runtimeCore.Eval(runtime.EvalRequest{Data: req.Data})
 
 	if err != nil {
-		error := NewParserErrorResponse("", err.ParserErrors, ver)
-		return nil, error
+		message := ""
+		if err.Error != nil {
+			message = err.Error.Error()
+		}
+		if err.SystemExit != nil {
+			return &EvaluateResponseSuccess{
+				Output:  nil,
+				Verbose: ver,
+			}, nil
+		} else if len(err.ParserErrors) != 0 {
+			error := NewParserErrorResponse(message, err.ParserErrors, ver)
+			return nil, error
+		} else if err.Error != nil {
+			return nil, NewEvalErrorResponse(message, ver)
+		} else {
+			return nil, common.NewErrorResponse(500) // Unknown error
+		}
 	} else if res != nil {
 		success := EvaluateResponseSuccess{
 			Output:  res.Output,
