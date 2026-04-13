@@ -39,7 +39,7 @@ func (c *ServiceCore) Print(mes string) {
 		if websocket.IsCloseError(err) {
 			c.conn = nil
 		} else {
-			log.Printf("ERROR: Got err when send print to client: ", err.Error())
+			log.Printf("ERROR: Got err when send print to client: %v", err.Error())
 		}
 	}
 }
