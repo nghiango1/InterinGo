@@ -11,11 +11,13 @@ import (
 	"net/http"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
 const API_ROUTE = "/api"
+const WS_ROUTE = "/ws"
 
 // This is enforce by build script, which copy over website built static file
 // into `content/dist`
@@ -48,6 +50,10 @@ func pageRoute(s *Server) {
 
 	s.ginEngine.Use(func(c *gin.Context) {
 		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
+			c.Next()
+			return
+		}
+		if strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
 			c.Next()
 			return
 		}
@@ -113,7 +119,49 @@ func apiRoute(s *Server) {
 	})
 }
 
+const (
+	pongWait = 70 * time.Second
+	// Client will ping, server don't expect to check health
+	// pingPeriod = 60 * time.Second
+)
+
+func (s *Server) handleWebSocket(c *gin.Context) {
+	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
+	if err != nil {
+		log.Printf("WebSocket upgrade error: %v", err)
+		return
+	}
+	defer conn.Close()
+
+	conn.SetReadDeadline(time.Now().Add(pongWait))
+	conn.SetPongHandler(func(string) error {
+		conn.SetReadDeadline(time.Now().Add(pongWait))
+		return nil
+	})
+
+	for {
+		messageType, message, err := conn.ReadMessage()
+
+		if err != nil {
+			log.Printf("Read error: %v", err)
+			break
+		}
+		log.Printf("Received: %s", message)
+
+		s.serviceCore.WebsocketHandler(conn, messageType, message)
+
+		// We not expect to return anything back to client
+		// if err := conn.WriteMessage(messageType, message); err != nil {
+		// 	log.Printf("Write error: %v", err)
+		// 	break
+		// }
+	}
+}
+
 func Route(s *Server) {
 	pageRoute(s)
 	apiRoute(s)
+
+	// setup websocket
+	s.ginEngine.GET("/ws", s.handleWebSocket)
 }

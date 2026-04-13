@@ -9,3 +9,5 @@ pkg/server/content/
 venv/
 
 __pycache__/
+
+.local/

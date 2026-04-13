@@ -5,21 +5,22 @@
 
 	function classify(line: string): LineType {
 		if (line.startsWith('>> ')) return 'command';
-		if (line.startsWith('ERROR') || line.startsWith('error')) return 'error';
+		if (line.startsWith('ERROR') || line.startsWith('PARSER ERROR')) return 'error';
 		if (line.startsWith('//') || line.startsWith('#')) return 'comment';
 		return 'output';
 	}
 
-	const type = $derived(classify(line));
+	// svelte-ignore state_referenced_locally
+	const type = classify(line);
 </script>
 
 <span
 	class={[
 		'block font-mono text-sm leading-relaxed',
 		type === 'command' && 'dark:text-stone-100',
-		type === 'output' && 'text-emerald-400',
+		type === 'output' && 'dark:text-stone-100',
 		type === 'error' && 'text-red-400',
-		type === 'comment' && 'text-stone-600 dark:text-stone-400 italic'
+		type === 'comment' && 'text-stone-500 italic dark:text-stone-400'
 	]
 		.filter(Boolean)
 		.join(' ')}

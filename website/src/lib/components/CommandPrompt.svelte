@@ -2,7 +2,12 @@
 	import Line from '$lib/components/command_prompt/Line.svelte';
 	import Control from '$lib/components/command_prompt/Control.svelte';
 	import { postEvaluate } from '$lib/controller/repl';
-	import { type EvalRequest, type EvalResponseSuccess } from '$lib/server/repl';
+	import {
+		type EvalErrorResponse,
+		type EvalRequest,
+		type EvalResponseSuccess,
+		type ParserErrorResponse
+	} from '$lib/server/repl';
 	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
 
 	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
@@ -10,6 +15,7 @@
 	let replOutput: HTMLElement;
 
 	$effect(() => {
+		state.hide; // Turn hide on and off should also have scroll effect
 		if (state.lines.length && replOutput) {
 			replOutput.scrollTop = replOutput.scrollHeight;
 		}
@@ -19,8 +25,19 @@
 		state.lines.push(`>> ${state.command}`);
 	}
 
-	function copyEvalResult(resp: EvalResponseSuccess) {
-		state.lines.push(resp.output);
+	function handleEvalResult(resp: EvalResponseSuccess) {
+		if (resp.output != null) state.lines.push(resp.output);
+	}
+
+	function handleEvalError(resp: EvalErrorResponse) {
+		let output = resp.message;
+		if ((resp.code == 'parser_error')) {
+			const parserErrors = (resp as ParserErrorResponse).error;
+			for (let i = 0; i < parserErrors.length; i++) {
+				output += `\n\t${parserErrors[i].message}`;
+			}
+		}
+		state.lines.push(output);
 	}
 
 	async function evaluate() {
@@ -33,7 +50,9 @@
 		const [status, resp] = await postEvaluate(req);
 
 		if (status === 200) {
-			copyEvalResult(resp as EvalResponseSuccess);
+			handleEvalResult(resp as EvalResponseSuccess);
+		} else {
+			handleEvalError(resp as EvalErrorResponse);
 		}
 
 		state.isEval = false;
@@ -82,9 +101,11 @@
 
 	{#if state.hide && !forceNotHide}
 		<!-- Minimized: show only last line -->
-		<div class="bg-white px-4 py-1.5 dark:bg-stone-900">
-			<Line line={state.lines[state.lines.length - 1]} />
-		</div>
+		<pre
+			class={[
+				'not-prose m-0 flex-1 resize-y overflow-auto bg-white px-4 py-3 dark:bg-stone-900 ',
+				state.wrap ? 'break-all whitespace-pre-wrap' : 'whitespace-pre'
+			].join(' ')}><Line line={state.lines[state.lines.length - 1]} /></pre>
 	{:else}
 		<pre
 			bind:this={replOutput}
