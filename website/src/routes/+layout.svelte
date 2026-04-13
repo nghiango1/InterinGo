@@ -12,21 +12,9 @@
 	<meta http-equiv="x-ua-compatible" content="ie=edge" />
 	<title>InterinGo — Interpreter built in Go</title>
 	<link rel="icon" type="image/x-icon" />
-	<link
-		rel="stylesheet"
-		href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css"
-		integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw=="
-		crossorigin="anonymous"
-		referrerpolicy="no-referrer"
-	/>
 	<link rel="stylesheet" href="/public/prism.css" />
-	<script src="/public/htmx.min.js"></script>
-	<script src="/public/custom.js"></script>
 	<script src="/public/prism.js"></script>
 	<link rel="icon" href={favicon} />
-
-	<link rel="preconnect" href="https://fonts.googleapis.com" />
-	<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin="anonymous" />
 </svelte:head>
 
 <div
