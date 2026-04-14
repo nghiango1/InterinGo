@@ -13,6 +13,7 @@ type ServiceCore struct {
 	runtimeCore *runtime.Core
 	muConn      sync.Mutex
 	conn        *websocket.Conn
+	connId      string
 }
 
 func NewServiceCore(evalCore *runtime.Core) *ServiceCore {

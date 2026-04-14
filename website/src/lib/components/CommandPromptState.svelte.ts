@@ -27,13 +27,6 @@ export class WebSocketImpl {
 		// Connection opened
 		this.ws.addEventListener("open", (_: Event) => {
 			this.ws.send("Hello Server!");
-
-			// Keep connection alive, else server will clean up this session
-			// ping every 1 mins
-			this.pingInterval = setInterval(() => {
-				console.log(`SENT: ping`);
-				this.ws.send("ping");
-			}, 1000 * 60);
 		});
 
 		this.ws.addEventListener('message', (event: MessageEvent) => {

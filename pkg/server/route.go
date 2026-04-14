@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 const API_ROUTE = "/api"
@@ -120,9 +121,8 @@ func apiRoute(s *Server) {
 }
 
 const (
-	pongWait = 70 * time.Second
-	// Client will ping, server don't expect to check health
-	// pingPeriod = 60 * time.Second
+	pongWait   = 60 * time.Second
+	pingPeriod = 50 * time.Second
 )
 
 func (s *Server) handleWebSocket(c *gin.Context) {
@@ -139,6 +139,19 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		return nil
 	})
 
+	// Start a goroutine to send pings.
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}()
+
+	connId := s.serviceCore.WebsocketConnectionCreate(conn)
+
 	for {
 		messageType, message, err := conn.ReadMessage()
 
@@ -148,13 +161,12 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		}
 		log.Printf("Received: %s", message)
 
-		s.serviceCore.WebsocketHandler(conn, messageType, message)
+		err = s.serviceCore.WebsocketHandler(connId, messageType, message)
 
-		// We not expect to return anything back to client
-		// if err := conn.WriteMessage(messageType, message); err != nil {
-		// 	log.Printf("Write error: %v", err)
-		// 	break
-		// }
+		if err != nil {
+			log.Printf("Write error: %v", err)
+			break
+		}
 	}
 }
 
