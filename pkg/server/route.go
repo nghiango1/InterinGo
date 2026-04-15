@@ -126,6 +126,10 @@ const (
 )
 
 func (s *Server) handleWebSocket(c *gin.Context) {
+	s.upgrader.CheckOrigin = func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		return origin == "https://nghiango.asia" || origin == "http://localhost:8080" // Dev
+	}
 	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("WebSocket upgrade error: %v", err)
