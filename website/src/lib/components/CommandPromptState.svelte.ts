@@ -2,9 +2,20 @@ const SESSION_SHARE_NOTICE = '// Session is shared with one backend';
 const SESSION_SHARE_NOTICE_2 = '// variables persist across snippets even after reload';
 const STARTED_LINE = '// Let start with help() command';
 
-export interface PrintRequest {
+export interface WebsocketMessageOpen {
+	type: "ws_open"
+	connId: string
+}
+export interface WebsocketMessageError {
+	type: "ws_error"
+	error: string
+}
+export interface WebsocketMessagePrintEvent {
+	type: "ws_print"
 	message: string
 }
+
+export type WebsocketMessage = WebsocketMessagePrintEvent | WebsocketMessageOpen | WebsocketMessageError
 
 const WS_PATH = '/ws'
 
@@ -31,13 +42,20 @@ export class WebSocketImpl {
 
 		this.ws.addEventListener('message', (event: MessageEvent) => {
 			// Parse the incoming message here
-			let data: PrintRequest | null = null;
+			let data: WebsocketMessage | null = null;
 			try {
 				data = JSON.parse(event.data);
 			} catch {
 				return;
 			}
-			if (data != null) {
+			if (data == null) {
+				return
+			}
+			if (data.type == "ws_open") {
+				commandPromptState.connId = data.connId
+			} else if (data.type == "ws_error") {
+				console.log("[ERROR] WS send error:", data.error)
+			} else if (data.type == "ws_print") {
 				commandPromptState.lines.push(data.message);
 			}
 		});
@@ -71,6 +89,7 @@ export class WebSocketImpl {
 
 export let commandPromptState = $state({
 	ws: null as WebSocketImpl | null,
+	connId: null as string | null,
 	command: "",
 	isEval: false,
 	hide: true,

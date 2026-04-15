@@ -2,38 +2,39 @@ package core
 
 import (
 	"fmt"
+	"log"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
-func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) string {
-	core.muConn.Lock()
-	defer core.muConn.Unlock()
+func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (string, error) {
+	core.muConnClients.Lock()
+	defer core.muConnClients.Unlock()
 
-	if core.conn != nil {
-		core.conn.WriteMessage(websocket.CloseMessage, []byte("Cuurrently only support one ws client for print"))
-		core.conn.Close()
+	connId := uuid.New().String()
+	_, ok := core.connClients[connId]
+	if ok {
+		log.Printf("[ERROR] ConnId collision, should not be possible")
+		return "", fmt.Errorf("[ERROR] ConnId collision, should not be possible")
 	}
 
-	core.conn = conn
-	core.connId = uuid.New().String()
+	client := &ConnectedClient{}
+	client.muConn.Lock()
+	defer client.muConn.Unlock()
 
-	return core.connId
+	client.conn = conn
+	core.connClients[connId] = client
+
+	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connId))
+	conn.WriteJSON(NewWebsocketConnectSuccess(connId))
+
+	return connId, nil
 }
 
-func (core *ServiceCore) WebsocketHandler(connId string, messageType int, message []byte) error {
-	core.muConn.Lock()
-	defer core.muConn.Unlock()
+func (core *ServiceCore) WebsocketConnectionCleanup(connId string) {
+	core.muConnClients.Lock()
+	defer core.muConnClients.Unlock()
 
-	if core.connId != connId {
-		return fmt.Errorf("ConnId doesn't match, server should drop the connection")
-	}
-
-	// if the client do want to try and close connection, remove core.conn
-	// else we will clean up conn after print return error
-	if messageType == websocket.CloseMessage {
-		core.conn = nil
-	}
-	return nil
+	delete(core.connClients, connId)
 }
