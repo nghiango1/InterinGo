@@ -6,6 +6,14 @@ import (
 	"strings"
 )
 
+type CreateReplRuntimeRequest struct {
+	ConnId string `json:"connId"`
+}
+
+type CreateReplRuntimeResponseSuccess struct {
+	RuntimeId string `json:"runtimeId"`
+}
+
 type EvaluateRequest struct {
 	RuntimeId string `json:"id"`
 	Data      string `json:"data"`

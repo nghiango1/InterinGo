@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
+	"log"
 	"sync"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -97,6 +99,46 @@ func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuc
 
 	// If both err and res from Eval is nil, there some thing wrong
 	return nil, common.NewErrorResponse(500)
+}
+
+func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponseInterface) {
+	if req.ConnId == "" {
+		return nil, common.NewErrorResponse(400)
+	}
+
+	c.muConnClients.Lock()
+	defer c.muConnClients.Unlock()
+
+	connectedClient, ok := c.connClients[req.ConnId]
+	if !ok {
+		return nil, common.NewBadRequestErrorResponse("req.ConnId not found", nil)
+	}
+
+	runtimeId := uuid.New().String()
+	_, ok = c.runtimeCores[runtimeId]
+	if ok {
+		log.Printf("[ERROR] ConnId collision, should not be possible")
+		return nil, common.NewErrorResponse(500)
+	}
+
+	evalCore := runtime.NewCore(runtime.EMBED, nil)
+
+	evalCore.Env.Set(
+		"print", &PrintBuiltin{
+			env: evalCore.Env,
+			externalPrint: func(message string) {
+				connectedClient.muConn.Lock()
+				defer connectedClient.muConn.Unlock()
+
+				connectedClient.conn.WriteJSON(NewPrintMessageEventData(message))
+			},
+		},
+	)
+
+	// If both err and res from Eval is nil, there some thing wrong
+	return &CreateReplRuntimeResponseSuccess{
+		RuntimeId: runtimeId,
+	}, nil
 }
 
 // Return

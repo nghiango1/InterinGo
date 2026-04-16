@@ -1,3 +1,6 @@
+import { createReplRuntime } from "$lib/controller/repl";
+import type { CreateReplRuntimeRequest, CreateReplRuntimeResponseSuccess } from "$lib/server/repl";
+
 const SESSION_SHARE_NOTICE = '// Session is shared with one backend';
 const SESSION_SHARE_NOTICE_2 = '// variables persist across snippets even after reload';
 const STARTED_LINE = '// Let start with help() command';
@@ -52,7 +55,21 @@ export class WebSocketImpl {
 				return
 			}
 			if (data.type == "ws_open") {
+				console.log("[INFO] Connection ready: ", data.connId)
 				commandPromptState.connId = data.connId
+
+				const req: CreateReplRuntimeRequest = { connId: data.connId };
+				createReplRuntime(req).then(([status, response]) => {
+					if (status === 200) {
+						console.log("[INFO] Connected to a seperated REPL Session")
+
+						commandPromptState.runtimeId = (response as CreateReplRuntimeResponseSuccess).runtimeId;
+					} else {
+						console.log("[ERROR] Failed to create seperated REPL Session")
+					}
+				});
+
+
 			} else if (data.type == "ws_error") {
 				console.log("[ERROR] WS send error:", data.error)
 			} else if (data.type == "ws_print") {
@@ -90,6 +107,7 @@ export class WebSocketImpl {
 export let commandPromptState = $state({
 	ws: null as WebSocketImpl | null,
 	connId: null as string | null,
+	runtimeId: null as string | null,
 	command: "",
 	isEval: false,
 	hide: true,
