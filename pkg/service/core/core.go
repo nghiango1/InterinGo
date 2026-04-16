@@ -135,6 +135,11 @@ func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateRe
 		},
 	)
 
+	c.runtimeCores[runtimeId] = &ReplRuntime{
+		core:   evalCore,
+		connId: req.ConnId,
+	}
+
 	// If both err and res from Eval is nil, there some thing wrong
 	return &CreateReplRuntimeResponseSuccess{
 		RuntimeId: runtimeId,
@@ -154,17 +159,11 @@ func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) (*EvaluateResponseS
 		return nil, common.NewErrorResponse(404)
 	}
 
-	if runtimeCore != nil {
+	if runtimeCore == nil {
 		fmt.Println("[ERROR] API error, evalCore didn't init yet")
 		return nil, common.NewErrorResponse(500)
 	}
 
-	// Handling eval can cause print, which will use connClients
-	connClient, ok := c.connClients[runtimeCore.connId]
-	if ok {
-		connClient.muConn.Lock()
-		defer connClient.muConn.Unlock()
-	}
 	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: req.Data})
 
 	if err != nil {
