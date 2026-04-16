@@ -50,7 +50,7 @@
 		let status, resp;
 		if (state.runtimeId != null) {
 			const req: EvalRequestV2 = { data: state.command, runtimeId: state.runtimeId };
-			[status, resp] = await postEvaluate(req);
+			[status, resp] = await postEvaluateV2(req);
 		} else {
 			const req: EvalRequest = { data: state.command };
 			[status, resp] = await postEvaluate(req);

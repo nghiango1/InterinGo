@@ -14,7 +14,7 @@ export async function postEvaluate(req: EvalRequest): Promise<[number, EvalRespo
 }
 
 export async function postEvaluateV2(req: EvalRequestV2): Promise<[number, EvalResponse]> {
-    const response = await fetch(`/api/repl`, {
+    const response = await fetch(`/api/repl/${req.runtimeId}/evaluate`, {
         method: 'POST',
         body: JSON.stringify(req),
         headers: {
