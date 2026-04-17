@@ -1,6 +1,8 @@
 package core
 
 import (
+	"encoding/json"
+	"fmt"
 	"interingo/pkg/parser"
 	"interingo/pkg/runtime"
 	"strings"
@@ -120,11 +122,68 @@ func NewPrintMessageEventData(message string) *PrintMessageEventData {
 	}
 }
 
+type RuntimeCreatedEventData struct {
+	Type      WebsocketMessage `json:"type"` // type already a keyword
+	RuntimeId string           `json:"runtimeId"`
+}
+
+func NewRuntimeCreatedEventData(runtimeId string) *RuntimeCreatedEventData {
+	return &RuntimeCreatedEventData{
+		Type:      WS_PRINT,
+		RuntimeId: runtimeId,
+	}
+}
+
 type WebsocketMessage string
 
 const (
-	WS_UNKNOW = WebsocketMessage("ws_unknow")
-	WS_OPEN   = WebsocketMessage("ws_open")
-	WS_ERROR  = WebsocketMessage("ws_error")
-	WS_PRINT  = WebsocketMessage("ws_print")
+	WS_UNKNOW         = WebsocketMessage("ws_unknow")
+	WS_OPEN           = WebsocketMessage("ws_open")
+	WS_ERROR          = WebsocketMessage("ws_error")
+	WS_PRINT          = WebsocketMessage("ws_print")
+	WS_REPL_CREATED   = WebsocketMessage("ws_repl_created")
+	WS_REPL_CONNECTED = WebsocketMessage("ws_repl_connected")
+)
+
+type WebsocketRequest interface {
+	Type() WebsocketRequestType
+}
+
+// Add type into the JSON result
+func WebsocketRequestToJson(w WebsocketRequest) ([]byte, error) {
+	if w.Type() == WS_REQUEST_UNKNOWN {
+		return nil, fmt.Errorf("Unknown websocket Request type")
+	}
+
+	var res []byte
+	res, err := json.Marshal(w)
+	if err != nil {
+		return nil, err
+	}
+
+	var temp map[string]any
+	_ = json.Unmarshal(res, temp)
+	temp["type"] = w.Type()
+
+	res, _ = json.Marshal(w)
+	return res, nil
+}
+
+type WebsocketRequestConnectRepl struct {
+	runtimeId string `json:"runtimeId"`
+}
+
+type WebsocketRequestCreateRepl struct{}
+
+type WebsocketRequestEvaluate struct {
+	Data string `json:"data"`
+}
+
+type WebsocketRequestType string
+
+const (
+	WS_REQUEST_UNKNOWN      = WebsocketRequestType("ws_request_unknown")
+	WS_REQUEST_CONNECT_REPL = WebsocketRequestType("ws_request_connect_repl")
+	WS_REQUEST_CREATE_REPL  = WebsocketRequestType("ws_request_create_repl")
+	WS_REQUEST_EVAL         = WebsocketRequestType("ws_request_eval")
 )
