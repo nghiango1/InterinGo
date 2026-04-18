@@ -14,6 +14,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
+	"github.com/gorilla/websocket"
 )
 
 const API_ROUTE = "/api"
@@ -93,6 +94,57 @@ func pageRoute(s *Server) {
 }
 
 func apiRoute(s *Server) {
+	s.ginEngine.POST("/api/repl/:id/evaluate", func(c *gin.Context) {
+		runtimeId := c.Param("id")
+		// Input validate
+		var req core.EvaluateRequest
+		err := c.BindJSON(&req)
+		if err != nil {
+			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
+			c.JSON(http.StatusBadRequest, errorResp)
+		}
+
+		req.RuntimeId = runtimeId
+
+		if s.serviceCore == nil {
+			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
+			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
+		}
+
+		res, evalErr := s.serviceCore.EvaluateHandlerV2(req)
+
+		// Return
+		if evalErr != nil {
+			c.JSON(evalErr.GetType(), evalErr)
+		} else if res != nil {
+			c.JSON(http.StatusOK, res)
+		}
+	})
+	s.ginEngine.POST("/api/repl", func(c *gin.Context) {
+		// Input validate
+		var req core.CreateReplRuntimeRequest
+		err := c.BindJSON(&req)
+		if err != nil {
+			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
+			c.JSON(http.StatusBadRequest, errorResp)
+		}
+
+		if s.serviceCore == nil {
+			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
+			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
+		}
+
+		res, evalErr := s.serviceCore.CreateReplRuntime(req)
+
+		// Return
+		if evalErr != nil {
+			c.JSON(evalErr.GetType(), evalErr)
+		} else if res != nil {
+			c.JSON(http.StatusOK, res)
+		}
+	})
 	s.ginEngine.POST("/api/evaluate", func(c *gin.Context) {
 		// Input validate
 		var req core.EvaluateRequest
@@ -120,12 +172,15 @@ func apiRoute(s *Server) {
 }
 
 const (
-	pongWait = 70 * time.Second
-	// Client will ping, server don't expect to check health
-	// pingPeriod = 60 * time.Second
+	pongWait   = 60 * time.Second
+	pingPeriod = 50 * time.Second
 )
 
 func (s *Server) handleWebSocket(c *gin.Context) {
+	s.upgrader.CheckOrigin = func(r *http.Request) bool {
+		origin := r.Header.Get("Origin")
+		return origin == "https://nghiango.asia" || origin == "http://localhost:8080" // Dev
+	}
 	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
 		log.Printf("WebSocket upgrade error: %v", err)
@@ -139,6 +194,23 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		return nil
 	})
 
+	// Start a goroutine to send pings.
+	go func() {
+		ticker := time.NewTicker(pingPeriod)
+		defer ticker.Stop()
+		for range ticker.C {
+			if err := conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+				return
+			}
+		}
+	}()
+
+	client, err := s.serviceCore.WebsocketConnectionCreate(conn)
+	if err != nil {
+		conn.WriteMessage(websocket.CloseMessage, []byte("LUCKY USER WITH 128 BIT ID COLLISION!!!"))
+		conn.Close()
+	}
+
 	for {
 		messageType, message, err := conn.ReadMessage()
 
@@ -146,15 +218,19 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 			log.Printf("Read error: %v", err)
 			break
 		}
+		if messageType == websocket.TextMessage {
+			s.serviceCore.WebsocketMessageHandler(client, message)
+		}
 		log.Printf("Received: %s", message)
 
-		s.serviceCore.WebsocketHandler(conn, messageType, message)
+		if messageType == websocket.CloseMessage {
+			s.serviceCore.WebsocketConnectionCleanup(client)
+		}
 
-		// We not expect to return anything back to client
-		// if err := conn.WriteMessage(messageType, message); err != nil {
-		// 	log.Printf("Write error: %v", err)
-		// 	break
-		// }
+		if err != nil {
+			log.Printf("Write error: %v", err)
+			break
+		}
 	}
 }
 

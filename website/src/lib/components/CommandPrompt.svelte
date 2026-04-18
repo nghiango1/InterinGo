@@ -1,14 +1,15 @@
 <script lang="ts">
 	import Line from '$lib/components/command_prompt/Line.svelte';
 	import Control from '$lib/components/command_prompt/Control.svelte';
-	import { postEvaluate } from '$lib/controller/repl';
+	import { postEvaluate, postEvaluateV2 } from '$lib/controller/repl';
 	import {
 		type EvalErrorResponse,
 		type EvalRequest,
+		type EvalRequestV2,
 		type EvalResponseSuccess,
 		type ParserErrorResponse
 	} from '$lib/server/repl';
-	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
+	import { CreateReplSessionHelper, commandPromptState as state, WebSocketImpl } from '$lib/components/CommandPromptState.svelte';
 
 	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
 	// svelte-ignore non_reactive_update
@@ -29,12 +30,22 @@
 		if (resp.output != null) state.lines.push(resp.output);
 	}
 
-	function handleEvalError(resp: EvalErrorResponse) {
+	async function handleEvalError(resp: EvalErrorResponse) {
 		let output = resp.message;
-		if ((resp.code == 'parser_error')) {
+		if (resp.code == 'parser_error') {
 			const parserErrors = (resp as ParserErrorResponse).error;
 			for (let i = 0; i < parserErrors.length; i++) {
 				output += `\n\t${parserErrors[i].message}`;
+			}
+		} else if (resp.code == 'resource_not_found') {
+			output += `\nCreate new repl runtime`;
+			const runtimeId = await CreateReplSessionHelper()
+			if (runtimeId != null) {
+				state.runtimeId = runtimeId
+				if (state.ws == null || state.ws?.status() == WebSocket.CLOSED) {
+					state.ws = new WebSocketImpl()
+				}
+				state.lines = []
 			}
 		}
 		state.lines.push(output);
@@ -44,15 +55,21 @@
 		if (!state.command.trim() || state.isEval) return;
 		state.isEval = true;
 
-		const req: EvalRequest = { data: state.command };
 		addCommand();
 
-		const [status, resp] = await postEvaluate(req);
+		let status, resp;
+		if (state.runtimeId != null) {
+			const req: EvalRequestV2 = { data: state.command, runtimeId: state.runtimeId };
+			[status, resp] = await postEvaluateV2(req);
+		} else {
+			const req: EvalRequest = { data: state.command };
+			[status, resp] = await postEvaluate(req);
+		}
 
 		if (status === 200) {
 			handleEvalResult(resp as EvalResponseSuccess);
 		} else {
-			handleEvalError(resp as EvalErrorResponse);
+			await handleEvalError(resp as EvalErrorResponse);
 		}
 
 		state.isEval = false;

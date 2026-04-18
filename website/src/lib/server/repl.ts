@@ -1,8 +1,8 @@
 // JSON schema will be better to handle this
 export interface ErrorResponse {
-    type: number;
-    code: string;
-    message: string;
+	type: number;
+	code: string;
+	message: string;
 }
 
 // Example
@@ -15,61 +15,47 @@ export interface ErrorResponse {
 //   ]
 // }
 export interface ParserErrorResponse extends ErrorResponse {
-    type: 400;
-    code: "parser_error";
-    error: ParserError[];
+	type: 400;
+	code: "parser_error";
+	error: ParserError[];
 }
 
 interface ParserError {
-    message: string;
-    range: Range;
+	message: string;
+	range: Range;
 }
 
 interface Range {
-    start: Position;
-    end: Position;
+	start: Position;
+	end: Position;
 }
 
 interface Position {
-    start: number;
-    end: number;
+	start: number;
+	end: number;
 }
 
 export interface EvalRequest {
-    data: string;
+	data: string;
 }
 
 export interface EvalResponseSuccess {
-    output?: string;
+	output?: string;
 }
 
 export type EvalErrorResponse = ErrorResponse | ParserErrorResponse;
 
 export type EvalResponse = EvalResponseSuccess | EvalErrorResponse;
 
-export async function evaluateServer(req: EvalRequest, base?: string): Promise<EvalResponse> {
-    const response = await fetch(new URL('/api/evaluate', base), {
-        method: 'POST',
-        body: JSON.stringify(req),
-        headers: {
-            'content-type': 'application/json'
-        }
-    });
-
-    try {
-        const output = await response.json();
-        return output as EvalResponse;
-    } catch (e) {
-        return {
-            code: "internal_error",
-            type: 500,
-            message: 'Internal server error'
-        };
-    }
+export interface EvalRequestV2 {
+	runtimeId: string;
+	data: string;
 }
 
-export function evaluateMock(_req: EvalRequest): EvalResponse {
-    return {
-        output: 'Mock output'
-    };
+export interface CreateReplRuntimeRequest { }
+
+export interface CreateReplRuntimeResponseSuccess {
+	runtimeId: string;
 }
+
+export type CreateReplRuntimeResponse = CreateReplRuntimeResponseSuccess | ErrorResponse;

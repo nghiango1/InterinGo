@@ -6,8 +6,15 @@ import (
 	"strings"
 )
 
+type CreateReplRuntimeRequest struct{}
+
+type CreateReplRuntimeResponseSuccess struct {
+	RuntimeId string `json:"runtimeId"`
+}
+
 type EvaluateRequest struct {
-	Data string `json:"data"`
+	RuntimeId string `json:"id"`
+	Data      string `json:"data"`
 }
 
 type EvaluateResponseSuccess struct {
@@ -73,3 +80,49 @@ func NewEvalErrorResponse(message string, verbose *runtime.VerboseInfo) *EvalErr
 func (e *EvalErrorResponse) GetType() int       { return e.Type }
 func (e *EvalErrorResponse) GetCode() string    { return e.Code }
 func (e *EvalErrorResponse) GetMessage() string { return e.Message }
+
+// Websocket
+type WebsocketConnectSuccess struct {
+	Type   WebsocketMessage `json:"type"` // type already a keyword
+	ConnId string           `json:"connId"`
+}
+
+func NewWebsocketConnectSuccess(connId string) *WebsocketConnectSuccess {
+	return &WebsocketConnectSuccess{
+		Type:   WS_OPEN,
+		ConnId: connId,
+	}
+}
+
+type WebsocketConnectError struct {
+	Type  WebsocketMessage `json:"type"` // type already a keyword
+	Error string           `json:"error"`
+}
+
+func NewWebsocketConnectError(error string) *WebsocketConnectError {
+	return &WebsocketConnectError{
+		Type:  WS_ERROR,
+		Error: error,
+	}
+}
+
+type PrintMessageEventData struct {
+	Type    WebsocketMessage `json:"type"` // type already a keyword
+	Message string           `json:"message"`
+}
+
+func NewPrintMessageEventData(message string) *PrintMessageEventData {
+	return &PrintMessageEventData{
+		Type:    WS_PRINT,
+		Message: message,
+	}
+}
+
+type WebsocketMessage string
+
+const (
+	WS_UNKNOW = WebsocketMessage("ws_unknow")
+	WS_OPEN   = WebsocketMessage("ws_open")
+	WS_ERROR  = WebsocketMessage("ws_error")
+	WS_PRINT  = WebsocketMessage("ws_print")
+)

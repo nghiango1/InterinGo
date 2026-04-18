@@ -12,11 +12,7 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-type PrintMessageEventData struct {
-	Message string `json:"message"`
-}
-
-func (c *ServiceCore) Print(mes string) {
+func (c *ConnectedClient) Print(mes string) {
 	c.muConn.Lock()
 	defer c.muConn.Unlock()
 
@@ -30,9 +26,7 @@ func (c *ServiceCore) Print(mes string) {
 		return
 	}
 
-	err := c.conn.WriteJSON(PrintMessageEventData{
-		Message: mes,
-	})
+	err := c.conn.WriteJSON(NewPrintMessageEventData(mes))
 
 	// Clean up c.conn
 	if err != nil {
@@ -45,8 +39,8 @@ func (c *ServiceCore) Print(mes string) {
 }
 
 type PrintBuiltin struct {
-	env  *object.Environment
-	core *ServiceCore
+	env           *object.Environment
+	externalPrint func(string)
 }
 
 func (b *PrintBuiltin) Description() string { return "PrintBuiltin into stdout" }
@@ -72,7 +66,7 @@ func (b *PrintBuiltin) Func(env *object.Environment) object.Object {
 	}
 	io.WriteString(message, "\n")
 
-	b.core.Print(message.String())
+	b.externalPrint(message.String())
 	return nil
 }
 

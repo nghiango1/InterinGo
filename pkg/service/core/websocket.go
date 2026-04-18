@@ -1,21 +1,101 @@
 package core
 
-import "github.com/gorilla/websocket"
+import (
+	"encoding/json"
+	"fmt"
+	"log"
 
-func (core *ServiceCore) WebsocketHandler(conn *websocket.Conn, messageType int, message []byte) {
-	core.muConn.Lock()
-	defer core.muConn.Unlock()
+	"github.com/google/uuid"
+	"github.com/gorilla/websocket"
+)
 
-	if core.conn != nil {
-		core.conn.WriteMessage(websocket.CloseMessage, []byte("Only support one ws client for print"))
-		core.conn.Close()
+func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (*ConnectedClient, error) {
+	core.muConnClients.Lock()
+	defer core.muConnClients.Unlock()
+
+	connId := uuid.New().String()
+	_, ok := core.connClients[connId]
+	if ok {
+		log.Printf("[ERROR] ConnId collision, should not be possible")
+		return nil, fmt.Errorf("[ERROR] ConnId collision, should not be possible")
 	}
 
-	core.conn = conn
-
-	// if the client do want to try and close connection, remove core.conn
-	// else we will clean up conn after print return error
-	if messageType == websocket.CloseMessage {
-		core.conn = nil
+	client := &ConnectedClient{
+		id:   connId,
+		conn: conn,
 	}
+
+	core.connClients[connId] = client
+
+	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connId))
+	conn.WriteJSON(NewWebsocketConnectSuccess(connId))
+
+	return client, nil
+}
+
+type Message interface {
+	Type() MessageType
+}
+
+type ReplBindMessage struct {
+	MessageType MessageType `json:"type"`
+	RuntimeId   string      `json:"runtimeId"`
+}
+
+func (m *ReplBindMessage) Type() MessageType {
+	return m.MessageType
+}
+
+type MessageType string
+
+const (
+	REPL_BIND = MessageType("repl_bind")
+)
+
+func (core *ServiceCore) WebsocketMessageHandler(connectedClient *ConnectedClient, data []byte) error {
+	log.Printf("[INFO] ServiceCore Websocket handler got request %v", string(data))
+	var mes ReplBindMessage
+	err := json.Unmarshal(data, &mes)
+
+	if err != nil {
+		log.Printf("[ERROR] Failed to read message data")
+		return err
+	}
+
+	return core.WebsocketConnectionReplBind(connectedClient, mes.RuntimeId)
+}
+
+func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedClient, runtimeId string) error {
+	core.muConnClients.Lock()
+	defer core.muConnClients.Unlock()
+
+	runtime, ok := core.runtimeCores[runtimeId]
+	if !ok {
+		return fmt.Errorf("[ERROR] Runtime not found")
+	}
+
+	// You can try to connect to others people created runtime, which overide
+	// the connection and then it can't received printed message anymore
+
+	runtime.core.Env.Set(
+		"print", &PrintBuiltin{
+			env: runtime.core.Env,
+			externalPrint: func(message string) {
+				connectedClient.muConn.Lock()
+				defer connectedClient.muConn.Unlock()
+
+				connectedClient.conn.WriteJSON(NewPrintMessageEventData(message))
+			},
+		},
+	)
+
+	runtime.connId = connectedClient.id
+	return nil
+}
+
+func (core *ServiceCore) WebsocketConnectionCleanup(client *ConnectedClient) {
+	core.muConnClients.Lock()
+	defer core.muConnClients.Unlock()
+
+	delete(core.connClients, client.id)
 }
