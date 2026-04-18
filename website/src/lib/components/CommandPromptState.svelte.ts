@@ -59,21 +59,32 @@ export class WebSocketImpl {
 				commandPromptState.connId = data.connId
 
 				const req: CreateReplRuntimeRequest = {};
-				createReplRuntime(req).then(([status, response]) => {
-					if (status === 200) {
-						commandPromptState.runtimeId = (response as CreateReplRuntimeResponseSuccess).runtimeId;
+				let runtimeId = window.localStorage.getItem("repl-session")
+				if (runtimeId == null) {
+					createReplRuntime(req).then(([status, response]) => {
+						if (status === 200) {
+							commandPromptState.runtimeId = (response as CreateReplRuntimeResponseSuccess).runtimeId;
+							window.localStorage.setItem("repl-session", commandPromptState.runtimeId)
 
-						let bindRequest = {
-							type: "repl_bind",
-							runtimeId: commandPromptState.runtimeId
+							let bindRequest = {
+								type: "repl_bind",
+								runtimeId: commandPromptState.runtimeId
+							}
+							this.ws.send(JSON.stringify(bindRequest))
+
+							console.log("[INFO] Connected to a seperated REPL Session", commandPromptState.runtimeId)
+						} else {
+							console.log("[ERROR] Failed to create seperated REPL Session")
 						}
-						this.ws.send(JSON.stringify(bindRequest))
-
-						console.log("[INFO] Connected to a seperated REPL Session", commandPromptState.runtimeId)
-					} else {
-						console.log("[ERROR] Failed to create seperated REPL Session")
+					});
+				} else {
+					commandPromptState.runtimeId = runtimeId
+					let bindRequest = {
+						type: "repl_bind",
+						runtimeId: commandPromptState.runtimeId
 					}
-				});
+					this.ws.send(JSON.stringify(bindRequest))
+				}
 
 
 			} else if (data.type == "ws_error") {
