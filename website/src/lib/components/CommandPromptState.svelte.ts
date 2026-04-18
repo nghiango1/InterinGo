@@ -6,13 +6,23 @@ export interface PrintRequest {
 	message: string
 }
 
-class WebSocketImpl {
+const WS_PATH = '/ws'
+
+export class WebSocketImpl {
 	ws: WebSocket
 	pingInterval: NodeJS.Timeout | null = null
 
 	constructor() {
 		// Create a new websocket
-		this.ws = new WebSocket('/ws');
+		try {
+			this.ws = new WebSocket(WS_PATH);
+		} catch {
+			const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+			const host = window.location.host; // includes hostname + port
+
+			const ws = `${protocol}//${host}${WS_PATH}`;
+			this.ws = new WebSocket(ws);
+		}
 
 		// Connection opened
 		this.ws.addEventListener("open", (_: Event) => {
@@ -67,7 +77,7 @@ class WebSocketImpl {
 }
 
 export let commandPromptState = $state({
-	ws: new WebSocketImpl(),
+	ws: null as WebSocketImpl | null,
 	command: "",
 	isEval: false,
 	hide: true,
