@@ -42,7 +42,7 @@ func (s *Server) registerFileServerMiddleware() {
 	serveFile := func(c *gin.Context, filePath string, status int) {
 		data, err := fs.ReadFile(fsys, filePath)
 		if err != nil {
-			log.Printf("[ERROR] Error when reading file, got", err)
+			log.Printf("[ERROR] Error when reading file, got %s", err.Error())
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
