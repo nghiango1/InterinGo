@@ -38,6 +38,7 @@ func pageRoute(s *Server) {
 	serveFile := func(c *gin.Context, filePath string, status int) {
 		data, err := fs.ReadFile(fsys, filePath)
 		if err != nil {
+			log.Printf("[ERROR] Error when reading file, got", err)
 			c.AbortWithStatus(http.StatusInternalServerError)
 			return
 		}
@@ -88,7 +89,7 @@ func pageRoute(s *Server) {
 			}
 		}
 
-		serveFile(c, "404.html", http.StatusNotFound)
+		serveFile(c, "200.html", http.StatusNotFound)
 		c.Abort()
 	})
 }
