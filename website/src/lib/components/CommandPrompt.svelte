@@ -9,7 +9,7 @@
 		type EvalResponseSuccess,
 		type ParserErrorResponse
 	} from '$lib/server/repl';
-	import { commandPromptState as state } from '$lib/components/CommandPromptState.svelte';
+	import { CreateReplSessionHelper, commandPromptState as state, WebSocketImpl } from '$lib/components/CommandPromptState.svelte';
 
 	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
 	// svelte-ignore non_reactive_update
@@ -30,12 +30,22 @@
 		if (resp.output != null) state.lines.push(resp.output);
 	}
 
-	function handleEvalError(resp: EvalErrorResponse) {
+	async function handleEvalError(resp: EvalErrorResponse) {
 		let output = resp.message;
 		if (resp.code == 'parser_error') {
 			const parserErrors = (resp as ParserErrorResponse).error;
 			for (let i = 0; i < parserErrors.length; i++) {
 				output += `\n\t${parserErrors[i].message}`;
+			}
+		} else if (resp.code == 'resource_not_found') {
+			output += `\nCreate new repl runtime`;
+			const runtimeId = await CreateReplSessionHelper()
+			if (runtimeId != null) {
+				state.runtimeId = runtimeId
+				if (state.ws == null || state.ws?.status() == WebSocket.CLOSED) {
+					state.ws = new WebSocketImpl()
+				}
+				state.lines = []
 			}
 		}
 		state.lines.push(output);
@@ -59,7 +69,7 @@
 		if (status === 200) {
 			handleEvalResult(resp as EvalResponseSuccess);
 		} else {
-			handleEvalError(resp as EvalErrorResponse);
+			await handleEvalError(resp as EvalErrorResponse);
 		}
 
 		state.isEval = false;
