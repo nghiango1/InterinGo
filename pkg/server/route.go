@@ -27,8 +27,12 @@ const WEBSITE_FILEPATH = "content/dist"
 //go:embed all:content
 var embedContent embed.FS
 
-// Any call which doesn't match `/api` route will be handle with static fileserver
-func pageRoute(s *Server) {
+// To make Gin (RESTful API server focus) to better handle request as a
+// static fileserver
+// - Middleware is use, check if user request for a specific route (api, ws)
+// - If there no prefix of URL.Path is found, middleware will serve the file
+// with the same name, then drop the handle chain via c.Abort()
+func (s *Server) registerFileServerMiddleware() {
 	fsys, err := fs.Sub(embedContent, WEBSITE_FILEPATH)
 	if err != nil {
 		log.Fatalln("Failed to embed folder, got error: ", err)
@@ -50,12 +54,9 @@ func pageRoute(s *Server) {
 		c.Data(status, mimeType, data)
 	}
 
+	// Middleware register
 	s.ginEngine.Use(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
-			c.Next()
-			return
-		}
-		if strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
+		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) || strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
 			c.Next()
 			return
 		}
@@ -65,8 +66,13 @@ func pageRoute(s *Server) {
 		if urlPath == "." {
 			urlPath = ""
 		}
-
 		candidates := []string{"index.html"}
+
+		// By default, I already build all page as <path>/index.html, this
+		// make sure we check others file server options
+		// - <path> -> <path> (literal file - js, css, ...)
+		// - <path> -> <path>.html (or it could be .html)
+		// - <path> -> <path>/index.html (or it could be a path)
 		if urlPath != "" {
 			candidates = []string{
 				urlPath,
@@ -76,6 +82,7 @@ func pageRoute(s *Server) {
 		}
 
 		for _, candidate := range candidates {
+			println(candidate)
 			// fs.FS rejects any path containing ".." at the API level
 			fileInfo, err := fs.Stat(fsys, candidate)
 			if err != nil {
@@ -89,6 +96,8 @@ func pageRoute(s *Server) {
 			}
 		}
 
+		// This have been setup as default fallback, it can handle render
+		// 404 page base on url.path via svelte routing support
 		serveFile(c, "200.html", http.StatusNotFound)
 		c.Abort()
 	})
@@ -236,7 +245,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 }
 
 func Route(s *Server) {
-	pageRoute(s)
+	s.registerFileServerMiddleware()
 	apiRoute(s)
 
 	// setup websocket
