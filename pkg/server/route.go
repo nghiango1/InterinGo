@@ -205,7 +205,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		}
 	}()
 
-	connId, err := s.serviceCore.WebsocketConnectionCreate(conn)
+	client, err := s.serviceCore.WebsocketConnectionCreate(conn)
 	if err != nil {
 		conn.WriteMessage(websocket.CloseMessage, []byte("LUCKY USER WITH 128 BIT ID COLLISION!!!"))
 		conn.Close()
@@ -218,10 +218,13 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 			log.Printf("Read error: %v", err)
 			break
 		}
+		if messageType == websocket.TextMessage {
+			s.serviceCore.WebsocketMessageHandler(client, message)
+		}
 		log.Printf("Received: %s", message)
 
 		if messageType == websocket.CloseMessage {
-			s.serviceCore.WebsocketConnectionCleanup(connId)
+			s.serviceCore.WebsocketConnectionCleanup(client)
 		}
 
 		if err != nil {

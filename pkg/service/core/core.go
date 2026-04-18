@@ -14,6 +14,7 @@ import (
 type ConnectedClient struct {
 	muConn sync.Mutex
 	conn   *websocket.Conn
+	id     string
 }
 
 type ReplRuntime struct {

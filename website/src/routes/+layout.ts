@@ -16,7 +16,7 @@ export function load({ }: LayoutLoad) {
 	console.log("[INFO] Create new WS connection to the server")
 	// init commandPromptState new websocket
 	commandPromptState.ws = new WebSocketImpl()
-	
+
 	return {
 		init: true,
 	}

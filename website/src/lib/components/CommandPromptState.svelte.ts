@@ -58,10 +58,17 @@ export class WebSocketImpl {
 				console.log("[INFO] Connection ready: ", data.connId)
 				commandPromptState.connId = data.connId
 
-				const req: CreateReplRuntimeRequest = { connId: data.connId };
+				const req: CreateReplRuntimeRequest = {};
 				createReplRuntime(req).then(([status, response]) => {
 					if (status === 200) {
 						commandPromptState.runtimeId = (response as CreateReplRuntimeResponseSuccess).runtimeId;
+
+						let bindRequest = {
+							type: "repl_bind",
+							runtimeId: commandPromptState.runtimeId
+						}
+						this.ws.send(JSON.stringify(bindRequest))
+
 						console.log("[INFO] Connected to a seperated REPL Session", commandPromptState.runtimeId)
 					} else {
 						console.log("[ERROR] Failed to create seperated REPL Session")

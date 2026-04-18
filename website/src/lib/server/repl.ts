@@ -52,9 +52,7 @@ export interface EvalRequestV2 {
 	data: string;
 }
 
-export interface CreateReplRuntimeRequest {
-	connId: string;
-}
+export interface CreateReplRuntimeRequest { }
 
 export interface CreateReplRuntimeResponseSuccess {
 	runtimeId: string;
