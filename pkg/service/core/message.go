@@ -6,9 +6,7 @@ import (
 	"strings"
 )
 
-type CreateReplRuntimeRequest struct {
-	ConnId string `json:"connId"`
-}
+type CreateReplRuntimeRequest struct{}
 
 type CreateReplRuntimeResponseSuccess struct {
 	RuntimeId string `json:"runtimeId"`
