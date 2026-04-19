@@ -23,6 +23,7 @@ const WS_ROUTE = "/ws"
 // This is enforce by build script, which copy over website built static file
 // into `content/dist`
 const WEBSITE_FILEPATH = "content/dist"
+const FALLBACK_PAGE = "index.html"
 
 //go:embed all:content
 var embedContent embed.FS
@@ -42,8 +43,14 @@ func (s *Server) registerFileServerMiddleware() {
 	serveFile := func(c *gin.Context, filePath string, status int) {
 		data, err := fs.ReadFile(fsys, filePath)
 		if err != nil {
-			log.Printf("[ERROR] Error when reading file, got %s", err.Error())
-			c.AbortWithStatus(http.StatusInternalServerError)
+			// Server content dist may not existed - Making fallback still return 500
+			if filePath == FALLBACK_PAGE {
+				log.Printf("[WARN] Server mode was not packed with embeded WebUI")
+				c.Data(status, "plan/text", []byte("Server is up and running"))
+			} else {
+				log.Printf("[ERROR] Error when reading file, got %s", err.Error())
+				c.AbortWithStatus(http.StatusInternalServerError)
+			}
 			return
 		}
 		ext := path.Ext(filePath)
@@ -81,24 +88,27 @@ func (s *Server) registerFileServerMiddleware() {
 			}
 		}
 
-		for _, candidate := range candidates {
-			println(candidate)
-			// fs.FS rejects any path containing ".." at the API level
-			fileInfo, err := fs.Stat(fsys, candidate)
+		isFile := func(path string) bool {
+			fileInfo, err := fs.Stat(fsys, path)
 			if err != nil {
-				continue
+				return false
 			}
-			if !fileInfo.IsDir() {
+			return !fileInfo.IsDir()
+		}
+
+		for _, candidate := range candidates {
+			// fs.FS rejects any path containing ".." at the API level
+			println(candidate)
+			if candidate == FALLBACK_PAGE || isFile(candidate) {
 				serveFile(c, candidate, http.StatusOK)
 				c.Abort()
 				return
-
 			}
 		}
 
 		// This have been setup as default fallback, it can handle render
 		// 404 page base on url.path via svelte routing support
-		serveFile(c, "200.html", http.StatusNotFound)
+		serveFile(c, FALLBACK_PAGE, http.StatusNotFound)
 		c.Abort()
 	})
 }

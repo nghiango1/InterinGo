@@ -1,13 +1,9 @@
 package core
 
 import (
-	"fmt"
 	"interingo/pkg/runtime"
-	"interingo/pkg/service/common"
-	"log"
 	"sync"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -54,131 +50,4 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 	)
 
 	return serviceCore
-}
-
-// Return
-// Success -> EvaluateResponseSuccess
-// Error -> 400:Bad request
-// Error -> 500:Internal server error
-func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
-	if c.runtimeCoreDefault == nil {
-		fmt.Println("[ERRPR] API error, evalCore didn't init yet")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	res, err, ver := c.runtimeCoreDefault.Eval(runtime.EvalRequest{Data: req.Data})
-
-	if err != nil {
-		message := ""
-		if err.Error != nil {
-			message = err.Error.Error()
-		}
-
-		if err.SystemExit != nil {
-			return &EvaluateResponseSuccess{
-				Output:  nil,
-				Verbose: ver,
-			}, nil
-		}
-
-		if len(err.ParserErrors) != 0 {
-			error := NewParserErrorResponse(message, err.ParserErrors, ver)
-			return nil, error
-		}
-
-		if err.Error != nil {
-			return nil, NewEvalErrorResponse(message, ver)
-		}
-
-		return nil, common.NewErrorResponse(500) // Unknown error
-	} else if res != nil {
-		success := EvaluateResponseSuccess{
-			Output:  res.Output,
-			Verbose: ver,
-		}
-		return &success, nil
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return nil, common.NewErrorResponse(500)
-}
-
-func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponseInterface) {
-	c.muConnClients.Lock()
-	defer c.muConnClients.Unlock()
-
-	runtimeId := uuid.New().String()
-	_, ok := c.runtimeCores[runtimeId]
-	if ok {
-		log.Printf("[ERROR] ConnId collision, should not be possible")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	evalCore := runtime.NewCore(runtime.EMBED, nil)
-
-	c.runtimeCores[runtimeId] = &ReplRuntime{
-		id:   runtimeId,
-		core: evalCore,
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return &CreateReplRuntimeResponseSuccess{
-		RuntimeId: runtimeId,
-	}, nil
-}
-
-// Return
-// Success -> EvaluateResponseSuccess
-// Error -> 400:Bad request
-// Error -> 500:Internal server error
-func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
-	if req.RuntimeId == "" {
-		return c.EvaluateHandler(req)
-	}
-	runtimeCore, ok := c.runtimeCores[req.RuntimeId]
-	if !ok {
-		return nil, common.NewErrorResponse(404)
-	}
-
-	if runtimeCore == nil {
-		fmt.Println("[ERROR] API error, evalCore didn't init yet")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: req.Data})
-
-	if err != nil {
-		message := ""
-		if err.Error != nil {
-			message = err.Error.Error()
-		}
-		if err.SystemExit != nil {
-			return &EvaluateResponseSuccess{
-				Output:  nil,
-				Verbose: ver,
-			}, nil
-		}
-
-		if len(err.ParserErrors) != 0 {
-			error := NewParserErrorResponse(message, err.ParserErrors, ver)
-			return nil, error
-		}
-
-		if err.Error != nil {
-			return nil, NewEvalErrorResponse(message, ver)
-		}
-
-		{
-			return nil, common.NewErrorResponse(500) // Unknown error
-		}
-	} else if res != nil {
-		success := EvaluateResponseSuccess{
-			Output:  res.Output,
-			Verbose: ver,
-		}
-		return &success, nil
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return nil, common.NewErrorResponse(500)
 }
