@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponseInterface) {
+func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponse) {
 	c.muConnClients.Lock()
 	defer c.muConnClients.Unlock()
 

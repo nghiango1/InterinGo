@@ -20,7 +20,7 @@ type EvaluateRequest struct {
 
 type EvaluateResponse struct {
 	Success *EvaluateResponseSuccess
-	Error   common.ErrorResponseInterface
+	Error   common.ErrorResponse
 	Verbose *runtime.VerboseInfo `json:"verbose"`
 }
 

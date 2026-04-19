@@ -14,7 +14,7 @@ func (s *interingoServiceV2Impl) EvaluateHandler(c *gin.Context) {
 	req, err := evaluateHandlerRequest(c)
 	if err != nil {
 		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-		errorResp := common.NewBadRequestErrorResponse(err.Error(), nil)
+		errorResp := common.NewInvalidParamsErrorResponse(err.Error(), nil)
 		evaluateHandlerErrorResponse(c, errorResp)
 		return
 	}
@@ -26,14 +26,15 @@ func (s *interingoServiceV2Impl) EvaluateHandler(c *gin.Context) {
 		return
 	}
 
-	resp := s.serviceCore.EvaluateHandlerV2(*req)
+	coreResp := s.serviceCore.EvaluateHandlerV2(*req)
 
 	// Return
-	if resp.Error != nil {
-		c.JSON(resp.Error.GetType(), resp.Error)
-	} else if resp.Success != nil {
-		c.JSON(http.StatusOK, resp.Success)
+	if coreResp.Error != nil {
+		evaluateHandlerErrorResponse(c, coreResp.Error)
+		return
 	}
+
+	evaluateHandlerResponse(c, coreResp)
 }
 
 // Ensure craft user input to service core standard
@@ -64,7 +65,7 @@ func evaluateHandlerResponse(c *gin.Context, coreResp core.EvaluateResponse) {
 }
 
 // Ensure output to api endpoit return to match API schema standard
-func evaluateHandlerErrorResponse(c *gin.Context, error common.ErrorResponseInterface) {
+func evaluateHandlerErrorResponse(c *gin.Context, error common.ErrorResponse) {
 	switch error := error.(type) {
 	case *core.EvalErrorResponse:
 		resp := EvaluateResponseEvalError{
@@ -74,11 +75,18 @@ func evaluateHandlerErrorResponse(c *gin.Context, error common.ErrorResponseInte
 		}
 		c.JSON(resp.Type, resp)
 	case *core.ParserErrorResponse:
+		var parserError []ParserError
+		for _, e := range error.Errors {
+			parserError = append(parserError, ParserError{
+				Message: e.Message,
+			})
+		}
+
 		resp := EvaluateResponseParserError{
 			Type:    error.GetType(),
 			Code:    error.GetCode(),
 			Message: error.GetMessage(),
-			Errors:  error.Errors,
+			Errors:  parserError,
 		}
 		c.JSON(resp.Type, resp)
 	default:
