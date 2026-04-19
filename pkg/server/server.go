@@ -3,6 +3,7 @@ package server
 import (
 	"interingo/pkg/service/core"
 	service_v1 "interingo/pkg/service/v1"
+	service_v2 "interingo/pkg/service/v2"
 	"log"
 	"net/http"
 	"os"
@@ -15,6 +16,7 @@ type Server struct {
 	ginEngine   *gin.Engine
 	serviceCore *core.ServiceCore
 	serviceV1   service_v1.InteringoServiceV1
+	serviceV2   service_v2.InteringoServiceV2
 	upgrader    websocket.Upgrader
 }
 
@@ -33,6 +35,7 @@ func NewServer() *Server {
 		ginEngine:   gin.Default(),
 		serviceCore: core,
 		serviceV1:   service_v1.NewInteringoServiceV1(core),
+		serviceV2:   service_v2.NewInteringoServiceV2(core),
 		upgrader:    upgrader,
 	}
 }
