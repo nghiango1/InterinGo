@@ -2,7 +2,6 @@ package core
 
 import (
 	"fmt"
-	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
 )
 
@@ -12,46 +11,13 @@ func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) EvaluateResponse {
 	}
 	runtimeCore, ok := c.runtimeCores[req.RuntimeId]
 	if !ok {
-		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(404)}
+		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(404), Verbose: nil}
 	}
 
 	if runtimeCore == nil {
 		fmt.Println("[ERROR] API error, evalCore didn't init yet")
-		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(500)}
+		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(500), Verbose: nil}
 	}
 
-	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: req.Data})
-
-	if err != nil {
-		message := ""
-		if err.Error != nil {
-			message = err.Error.Error()
-		}
-		if err.SystemExit != nil {
-			return EvaluateResponse{Success: &EvaluateResponseSuccess{
-				Output:  nil,
-				Verbose: ver,
-			}, Error: nil}
-		}
-
-		if len(err.ParserErrors) != 0 {
-			error := NewParserErrorResponse(message, err.ParserErrors, ver)
-			return EvaluateResponse{Success: nil, Error: error}
-		}
-
-		if err.Error != nil {
-			return EvaluateResponse{Success: nil, Error: NewEvalErrorResponse(message, ver)}
-		}
-
-		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(500)} // Unknown error
-	} else if res != nil {
-		success := EvaluateResponseSuccess{
-			Output:  res.Output,
-			Verbose: ver,
-		}
-		return EvaluateResponse{Success: &success, Error: nil}
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(500)}
+	return c.evaluateHandler(*runtimeCore, req.Data)
 }

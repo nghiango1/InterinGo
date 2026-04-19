@@ -21,23 +21,20 @@ type EvaluateRequest struct {
 type EvaluateResponse struct {
 	Success *EvaluateResponseSuccess
 	Error   common.ErrorResponseInterface
+	Verbose *runtime.VerboseInfo `json:"verbose"`
 }
 
 type EvaluateResponseSuccess struct {
-	Output  *string              `json:"output,omitempty"`
-	Verbose *runtime.VerboseInfo `json:"verbose,omitempty"`
+	Output *string `json:"output,omitempty"`
 }
 
 // Share common interface of common.ErrorResponseInterface
 type ParserErrorResponse struct {
-	Type    int                  `json:"type"` // type already a keyword
-	Code    string               `json:"code"`
 	Message string               `json:"message"`
 	Errors  []parser.ParserError `json:"error,omitempty"`
-	Verbose *runtime.VerboseInfo `json:"verbose,omitempty"`
 }
 
-func NewParserErrorResponse(message string, errors []parser.ParserError, verbose *runtime.VerboseInfo) *ParserErrorResponse {
+func NewParserErrorResponse(message string, errors []parser.ParserError) *ParserErrorResponse {
 	// Make sure Parser errors is clear at start, this help with UI display
 	// Could have better way, this work for now
 	if message == "" {
@@ -47,27 +44,21 @@ func NewParserErrorResponse(message string, errors []parser.ParserError, verbose
 	}
 
 	return &ParserErrorResponse{
-		Type:    400,
-		Code:    "parser_error",
 		Message: message,
 		Errors:  errors,
-		Verbose: verbose,
 	}
 }
 
-func (e *ParserErrorResponse) GetType() int       { return e.Type }
-func (e *ParserErrorResponse) GetCode() string    { return e.Code }
+func (e *ParserErrorResponse) GetType() int       { return 400 }
+func (e *ParserErrorResponse) GetCode() string    { return "parser_error" }
 func (e *ParserErrorResponse) GetMessage() string { return e.Message }
 
 // Share common interface of common.ErrorResponseInterface
 type EvalErrorResponse struct {
-	Type    int                  `json:"type"` // type already a keyword
-	Code    string               `json:"code"`
-	Message string               `json:"message"`
-	Verbose *runtime.VerboseInfo `json:"verbose"`
+	Message string `json:"message"`
 }
 
-func NewEvalErrorResponse(message string, verbose *runtime.VerboseInfo) *EvalErrorResponse {
+func NewEvalErrorResponse(message string) *EvalErrorResponse {
 	// Make sure Parser errors is clear at start, this help with UI display
 	// Could have better way, this work for now
 	if message == "" {
@@ -77,14 +68,12 @@ func NewEvalErrorResponse(message string, verbose *runtime.VerboseInfo) *EvalErr
 	}
 
 	return &EvalErrorResponse{
-		Type:    400,
-		Code:    "eval_error",
 		Message: message,
 	}
 }
 
-func (e *EvalErrorResponse) GetType() int       { return e.Type }
-func (e *EvalErrorResponse) GetCode() string    { return e.Code }
+func (e *EvalErrorResponse) GetType() int       { return 400 }
+func (e *EvalErrorResponse) GetCode() string    { return "eval_error" }
 func (e *EvalErrorResponse) GetMessage() string { return e.Message }
 
 // Websocket
