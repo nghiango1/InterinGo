@@ -1,0 +1,209 @@
+openapi: 3.0.0
+info:
+  title: REPL API
+  version: 1.0.0
+
+paths:
+  /api/evaluate:
+    post:
+      summary: Evaluate code
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvalRequest'
+      responses:
+        '200':
+          description: Successful evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvalResponseSuccess'
+        '400':
+          description: Parser or evaluation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserOrEvalErrorResponse'
+        'default':
+          description: General error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/repl/{runtimeId}/evaluate:
+    post:
+      summary: Evaluate code in a REPL runtime
+      parameters:
+        - name: runtimeId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/EvalRequest'
+      responses:
+        '200':
+          description: Successful evaluation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EvalResponseSuccess'
+        '400':
+          description: Parser or evaluation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ParserOrEvalErrorResponse'
+        'default':
+          description: General error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /api/repl:
+    post:
+      summary: Create REPL runtime
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateReplRuntimeRequest'
+      responses:
+        '201':
+          description: Runtime created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CreateReplRuntimeResponseSuccess'
+        'default':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [type, code, message]
+      properties:
+        type:
+          type: integer
+          minimum: 100
+          maximum: 600
+          example: 400
+        code:
+          type: string
+          example: bad_request
+        message:
+          type: string
+          example: Bad request
+
+    ParserErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          required: [error]
+          properties:
+            type:
+              type: integer
+              enum: [400]
+              example: 400
+            code:
+              type: string
+              enum: [parser_error]
+              example: parser_error
+            message:
+              type: string
+              example: "PARSER ERROR: provided code was invalid"
+            error:
+              type: array
+              items:
+                $ref: '#/components/schemas/ParserError'
+
+    EvalErrorResponse:
+      allOf:
+        - $ref: '#/components/schemas/ErrorResponse'
+        - type: object
+          required: [error]
+          properties:
+            type:
+              type: integer
+              enum: [400]
+              example: 400
+            code:
+              type: string
+              enum: [eval_error]
+              example: eval_error
+            message:
+              type: string
+              example: "ERROR: Runtime state already ended!"
+
+    ParserOrEvalErrorResponse:
+      oneOf:
+        - $ref: '#/components/schemas/ParserErrorResponse'
+        - $ref: '#/components/schemas/EvalErrorResponse'
+      discriminator:
+        propertyName: code
+        mapping:
+          parser_error: '#/components/schemas/ParserErrorResponse'
+          eval_error: '#/components/schemas/EvalErrorResponse'
+
+    ParserError:
+      type: object
+      properties:
+        message:
+          type: string
+        range:
+          $ref: '#/components/schemas/Range'
+
+    Range:
+      type: object
+      properties:
+        start:
+          $ref: '#/components/schemas/Position'
+        end:
+          $ref: '#/components/schemas/Position'
+
+    Position:
+      type: object
+      properties:
+        line:
+          type: integer
+        character:
+          type: integer
+
+    EvalRequest:
+      type: object
+      required: [data]
+      properties:
+        data:
+          type: string
+
+    EvalResponseSuccess:
+      type: object
+      properties:
+        output:
+          type: string
+          nullable: true
+
+    CreateReplRuntimeRequest:
+      type: object
+      description: Empty request body
+
+    CreateReplRuntimeResponseSuccess:
+      type: object
+      required: [runtimeId]
+      properties:
+        runtimeId:
+          type: string
