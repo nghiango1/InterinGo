@@ -1,4 +1,4 @@
-package v1
+package v2
 
 import (
 	"fmt"
@@ -9,8 +9,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// API v1 api/evalutate
-func (s *interingoServiceV1Impl) EvaluateHandler(c *gin.Context) {
+// API v2 api/repl/:id/evalutate
+func (s *interingoServiceV2Impl) EvaluateHandler(c *gin.Context) {
 	req, err := evaluateHandlerRequest(c)
 	if err != nil {
 		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
@@ -20,32 +20,36 @@ func (s *interingoServiceV1Impl) EvaluateHandler(c *gin.Context) {
 	}
 
 	if s.serviceCore == nil {
-		fmt.Println("[ERRPO] API error, serviceCore didn't init yet")
+		fmt.Println("[ERROR] API error, serviceCore didn't init yet")
 		errorResp := common.NewErrorResponse(500)
 		evaluateHandlerErrorResponse(c, errorResp)
 		return
 	}
 
-	coreResp := s.serviceCore.EvaluateHandler(*req)
-	if coreResp.Error != nil {
-		evaluateHandlerErrorResponse(c, coreResp.Error)
-		return
-	}
+	resp := s.serviceCore.EvaluateHandlerV2(*req)
 
-	evaluateHandlerResponse(c, coreResp)
+	// Return
+	if resp.Error != nil {
+		c.JSON(resp.Error.GetType(), resp.Error)
+	} else if resp.Success != nil {
+		c.JSON(http.StatusOK, resp.Success)
+	}
 }
 
 // Ensure craft user input to service core standard
 func evaluateHandlerRequest(c *gin.Context) (*core.EvaluateRequest, error) {
+	runtimeId := c.Param("id")
+	// Input validate
 	var userInput EvaluateRequest
 	err := c.BindJSON(&userInput)
-
 	if err != nil {
-		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+		fmt.Println("[ERROR] API error, can't parse JSON value, got: ", err.Error())
 		return nil, fmt.Errorf("Can't parse JSON value")
 	}
+
 	req := &core.EvaluateRequest{
-		Data: userInput.Data,
+		RuntimeId: runtimeId,
+		Data:      userInput.Data,
 	}
 	return req, nil
 }

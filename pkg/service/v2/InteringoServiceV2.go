@@ -25,35 +25,6 @@ type interingoServiceV2Impl struct {
 }
 
 // API v1 api/repl/:id/evalutate
-func (s *interingoServiceV2Impl) EvaluateHandler(c *gin.Context) {
-	runtimeId := c.Param("id")
-	// Input validate
-	var req core.EvaluateRequest
-	err := c.BindJSON(&req)
-	if err != nil {
-		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-		errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-		c.JSON(http.StatusBadRequest, errorResp)
-	}
-
-	req.RuntimeId = runtimeId
-
-	if s.serviceCore == nil {
-		fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-		c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-	}
-
-	resp := s.serviceCore.EvaluateHandlerV2(req)
-
-	// Return
-	if resp.Error != nil {
-		c.JSON(resp.Error.GetType(), resp.Error)
-	} else if resp.Success != nil {
-		c.JSON(http.StatusOK, resp.Success)
-	}
-}
-
-// API v1 api/repl/:id/evalutate
 func (s *interingoServiceV2Impl) CreateReplRuntimeHandler(c *gin.Context) {
 	// Input validate
 	var req core.CreateReplRuntimeRequest
