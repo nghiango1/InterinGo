@@ -4,20 +4,36 @@ import (
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
 	"sync"
+	"time"
 
+	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
 type ConnectedClient struct {
-	muConn sync.Mutex
-	conn   *websocket.Conn
-	id     string
+	id        string
+	muConn    sync.Mutex
+	conn      *websocket.Conn
+	runtimeId string
+}
+
+func NewConnectedClient(conn *websocket.Conn) *ConnectedClient {
+	connId := uuid.New().String()
+
+	client := &ConnectedClient{
+		id:        connId,
+		conn:      conn,
+		runtimeId: "",
+	}
+
+	return client
 }
 
 type ReplRuntime struct {
-	id     string
-	core   *runtime.Core
-	connId string
+	id         string
+	core       *runtime.Core
+	connId     string
+	lastUpdate time.Time
 }
 
 type ServiceCore struct {
@@ -56,6 +72,7 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 // common handler
 func (c *ServiceCore) evaluateHandler(runtimeCore ReplRuntime, data string) EvaluateResponse {
 	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: data})
+	runtimeCore.lastUpdate = time.Now()
 
 	if err != nil {
 		message := ""

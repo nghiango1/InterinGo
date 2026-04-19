@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -13,24 +12,19 @@ func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (*Conne
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
-	connId := uuid.New().String()
-	_, ok := core.connClients[connId]
+	connectedClient := NewConnectedClient(conn)
+	_, ok := core.connClients[connectedClient.id]
 	if ok {
 		log.Printf("[ERROR] ConnId collision, should not be possible")
 		return nil, fmt.Errorf("[ERROR] ConnId collision, should not be possible")
 	}
 
-	client := &ConnectedClient{
-		id:   connId,
-		conn: conn,
-	}
+	core.connClients[connectedClient.id] = connectedClient
 
-	core.connClients[connId] = client
+	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connectedClient.id))
+	conn.WriteJSON(NewWebsocketConnectSuccess(connectedClient.id))
 
-	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connId))
-	conn.WriteJSON(NewWebsocketConnectSuccess(connId))
-
-	return client, nil
+	return connectedClient, nil
 }
 
 type Message interface {
@@ -77,6 +71,15 @@ func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedC
 	// You can try to connect to others people created runtime, which overide
 	// the connection and then it can't received printed message anymore
 
+	// Clean up runtimeId which this connectedClient connected to
+	// UI only allow one REPL anyway, so this is safe
+	if connectedClient.runtimeId != "" {
+		prevRuntime, ok := core.runtimeCores[connectedClient.runtimeId]
+		if ok && prevRuntime != nil {
+			delete(core.runtimeCores, prevRuntime.id)
+		}
+	}
+
 	runtime.core.Env.Set(
 		"print", &PrintBuiltin{
 			env: runtime.core.Env,
@@ -89,13 +92,24 @@ func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedC
 		},
 	)
 
+	// Overide to the new runtime
+	connectedClient.runtimeId = runtimeId
 	runtime.connId = connectedClient.id
 	return nil
 }
 
-func (core *ServiceCore) WebsocketConnectionCleanup(client *ConnectedClient) {
+func (core *ServiceCore) WebsocketConnectionCleanup(connectedClient *ConnectedClient) {
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
-	delete(core.connClients, client.id)
+	// Clean up runtimeId which this connectedClient connected to
+	// UI only allow one REPL anyway, so this is safe
+	if connectedClient.runtimeId != "" {
+		prevRuntime, ok := core.runtimeCores[connectedClient.runtimeId]
+		if ok && prevRuntime != nil {
+			delete(core.runtimeCores, prevRuntime.id)
+		}
+	}
+
+	delete(core.connClients, connectedClient.id)
 }
