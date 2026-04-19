@@ -3,6 +3,7 @@ package core
 import (
 	"interingo/pkg/parser"
 	"interingo/pkg/runtime"
+	"interingo/pkg/service/common"
 	"strings"
 )
 
@@ -15,6 +16,11 @@ type CreateReplRuntimeResponseSuccess struct {
 type EvaluateRequest struct {
 	RuntimeId string `json:"id"`
 	Data      string `json:"data"`
+}
+
+type EvaluateResponse struct {
+	Success *EvaluateResponseSuccess
+	Error   common.ErrorResponseInterface
 }
 
 type EvaluateResponseSuccess struct {

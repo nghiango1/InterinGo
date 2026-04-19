@@ -43,13 +43,13 @@ func (s *interingoServiceV2Impl) EvaluateHandler(c *gin.Context) {
 		c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
 	}
 
-	res, evalErr := s.serviceCore.EvaluateHandlerV2(req)
+	resp := s.serviceCore.EvaluateHandlerV2(req)
 
 	// Return
-	if evalErr != nil {
-		c.JSON(evalErr.GetType(), evalErr)
-	} else if res != nil {
-		c.JSON(http.StatusOK, res)
+	if resp.Error != nil {
+		c.JSON(resp.Error.GetType(), resp.Error)
+	} else if resp.Success != nil {
+		c.JSON(http.StatusOK, resp.Success)
 	}
 }
 
