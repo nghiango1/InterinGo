@@ -167,7 +167,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 			break
 		}
 		if messageType == websocket.TextMessage {
-			s.serviceCore.WebsocketMessageHandler(client, message)
+			s.serviceCore.WebsocketReceivedTextMessageHandler(client, message)
 		}
 		log.Printf("Received: %s", message)
 

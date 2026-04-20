@@ -27,28 +27,9 @@ func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (*Conne
 	return connectedClient, nil
 }
 
-type Message interface {
-	Type() MessageType
-}
-
-type ReplBindMessage struct {
-	MessageType MessageType `json:"type"`
-	RuntimeId   string      `json:"runtimeId"`
-}
-
-func (m *ReplBindMessage) Type() MessageType {
-	return m.MessageType
-}
-
-type MessageType string
-
-const (
-	REPL_BIND = MessageType("repl_bind")
-)
-
-func (core *ServiceCore) WebsocketMessageHandler(connectedClient *ConnectedClient, data []byte) error {
+func (core *ServiceCore) WebsocketReceivedTextMessageHandler(connectedClient *ConnectedClient, data []byte) error {
 	log.Printf("[INFO] ServiceCore Websocket handler got request %v", string(data))
-	var mes ReplBindMessage
+	var mes ReplBindRequest
 	err := json.Unmarshal(data, &mes)
 
 	if err != nil {
@@ -56,10 +37,10 @@ func (core *ServiceCore) WebsocketMessageHandler(connectedClient *ConnectedClien
 		return err
 	}
 
-	return core.WebsocketConnectionReplBind(connectedClient, mes.RuntimeId)
+	return core.WebsocketReplBindHandler(connectedClient, mes.RuntimeId)
 }
 
-func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedClient, runtimeId string) error {
+func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClient, runtimeId string) error {
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
@@ -84,9 +65,6 @@ func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedC
 		"print", &PrintBuiltin{
 			env: runtime.core.Env,
 			externalPrint: func(message string) {
-				connectedClient.muConn.Lock()
-				defer connectedClient.muConn.Unlock()
-
 				connectedClient.conn.WriteJSON(NewPrintMessageEventData(message))
 			},
 		},

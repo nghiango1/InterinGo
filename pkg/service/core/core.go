@@ -12,7 +12,6 @@ import (
 
 type ConnectedClient struct {
 	id        string
-	muConn    sync.Mutex
 	conn      *websocket.Conn
 	runtimeId string
 }

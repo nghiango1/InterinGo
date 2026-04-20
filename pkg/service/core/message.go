@@ -78,8 +78,8 @@ func (e *EvalErrorResponse) GetMessage() string { return e.Message }
 
 // Websocket
 type WebsocketConnectSuccess struct {
-	Type   WebsocketMessage `json:"type"` // type already a keyword
-	ConnId string           `json:"connId"`
+	Type   WebsocketMessageResponseType `json:"type"` // type already a keyword
+	ConnId string                       `json:"connId"`
 }
 
 func NewWebsocketConnectSuccess(connId string) *WebsocketConnectSuccess {
@@ -90,8 +90,8 @@ func NewWebsocketConnectSuccess(connId string) *WebsocketConnectSuccess {
 }
 
 type WebsocketConnectError struct {
-	Type  WebsocketMessage `json:"type"` // type already a keyword
-	Error string           `json:"error"`
+	Type  WebsocketMessageResponseType `json:"type"` // type already a keyword
+	Error string                       `json:"error"`
 }
 
 func NewWebsocketConnectError(error string) *WebsocketConnectError {
@@ -102,8 +102,8 @@ func NewWebsocketConnectError(error string) *WebsocketConnectError {
 }
 
 type PrintMessageEventData struct {
-	Type    WebsocketMessage `json:"type"` // type already a keyword
-	Message string           `json:"message"`
+	Type    WebsocketMessageResponseType `json:"type"` // type already a keyword
+	Message string                       `json:"message"`
 }
 
 func NewPrintMessageEventData(message string) *PrintMessageEventData {
@@ -113,11 +113,30 @@ func NewPrintMessageEventData(message string) *PrintMessageEventData {
 	}
 }
 
-type WebsocketMessage string
+type WebsocketMessageResponseType string
 
 const (
-	WS_UNKNOW = WebsocketMessage("ws_unknow")
-	WS_OPEN   = WebsocketMessage("ws_open")
-	WS_ERROR  = WebsocketMessage("ws_error")
-	WS_PRINT  = WebsocketMessage("ws_print")
+	WS_UNKNOW = WebsocketMessageResponseType("ws_unknow")
+	WS_OPEN   = WebsocketMessageResponseType("ws_open")
+	WS_ERROR  = WebsocketMessageResponseType("ws_error")
+	WS_PRINT  = WebsocketMessageResponseType("ws_print")
+)
+
+type WebsocketRequest interface {
+	Type() WebsocketRequestType
+}
+
+type ReplBindRequest struct {
+	MessageType WebsocketRequestType `json:"type"`
+	RuntimeId   string               `json:"runtimeId"`
+}
+
+func (m *ReplBindRequest) Type() WebsocketRequestType {
+	return m.MessageType
+}
+
+type WebsocketRequestType string
+
+const (
+	REPL_BIND = WebsocketRequestType("repl_bind")
 )
