@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 )
 
-func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponseInterface) {
+func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponse) {
 	c.muConnClients.Lock()
 	defer c.muConnClients.Unlock()
 
@@ -22,10 +22,11 @@ func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateRe
 
 	evalCore := runtime.NewCore(runtime.EMBED, nil)
 
-	c.runtimeCores[runtimeId] = &ReplRuntime{
+	runtime := &ReplRuntime{
 		id:   runtimeId,
 		core: evalCore,
 	}
+	c.runtimeCores[runtimeId] = runtime
 
 	// If both err and res from Eval is nil, there some thing wrong
 	return &CreateReplRuntimeResponseSuccess{

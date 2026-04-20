@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -13,48 +12,24 @@ func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (*Conne
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
-	connId := uuid.New().String()
-	_, ok := core.connClients[connId]
+	connectedClient := NewConnectedClient(conn)
+	_, ok := core.connClients[connectedClient.id]
 	if ok {
 		log.Printf("[ERROR] ConnId collision, should not be possible")
 		return nil, fmt.Errorf("[ERROR] ConnId collision, should not be possible")
 	}
 
-	client := &ConnectedClient{
-		id:   connId,
-		conn: conn,
-	}
+	core.connClients[connectedClient.id] = connectedClient
 
-	core.connClients[connId] = client
+	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connectedClient.id))
+	conn.WriteJSON(NewWebsocketConnectSuccess(connectedClient.id))
 
-	log.Printf("[INFO] New connection: %v", NewWebsocketConnectSuccess(connId))
-	conn.WriteJSON(NewWebsocketConnectSuccess(connId))
-
-	return client, nil
+	return connectedClient, nil
 }
 
-type Message interface {
-	Type() MessageType
-}
-
-type ReplBindMessage struct {
-	MessageType MessageType `json:"type"`
-	RuntimeId   string      `json:"runtimeId"`
-}
-
-func (m *ReplBindMessage) Type() MessageType {
-	return m.MessageType
-}
-
-type MessageType string
-
-const (
-	REPL_BIND = MessageType("repl_bind")
-)
-
-func (core *ServiceCore) WebsocketMessageHandler(connectedClient *ConnectedClient, data []byte) error {
+func (core *ServiceCore) WebsocketReceivedTextMessageHandler(connectedClient *ConnectedClient, data []byte) error {
 	log.Printf("[INFO] ServiceCore Websocket handler got request %v", string(data))
-	var mes ReplBindMessage
+	var mes ReplBindRequest
 	err := json.Unmarshal(data, &mes)
 
 	if err != nil {
@@ -62,10 +37,10 @@ func (core *ServiceCore) WebsocketMessageHandler(connectedClient *ConnectedClien
 		return err
 	}
 
-	return core.WebsocketConnectionReplBind(connectedClient, mes.RuntimeId)
+	return core.WebsocketReplBindHandler(connectedClient, mes.RuntimeId)
 }
 
-func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedClient, runtimeId string) error {
+func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClient, runtimeId string) error {
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
@@ -81,21 +56,27 @@ func (core *ServiceCore) WebsocketConnectionReplBind(connectedClient *ConnectedC
 		"print", &PrintBuiltin{
 			env: runtime.core.Env,
 			externalPrint: func(message string) {
-				connectedClient.muConn.Lock()
-				defer connectedClient.muConn.Unlock()
-
 				connectedClient.conn.WriteJSON(NewPrintMessageEventData(message))
 			},
 		},
 	)
 
+	if connectedClient.runtime != nil {
+		log.Printf("[INFO] Connection %s release runtime %s", connectedClient.id, runtime.id)
+	}
+	// Overide to the new runtime
+	connectedClient.runtime = runtime
+	// Remove binding to this runtime from core (connectedClient own it now)
+	delete(core.runtimeCores, runtime.id)
+	log.Printf("[INFO] Connection %s take over runtime %s", connectedClient.id, runtime.id)
+
 	runtime.connId = connectedClient.id
 	return nil
 }
 
-func (core *ServiceCore) WebsocketConnectionCleanup(client *ConnectedClient) {
+func (core *ServiceCore) WebsocketConnectionCleanup(connectedClient *ConnectedClient) {
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
 
-	delete(core.connClients, client.id)
+	delete(core.connClients, connectedClient.id)
 }

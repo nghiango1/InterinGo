@@ -13,9 +13,6 @@ import (
 )
 
 func (c *ConnectedClient) Print(mes string) {
-	c.muConn.Lock()
-	defer c.muConn.Unlock()
-
 	if c.conn == nil {
 		log.Printf("ERROR: Try to print without any client connection")
 		return

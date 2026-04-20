@@ -2,9 +2,6 @@ package server
 
 import (
 	"embed"
-	"fmt"
-	"interingo/pkg/service/common"
-	"interingo/pkg/service/core"
 	"io/fs"
 	"log"
 	"mime"
@@ -98,7 +95,6 @@ func (s *Server) registerFileServerMiddleware() {
 
 		for _, candidate := range candidates {
 			// fs.FS rejects any path containing ".." at the API level
-			println(candidate)
 			if candidate == FALLBACK_PAGE || isFile(candidate) {
 				serveFile(c, candidate, http.StatusOK)
 				c.Abort()
@@ -114,81 +110,12 @@ func (s *Server) registerFileServerMiddleware() {
 }
 
 func apiRoute(s *Server) {
-	s.ginEngine.POST("/api/repl/:id/evaluate", func(c *gin.Context) {
-		runtimeId := c.Param("id")
-		// Input validate
-		var req core.EvaluateRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
+	// v1 - original one REPL for all appoarch
+	s.ginEngine.POST("/api/evaluate", s.serviceV1.EvaluateHandler)
 
-		req.RuntimeId = runtimeId
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.EvaluateHandlerV2(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
-	s.ginEngine.POST("/api/repl", func(c *gin.Context) {
-		// Input validate
-		var req core.CreateReplRuntimeRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.CreateReplRuntime(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
-	s.ginEngine.POST("/api/evaluate", func(c *gin.Context) {
-		// Input validate
-		var req core.EvaluateRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.EvaluateHandler(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
+	// v2 - Create multiple REPL for each session
+	s.ginEngine.POST("/api/repl/:id/evaluate", s.serviceV2.EvaluateHandler)
+	s.ginEngine.POST("/api/repl", s.serviceV2.CreateReplRuntimeHandler)
 }
 
 const (
@@ -239,7 +166,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 			break
 		}
 		if messageType == websocket.TextMessage {
-			s.serviceCore.WebsocketMessageHandler(client, message)
+			s.serviceCore.WebsocketReceivedTextMessageHandler(client, message)
 		}
 		log.Printf("Received: %s", message)
 
