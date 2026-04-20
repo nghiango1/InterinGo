@@ -1,0 +1,35 @@
+package core
+
+import (
+	"log"
+
+	"interingo/pkg/runtime"
+	"interingo/pkg/service/common"
+
+	"github.com/google/uuid"
+)
+
+func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponse) {
+	c.muConnClients.Lock()
+	defer c.muConnClients.Unlock()
+
+	runtimeId := uuid.New().String()
+	_, ok := c.runtimeCores[runtimeId]
+	if ok {
+		log.Printf("[ERROR] ConnId collision, should not be possible")
+		return nil, common.NewErrorResponse(500)
+	}
+
+	evalCore := runtime.NewCore(runtime.EMBED, nil)
+
+	runtime := &ReplRuntime{
+		id:   runtimeId,
+		core: evalCore,
+	}
+	c.runtimeCores[runtimeId] = runtime
+
+	// If both err and res from Eval is nil, there some thing wrong
+	return &CreateReplRuntimeResponseSuccess{
+		RuntimeId: runtimeId,
+	}, nil
+}

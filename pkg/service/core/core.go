@@ -1,26 +1,43 @@
 package core
 
 import (
-	"fmt"
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
 	"log"
 	"sync"
+	"time"
 
 	"github.com/google/uuid"
 	"github.com/gorilla/websocket"
 )
 
+const (
+	alivePeriod = 60 * time.Second
+)
+
 type ConnectedClient struct {
-	muConn sync.Mutex
-	conn   *websocket.Conn
-	id     string
+	id      string
+	conn    *websocket.Conn
+	runtime *ReplRuntime
+}
+
+func NewConnectedClient(conn *websocket.Conn) *ConnectedClient {
+	connId := uuid.New().String()
+
+	client := &ConnectedClient{
+		id:      connId,
+		conn:    conn,
+		runtime: nil,
+	}
+
+	return client
 }
 
 type ReplRuntime struct {
-	id     string
-	core   *runtime.Core
-	connId string
+	id         string
+	core       *runtime.Core
+	connId     string
+	lastUpdate time.Time
 }
 
 type ServiceCore struct {
@@ -30,43 +47,73 @@ type ServiceCore struct {
 	runtimeCoreDefault *runtime.Core
 }
 
-func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
-	evalCore = runtime.NewCore(runtime.EMBED, nil)
-
-	serviceCore := &ServiceCore{
-		connClients:        make(map[string]*ConnectedClient),
-		runtimeCores:       make(map[string]*ReplRuntime),
-		runtimeCoreDefault: evalCore,
+func (core *ServiceCore) EnsureDefaultEvalCode() {
+	if core.runtimeCoreDefault != nil {
+		if core.runtimeCoreDefault.State() != runtime.RUNTIME_END {
+			return
+		}
 	}
+
+	evalCore := runtime.NewCore(runtime.EMBED, nil)
 
 	evalCore.Env.Set(
 		"print", &PrintBuiltin{
 			env: evalCore.Env,
 			externalPrint: func(message string) {
-				serviceCore.muConnClients.Lock()
-				defer serviceCore.muConnClients.Unlock()
+				core.muConnClients.Lock()
+				defer core.muConnClients.Unlock()
 
-				for _, client := range serviceCore.connClients {
+				for _, client := range core.connClients {
 					client.conn.WriteJSON(NewPrintMessageEventData(message))
 				}
 			},
 		},
 	)
 
+	core.runtimeCoreDefault = evalCore
+}
+
+func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
+	serviceCore := &ServiceCore{
+		connClients:        make(map[string]*ConnectedClient),
+		runtimeCores:       make(map[string]*ReplRuntime),
+		runtimeCoreDefault: evalCore,
+	}
+
+	if evalCore == nil {
+		serviceCore.EnsureDefaultEvalCode()
+	}
+
+	// With out Client connection, we need to clean up base from the request
+	// for evaluate of this REPL session
+	go func() {
+		// good enough, timer check every 60 second
+		ticker := time.NewTicker(alivePeriod)
+		defer ticker.Stop()
+		for range ticker.C {
+			serviceCore.muConnClients.Lock()
+			defer serviceCore.muConnClients.Unlock()
+
+			serviceCore.EnsureDefaultEvalCode()
+			// else check if lastUpdate + alivePeriod < current time.
+			// or there already have a client bind to it
+			// If so clean up is perform
+			for _, runtime := range serviceCore.runtimeCores {
+				if time.Now().After(runtime.lastUpdate.Add(alivePeriod)) || runtime.connId != "" {
+					log.Printf("[INFO] Core release runtime %s", runtime.id)
+					delete(serviceCore.runtimeCores, runtime.id)
+				}
+			}
+		}
+	}()
+
 	return serviceCore
 }
 
-// Return
-// Success -> EvaluateResponseSuccess
-// Error -> 400:Bad request
-// Error -> 500:Internal server error
-func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
-	if c.runtimeCoreDefault == nil {
-		fmt.Println("[ERRPR] API error, evalCore didn't init yet")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	res, err, ver := c.runtimeCoreDefault.Eval(runtime.EvalRequest{Data: req.Data})
+// common handler
+func (c *ServiceCore) evaluateHandler(runtimeCore ReplRuntime, data string) EvaluateResponse {
+	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: data})
+	runtimeCore.lastUpdate = time.Now()
 
 	if err != nil {
 		message := ""
@@ -75,110 +122,52 @@ func (c *ServiceCore) EvaluateHandler(req EvaluateRequest) (*EvaluateResponseSuc
 		}
 
 		if err.SystemExit != nil {
-			return &EvaluateResponseSuccess{
-				Output:  nil,
+			return EvaluateResponse{
+				Success: &EvaluateResponseSuccess{
+					Output: nil,
+				},
+				Error:   nil,
 				Verbose: ver,
-			}, nil
+			}
 		}
 
 		if len(err.ParserErrors) != 0 {
-			error := NewParserErrorResponse(message, err.ParserErrors, ver)
-			return nil, error
-		}
-
-		if err.Error != nil {
-			return nil, NewEvalErrorResponse(message, ver)
-		}
-
-		return nil, common.NewErrorResponse(500) // Unknown error
-	} else if res != nil {
-		success := EvaluateResponseSuccess{
-			Output:  res.Output,
-			Verbose: ver,
-		}
-		return &success, nil
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return nil, common.NewErrorResponse(500)
-}
-
-func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponseInterface) {
-	c.muConnClients.Lock()
-	defer c.muConnClients.Unlock()
-
-	runtimeId := uuid.New().String()
-	_, ok := c.runtimeCores[runtimeId]
-	if ok {
-		log.Printf("[ERROR] ConnId collision, should not be possible")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	evalCore := runtime.NewCore(runtime.EMBED, nil)
-
-	c.runtimeCores[runtimeId] = &ReplRuntime{
-		id:   runtimeId,
-		core: evalCore,
-	}
-
-	// If both err and res from Eval is nil, there some thing wrong
-	return &CreateReplRuntimeResponseSuccess{
-		RuntimeId: runtimeId,
-	}, nil
-}
-
-// Return
-// Success -> EvaluateResponseSuccess
-// Error -> 400:Bad request
-// Error -> 500:Internal server error
-func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) (*EvaluateResponseSuccess, common.ErrorResponseInterface) {
-	if req.RuntimeId == "" {
-		return c.EvaluateHandler(req)
-	}
-	runtimeCore, ok := c.runtimeCores[req.RuntimeId]
-	if !ok {
-		return nil, common.NewErrorResponse(404)
-	}
-
-	if runtimeCore == nil {
-		fmt.Println("[ERROR] API error, evalCore didn't init yet")
-		return nil, common.NewErrorResponse(500)
-	}
-
-	res, err, ver := runtimeCore.core.Eval(runtime.EvalRequest{Data: req.Data})
-
-	if err != nil {
-		message := ""
-		if err.Error != nil {
-			message = err.Error.Error()
-		}
-		if err.SystemExit != nil {
-			return &EvaluateResponseSuccess{
-				Output:  nil,
+			error := NewParserErrorResponse(message, err.ParserErrors)
+			return EvaluateResponse{
+				Success: nil,
+				Error:   error,
 				Verbose: ver,
-			}, nil
-		}
-
-		if len(err.ParserErrors) != 0 {
-			error := NewParserErrorResponse(message, err.ParserErrors, ver)
-			return nil, error
+			}
 		}
 
 		if err.Error != nil {
-			return nil, NewEvalErrorResponse(message, ver)
+			return EvaluateResponse{
+				Success: nil,
+				Error:   NewEvalErrorResponse(message),
+				Verbose: ver,
+			}
 		}
 
-		{
-			return nil, common.NewErrorResponse(500) // Unknown error
-		}
+		return EvaluateResponse{
+			Success: nil,
+			Error:   common.NewErrorResponse(500),
+			Verbose: ver,
+		} // Unknown error
 	} else if res != nil {
 		success := EvaluateResponseSuccess{
-			Output:  res.Output,
+			Output: res.Output,
+		}
+		return EvaluateResponse{
+			Success: &success,
+			Error:   nil,
 			Verbose: ver,
 		}
-		return &success, nil
 	}
 
 	// If both err and res from Eval is nil, there some thing wrong
-	return nil, common.NewErrorResponse(500)
+	return EvaluateResponse{
+		Success: nil,
+		Error:   common.NewErrorResponse(500),
+		Verbose: ver,
+	}
 }

@@ -2,9 +2,6 @@ package server
 
 import (
 	"embed"
-	"fmt"
-	"interingo/pkg/service/common"
-	"interingo/pkg/service/core"
 	"io/fs"
 	"log"
 	"mime"
@@ -23,12 +20,17 @@ const WS_ROUTE = "/ws"
 // This is enforce by build script, which copy over website built static file
 // into `content/dist`
 const WEBSITE_FILEPATH = "content/dist"
+const FALLBACK_PAGE = "index.html"
 
 //go:embed all:content
 var embedContent embed.FS
 
-// Any call which doesn't match `/api` route will be handle with static fileserver
-func pageRoute(s *Server) {
+// To make Gin (RESTful API server focus) to better handle request as a
+// static fileserver
+// - Middleware is use, check if user request for a specific route (api, ws)
+// - If there no prefix of URL.Path is found, middleware will serve the file
+// with the same name, then drop the handle chain via c.Abort()
+func (s *Server) registerFileServerMiddleware() {
 	fsys, err := fs.Sub(embedContent, WEBSITE_FILEPATH)
 	if err != nil {
 		log.Fatalln("Failed to embed folder, got error: ", err)
@@ -38,7 +40,14 @@ func pageRoute(s *Server) {
 	serveFile := func(c *gin.Context, filePath string, status int) {
 		data, err := fs.ReadFile(fsys, filePath)
 		if err != nil {
-			c.AbortWithStatus(http.StatusInternalServerError)
+			// Server content dist may not existed - Making fallback still return 500
+			if filePath == FALLBACK_PAGE {
+				log.Printf("[WARN] Server mode was not packed with embeded WebUI")
+				c.Data(status, "plan/text", []byte("Server is up and running"))
+			} else {
+				log.Printf("[ERROR] Error when reading file, got %s", err.Error())
+				c.AbortWithStatus(http.StatusInternalServerError)
+			}
 			return
 		}
 		ext := path.Ext(filePath)
@@ -49,12 +58,9 @@ func pageRoute(s *Server) {
 		c.Data(status, mimeType, data)
 	}
 
+	// Middleware register
 	s.ginEngine.Use(func(c *gin.Context) {
-		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) {
-			c.Next()
-			return
-		}
-		if strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
+		if strings.HasPrefix(c.Request.URL.Path, API_ROUTE) || strings.HasPrefix(c.Request.URL.Path, WS_ROUTE) {
 			c.Next()
 			return
 		}
@@ -64,8 +70,13 @@ func pageRoute(s *Server) {
 		if urlPath == "." {
 			urlPath = ""
 		}
-
 		candidates := []string{"index.html"}
+
+		// By default, I already build all page as <path>/index.html, this
+		// make sure we check others file server options
+		// - <path> -> <path> (literal file - js, css, ...)
+		// - <path> -> <path>.html (or it could be .html)
+		// - <path> -> <path>/index.html (or it could be a path)
 		if urlPath != "" {
 			candidates = []string{
 				urlPath,
@@ -74,101 +85,37 @@ func pageRoute(s *Server) {
 			}
 		}
 
+		isFile := func(path string) bool {
+			fileInfo, err := fs.Stat(fsys, path)
+			if err != nil {
+				return false
+			}
+			return !fileInfo.IsDir()
+		}
+
 		for _, candidate := range candidates {
 			// fs.FS rejects any path containing ".." at the API level
-			fileInfo, err := fs.Stat(fsys, candidate)
-			if err != nil {
-				continue
-			}
-			if !fileInfo.IsDir() {
+			if candidate == FALLBACK_PAGE || isFile(candidate) {
 				serveFile(c, candidate, http.StatusOK)
 				c.Abort()
 				return
-
 			}
 		}
 
-		serveFile(c, "404.html", http.StatusNotFound)
+		// This have been setup as default fallback, it can handle render
+		// 404 page base on url.path via svelte routing support
+		serveFile(c, FALLBACK_PAGE, http.StatusNotFound)
 		c.Abort()
 	})
 }
 
 func apiRoute(s *Server) {
-	s.ginEngine.POST("/api/repl/:id/evaluate", func(c *gin.Context) {
-		runtimeId := c.Param("id")
-		// Input validate
-		var req core.EvaluateRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
+	// v1 - original one REPL for all appoarch
+	s.ginEngine.POST("/api/evaluate", s.serviceV1.EvaluateHandler)
 
-		req.RuntimeId = runtimeId
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.EvaluateHandlerV2(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
-	s.ginEngine.POST("/api/repl", func(c *gin.Context) {
-		// Input validate
-		var req core.CreateReplRuntimeRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.CreateReplRuntime(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
-	s.ginEngine.POST("/api/evaluate", func(c *gin.Context) {
-		// Input validate
-		var req core.EvaluateRequest
-		err := c.BindJSON(&req)
-		if err != nil {
-			fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
-			errorResp := common.NewBadRequestErrorResponse("Invalid JSON", nil)
-			c.JSON(http.StatusBadRequest, errorResp)
-		}
-
-		if s.serviceCore == nil {
-			fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
-			c.JSON(http.StatusInternalServerError, common.NewErrorResponse(500))
-		}
-
-		res, evalErr := s.serviceCore.EvaluateHandler(req)
-
-		// Return
-		if evalErr != nil {
-			c.JSON(evalErr.GetType(), evalErr)
-		} else if res != nil {
-			c.JSON(http.StatusOK, res)
-		}
-	})
+	// v2 - Create multiple REPL for each session
+	s.ginEngine.POST("/api/repl/:id/evaluate", s.serviceV2.EvaluateHandler)
+	s.ginEngine.POST("/api/repl", s.serviceV2.CreateReplRuntimeHandler)
 }
 
 const (
@@ -219,7 +166,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 			break
 		}
 		if messageType == websocket.TextMessage {
-			s.serviceCore.WebsocketMessageHandler(client, message)
+			s.serviceCore.WebsocketReceivedTextMessageHandler(client, message)
 		}
 		log.Printf("Received: %s", message)
 
@@ -235,7 +182,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 }
 
 func Route(s *Server) {
-	pageRoute(s)
+	s.registerFileServerMiddleware()
 	apiRoute(s)
 
 	// setup websocket

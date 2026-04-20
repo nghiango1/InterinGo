@@ -1,6 +1,10 @@
 .PHONY: all
  all: help
 
+GIT_TAG := $(shell git rev-parse --short HEAD)
+SERVICE_IMAGE := docker.io/nghiango1/interingo-service
+NVIM_IMAGE := docker.io/nghiango1/interingo
+
 ### Build command
 
 .PHONY: build
@@ -36,20 +40,24 @@ embed-content: website/dist embed-content-clean # Put built website into embed d
 ### Container deploy helper
 .PHONY: docker-build
 docker-build: # Build the container image for services hosting
-	docker build -f docker/service.Dockerfile . -t docker.io/nghiango1/interingo-service:latest
+	docker build -f docker/service.Dockerfile . -t $(SERVICE_IMAGE):latest
+	docker tag $(SERVICE_IMAGE):latest $(SERVICE_IMAGE):$(GIT_TAG)
 
 .PHONY: docker-push
 docker-push: # Push the services hosting image into docker.io
-	docker push docker.io/nghiango1/interingo-service:latest
+	docker push $(SERVICE_IMAGE):latest
+	docker push $(SERVICE_IMAGE):$(GIT_TAG)
 
 .PHONY: docker-nvim-build
 docker-nvim-build: # Build the image for nvim showcase
-	mkdir -p dist
-	docker build -f docker/nvim.Dockerfile . -t docker.io/nghiango1/interingo:latest
+	docker build -f docker/nvim.Dockerfile . -t $(SERVICE_IMAGE):latest
+	docker tag $(NVIM_IMAGE):latest $(NVIM_IMAGE):$(GIT_TAG)
 
 .PHONY: docker-nvim-push
 docker-nvim-push: # Push the image for nvim showcase into docker.io
-	docker push docker.io/nghiango1/interingo:latest
+	docker push $(NVIM_IMAGE):latest
+	docker push $(NVIM_IMAGE):$(GIT_TAG)
+
 
 ### Development helper
 
