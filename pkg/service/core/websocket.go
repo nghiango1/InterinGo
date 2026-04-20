@@ -52,15 +52,6 @@ func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClie
 	// You can try to connect to others people created runtime, which overide
 	// the connection and then it can't received printed message anymore
 
-	// Clean up runtimeId which this connectedClient connected to
-	// UI only allow one REPL anyway, so this is safe
-	if connectedClient.runtimeId != "" {
-		prevRuntime, ok := core.runtimeCores[connectedClient.runtimeId]
-		if ok && prevRuntime != nil {
-			delete(core.runtimeCores, prevRuntime.id)
-		}
-	}
-
 	runtime.core.Env.Set(
 		"print", &PrintBuiltin{
 			env: runtime.core.Env,
@@ -70,8 +61,15 @@ func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClie
 		},
 	)
 
+	if connectedClient.runtime != nil {
+		log.Printf("[INFO] Connection %s release runtime %s", connectedClient.id, runtime.id)
+	}
 	// Overide to the new runtime
-	connectedClient.runtimeId = runtimeId
+	connectedClient.runtime = runtime
+	// Remove binding to this runtime from core (connectedClient own it now)
+	delete(core.runtimeCores, runtime.id)
+	log.Printf("[INFO] Connection %s take over runtime %s", connectedClient.id, runtime.id)
+
 	runtime.connId = connectedClient.id
 	return nil
 }
@@ -79,15 +77,6 @@ func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClie
 func (core *ServiceCore) WebsocketConnectionCleanup(connectedClient *ConnectedClient) {
 	core.muConnClients.Lock()
 	defer core.muConnClients.Unlock()
-
-	// Clean up runtimeId which this connectedClient connected to
-	// UI only allow one REPL anyway, so this is safe
-	if connectedClient.runtimeId != "" {
-		prevRuntime, ok := core.runtimeCores[connectedClient.runtimeId]
-		if ok && prevRuntime != nil {
-			delete(core.runtimeCores, prevRuntime.id)
-		}
-	}
 
 	delete(core.connClients, connectedClient.id)
 }

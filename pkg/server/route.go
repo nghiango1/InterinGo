@@ -95,7 +95,6 @@ func (s *Server) registerFileServerMiddleware() {
 
 		for _, candidate := range candidates {
 			// fs.FS rejects any path containing ".." at the API level
-			println(candidate)
 			if candidate == FALLBACK_PAGE || isFile(candidate) {
 				serveFile(c, candidate, http.StatusOK)
 				c.Abort()

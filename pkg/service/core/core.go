@@ -3,6 +3,7 @@ package core
 import (
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
+	"log"
 	"sync"
 	"time"
 
@@ -10,19 +11,23 @@ import (
 	"github.com/gorilla/websocket"
 )
 
+const (
+	alivePeriod = 60 * time.Second
+)
+
 type ConnectedClient struct {
-	id        string
-	conn      *websocket.Conn
-	runtimeId string
+	id      string
+	conn    *websocket.Conn
+	runtime *ReplRuntime
 }
 
 func NewConnectedClient(conn *websocket.Conn) *ConnectedClient {
 	connId := uuid.New().String()
 
 	client := &ConnectedClient{
-		id:        connId,
-		conn:      conn,
-		runtimeId: "",
+		id:      connId,
+		conn:    conn,
+		runtime: nil,
 	}
 
 	return client
@@ -42,28 +47,65 @@ type ServiceCore struct {
 	runtimeCoreDefault *runtime.Core
 }
 
-func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
-	evalCore = runtime.NewCore(runtime.EMBED, nil)
+func (core *ServiceCore) EnsureDefaultEvalCode() {
+	if core.runtimeCoreDefault != nil {
+		if core.runtimeCoreDefault.State() != runtime.RUNTIME_END {
+			return
+		}
+	}
 
+	evalCore := runtime.NewCore(runtime.EMBED, nil)
+
+	evalCore.Env.Set(
+		"print", &PrintBuiltin{
+			env: evalCore.Env,
+			externalPrint: func(message string) {
+				core.muConnClients.Lock()
+				defer core.muConnClients.Unlock()
+
+				for _, client := range core.connClients {
+					client.conn.WriteJSON(NewPrintMessageEventData(message))
+				}
+			},
+		},
+	)
+
+	core.runtimeCoreDefault = evalCore
+}
+
+func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 	serviceCore := &ServiceCore{
 		connClients:        make(map[string]*ConnectedClient),
 		runtimeCores:       make(map[string]*ReplRuntime),
 		runtimeCoreDefault: evalCore,
 	}
 
-	evalCore.Env.Set(
-		"print", &PrintBuiltin{
-			env: evalCore.Env,
-			externalPrint: func(message string) {
-				serviceCore.muConnClients.Lock()
-				defer serviceCore.muConnClients.Unlock()
+	if evalCore == nil {
+		serviceCore.EnsureDefaultEvalCode()
+	}
 
-				for _, client := range serviceCore.connClients {
-					client.conn.WriteJSON(NewPrintMessageEventData(message))
+	// With out Client connection, we need to clean up base from the request
+	// for evaluate of this REPL session
+	go func() {
+		// good enough, timer check every 60 second
+		ticker := time.NewTicker(alivePeriod)
+		defer ticker.Stop()
+		for range ticker.C {
+			serviceCore.muConnClients.Lock()
+			defer serviceCore.muConnClients.Unlock()
+
+			serviceCore.EnsureDefaultEvalCode()
+			// else check if lastUpdate + alivePeriod < current time.
+			// or there already have a client bind to it
+			// If so clean up is perform
+			for _, runtime := range serviceCore.runtimeCores {
+				if time.Now().After(runtime.lastUpdate.Add(alivePeriod)) || runtime.connId != "" {
+					log.Printf("[INFO] Core release runtime %s", runtime.id)
+					delete(serviceCore.runtimeCores, runtime.id)
 				}
-			},
-		},
-	)
+			}
+		}
+	}()
 
 	return serviceCore
 }
