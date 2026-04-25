@@ -6,6 +6,7 @@ import (
 	"interingo/pkg/repl"
 	"interingo/pkg/server"
 	"interingo/pkg/share"
+	"log/slog"
 	"os"
 	"os/user"
 )
@@ -25,6 +26,9 @@ var listenAddress string
 // Input file directory - Use in File mode flag
 var fileLocation string
 
+// Default level - Can be overide by make file
+var debugLever slog.Level
+
 func init() {
 	const (
 		defaultServerMode    = false
@@ -33,7 +37,7 @@ func init() {
 		defaultListenAddress = "0.0.0.0:8080"
 		defaultFileLocation  = ""
 		serverUsage          = "Start as server mode"
-		verboseUsage         = "Start as verbose mode, InterinGo will print a lot more infomation for Lexer, Parse and Evaluation product"
+		verboseUsage         = "Start as verbose mode, InterinGo will print a lot more dev debug log"
 		listenAdrUsage       = "Listen address"
 		hotloadUsage         = "Using with server mode, allow using os.ReadFile to populate md docs pages in runtime"
 		fileLocationUsage    = "Using a file as input to parse, default as \"\" which mean not using file input"
@@ -49,23 +53,26 @@ func init() {
 	flag.BoolVar(&verboseMode, "v", defaultVerboseMode, verboseUsage+" (shorthand)")
 
 	flag.Parse()
-	share.VerboseMode = verboseMode
+	if verboseMode {
+		debugLever = slog.LevelDebug
+	}
 }
 
 func main() {
+	share.SetDefaultLog(debugLever)
 	user, err := user.Current()
 	if err != nil {
 		panic(err)
 	}
 
 	if verboseMode {
-		fmt.Println("Verbose mode enable")
+		slog.Debug("Verbose mode enable", "level", debugLever)
 	}
 
 	if fileLocation != "" {
 		fileContent, err := os.ReadFile(fileLocation)
 		if err != nil {
-			fmt.Println("File read error, recheck file location, error code:", err)
+			slog.Error("File read error, recheck file location", "error", err)
 			return
 		}
 		repl := repl.NewRepl(nil, os.Stdin, os.Stdout)

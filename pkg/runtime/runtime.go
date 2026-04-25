@@ -16,7 +16,6 @@ import (
 	"interingo/pkg/parser"
 	"interingo/pkg/runtime/embed"
 	"interingo/pkg/runtime/native"
-	"interingo/pkg/share"
 	"interingo/pkg/token"
 )
 
@@ -63,7 +62,7 @@ func NewCore(t RuntimeType, lifeCycleHandler LifeCycleHandler) *Core {
 
 	c := &Core{
 		Env:              env,
-		Verbose:          share.VerboseMode,
+		Verbose:          false,
 		lifeCycleHandler: lifeCycleHandler,
 		state:            RUNTIME_START,
 	}
