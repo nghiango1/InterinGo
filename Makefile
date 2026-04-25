@@ -1,6 +1,3 @@
-.PHONY: all
- all: help
-
 GIT_TAG := $(shell git rev-parse --short HEAD)
 SERVICE_IMAGE := docker.io/nghiango1/interingo-service
 NVIM_IMAGE := docker.io/nghiango1/interingo
@@ -8,7 +5,7 @@ NVIM_IMAGE := docker.io/nghiango1/interingo
 ### Build command
 
 .PHONY: build
-build: clean website/dist interingo-build interingo-service-build lsp-build # Build all the code: Website front-end, REPL, backend-service, lsp
+build: clean website/dist interingo-build interingo-service-build lsp-build # Build Website front-end, REPL, backend-service, lsp
 
 .PHONY: interingo-build
 interingo-build: embed-content-clean # Build Interingo REPL and API only, doesn't contain front-end
