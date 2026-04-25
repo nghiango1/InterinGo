@@ -9,8 +9,11 @@ import (
 )
 
 func (core *ServiceCore) WebsocketConnectionCreate(conn *websocket.Conn) (*ConnectedClient, error) {
+	log.Printf("[INFO] WebsocketConnectionCreate request lock muConnClients")
 	core.muConnClients.Lock()
+	log.Printf("[INFO] WebsocketConnectionCreate take lock muConnClients")
 	defer core.muConnClients.Unlock()
+	defer log.Printf("[INFO] WebsocketConnectionCreate release lock muConnClients")
 
 	connectedClient := NewConnectedClient(conn)
 	_, ok := core.connClients[connectedClient.id]
@@ -41,8 +44,11 @@ func (core *ServiceCore) WebsocketReceivedTextMessageHandler(connectedClient *Co
 }
 
 func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClient, runtimeId string) error {
+	log.Printf("[INFO] WebsocketReplBindHandler request lock muConnClients")
 	core.muConnClients.Lock()
+	log.Printf("[INFO] WebsocketReplBindHandler take lock muConnClients")
 	defer core.muConnClients.Unlock()
+	defer log.Printf("[INFO] WebsocketReplBindHandler release lock muConnClients")
 
 	runtime, ok := core.runtimeCores[runtimeId]
 	if !ok {
@@ -66,17 +72,20 @@ func (core *ServiceCore) WebsocketReplBindHandler(connectedClient *ConnectedClie
 	}
 	// Overide to the new runtime
 	connectedClient.runtime = runtime
-	// Remove binding to this runtime from core (connectedClient own it now)
-	delete(core.runtimeCores, runtime.id)
-	log.Printf("[INFO] Connection %s take over runtime %s", connectedClient.id, runtime.id)
 
 	runtime.connId = connectedClient.id
 	return nil
 }
 
 func (core *ServiceCore) WebsocketConnectionCleanup(connectedClient *ConnectedClient) {
+	log.Printf("[INFO] WebsocketConnectionCleanup request lock muConnClients")
 	core.muConnClients.Lock()
+	log.Printf("[INFO] WebsocketConnectionCleanup take lock muConnClients")
 	defer core.muConnClients.Unlock()
+	defer log.Printf("[INFO] WebsocketConnectionCleanup release lock muConnClients")
 
+	// Still have some room for others to take over the Repl Runtime
+	// till the next Core Cleanup cycle
 	delete(core.connClients, connectedClient.id)
+	connectedClient.runtime = nil
 }

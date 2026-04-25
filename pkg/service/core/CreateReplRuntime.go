@@ -10,8 +10,11 @@ import (
 )
 
 func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponse) {
+	log.Printf("[INFO] CreateReplRuntime request lock muConnClients")
 	c.muConnClients.Lock()
+	log.Printf("[INFO] CreateReplRuntime take lock muConnClients")
 	defer c.muConnClients.Unlock()
+	defer log.Printf("[INFO] CreateReplRuntime release lock muConnClients")
 
 	runtimeId := uuid.New().String()
 	_, ok := c.runtimeCores[runtimeId]
