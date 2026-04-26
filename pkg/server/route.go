@@ -169,7 +169,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		if messageType == websocket.TextMessage {
 			s.serviceCore.WebsocketReceivedTextMessageHandler(client, message)
 		}
-		slog.Debug("Websocket received", "message", message)
+		slog.Debug("Websocket received", "message", string(message))
 
 		if messageType == websocket.CloseMessage {
 			s.serviceCore.WebsocketConnectionCleanup(client)

@@ -8,6 +8,7 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -32,8 +33,23 @@ func NewServer() *Server {
 
 	core := core.NewServiceCore(nil)
 
+	ginEngine := gin.New()
+	ginEngine.Use(gin.Recovery())
+	ginEngine.Use(func(c *gin.Context) {
+		start := time.Now()
+
+		c.Next()
+
+		slog.Info("http_request",
+			"status", c.Writer.Status(),
+			"latency", time.Since(start),
+			"ip", c.ClientIP(),
+			"method", c.Request.Method,
+			"path", c.Request.URL.Path,
+		)
+	})
 	return &Server{
-		ginEngine:   gin.Default(),
+		ginEngine:   ginEngine,
 		serviceCore: core,
 		serviceV1:   service_v1.NewInteringoServiceV1(core),
 		serviceV2:   service_v2.NewInteringoServiceV2(core),
