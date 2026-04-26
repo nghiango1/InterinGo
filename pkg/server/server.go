@@ -1,6 +1,7 @@
 package server
 
 import (
+	"interingo/pkg/server/middleware"
 	"interingo/pkg/service/core"
 	service_v1 "interingo/pkg/service/v1"
 	service_v2 "interingo/pkg/service/v2"
@@ -8,7 +9,6 @@ import (
 	"log/slog"
 	"net/http"
 	"os"
-	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -35,19 +35,7 @@ func NewServer() *Server {
 
 	ginEngine := gin.New()
 	ginEngine.Use(gin.Recovery())
-	ginEngine.Use(func(c *gin.Context) {
-		start := time.Now()
-
-		c.Next()
-
-		slog.Info("http_request",
-			"status", c.Writer.Status(),
-			"latency", time.Since(start),
-			"ip", c.ClientIP(),
-			"method", c.Request.Method,
-			"path", c.Request.URL.Path,
-		)
-	})
+	ginEngine.Use(middleware.Logger)
 	return &Server{
 		ginEngine:   ginEngine,
 		serviceCore: core,

@@ -36,7 +36,8 @@ func (core *ServiceCore) WebsocketReceivedTextMessageHandler(connectedClient *Co
 	err := json.Unmarshal(data, &mes)
 
 	if err != nil {
-		slog.Error("Failed to read message data", "error", err)
+		// Likely just mean user close the website - no need for error
+		slog.Warn("Failed to read message data, likely just mean user close the website", "error", err)
 		return err
 	}
 

@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+const (
+	ISO_8601 = "2026-04-26T05:28:56Z"
+)
+
 type PrettyHandler struct {
 	level slog.Level
 }
@@ -42,6 +46,18 @@ func levelColor(l slog.Level) string {
 	}
 }
 
+// LatencyColor is the ANSI color for latency
+func latencyColor(latency time.Duration, defaultColor string) string {
+	switch {
+	case latency < 200 * time.Millisecond:
+		return defaultColor
+	case latency < time.Second:
+		return yellow
+	default:
+		return red
+	}
+}
+
 func (h *PrettyHandler) Enabled(_ context.Context, l slog.Level) bool {
 	return l >= h.level
 }
@@ -52,8 +68,29 @@ func runtimeCallersFrame(pc uintptr) runtime.Frame {
 	return frame
 }
 
+// No caller data is show, thus limited the log data leak
+// Only care about the call tree
+func fullTracebackFrames(skip int) []runtime.Frame {
+	// capture PCs; +10 is an upper bound for depth growth
+	pcs := make([]uintptr, 64)
+	n := runtime.Callers(2+skip, pcs) // skip runtime.Callers + this wrapper
+	pcs = pcs[:n]
+
+	frames := runtime.CallersFrames(pcs)
+	var res []runtime.Frame
+	for {
+		frame, more := frames.Next()
+		res = append(res, frame)
+		if !more {
+			break
+		}
+	}
+	return res
+}
+
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
-	timeStr := time.Now().Format("2006-01-02 15:04:05")
+	// ISO 8601
+	timeStr := time.Now().Format(ISO_8601)
 
 	levelStr := r.Level.String()
 	color := levelColor(r.Level)
@@ -62,29 +99,49 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	source := ""
 	if r.PC != 0 {
 		fs := runtimeCallersFrame(r.PC)
-		source = fmt.Sprintf("%s:%d", filepath.Base(fs.File), fs.Line)
+		source = fmt.Sprintf("%s (%s:%d)", fs.Function, filepath.Base(fs.File), fs.Line)
+	}
+
+	var traceback []runtime.Frame = nil
+	if r.Level >= slog.LevelError {
+		traceback = fullTracebackFrames(0)
 	}
 
 	// attributes
 	attrs := ""
 	r.Attrs(func(a slog.Attr) bool {
-		data, err := json.Marshal(a.Value.Any())
-		if err == nil {
-			attrs += fmt.Sprintf(" %s=%s", a.Key, string(data))
-		} else {
-			attrs += fmt.Sprintf(" %s=%v", a.Key, a.Value.Any())
+		switch a.Value.Kind() {
+		case slog.KindDuration:
+			attrs += fmt.Sprintf(reset+latencyColor(a.Value.Duration(), color)+" %s=%8v"+reset+color, a.Key, a.Value.Duration())
+		case slog.KindTime:
+			attrs += fmt.Sprintf(" %s=%v", a.Key, a.Value.Time().Format(ISO_8601))
+
+		case slog.KindAny:
+			fallthrough
+		default:
+			data, err := json.Marshal(a.Value.Any())
+			if err != nil {
+				attrs += fmt.Sprintf(" %s=%v", a.Key, a.Value.Any())
+			} else {
+				attrs += fmt.Sprintf(" %s=%s", a.Key, string(data))
+			}
+
 		}
 		return true
 	})
 
 	fmt.Fprintf(os.Stdout,
-		color+"%s | %-5s | %s | %s | %s\n"+reset,
+		color+"%s | %-5s | %s | source=%s %s\n"+reset,
 		timeStr,
 		levelStr,
-		source,
 		r.Message,
+		source,
 		attrs,
 	)
+
+	for _, fs := range traceback {
+		fmt.Printf("\t%s:%d\n", fs.File, fs.Line)
+	}
 
 	return nil
 }
