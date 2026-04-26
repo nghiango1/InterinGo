@@ -163,7 +163,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		messageType, message, err := conn.ReadMessage()
 
 		if err != nil {
-			slog.Error("Read error", "error", err)
+			slog.Warn("Failed to read message data, likely just mean user close the website", "error", err)
 			break
 		}
 		if messageType == websocket.TextMessage {

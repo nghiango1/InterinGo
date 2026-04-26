@@ -12,10 +12,6 @@ import (
 	"time"
 )
 
-const (
-	ISO_8601 = "2026-04-26T05:28:56Z"
-)
-
 type PrettyHandler struct {
 	level slog.Level
 }
@@ -90,7 +86,7 @@ func fullTracebackFrames(skip int) []runtime.Frame {
 
 func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 	// ISO 8601
-	timeStr := time.Now().Format(ISO_8601)
+	timeStr := time.Now().Format(time.RFC3339)
 
 	levelStr := r.Level.String()
 	color := levelColor(r.Level)
@@ -114,7 +110,7 @@ func (h *PrettyHandler) Handle(_ context.Context, r slog.Record) error {
 		case slog.KindDuration:
 			attrs += fmt.Sprintf(reset+latencyColor(a.Value.Duration(), color)+" %s=%8v"+reset+color, a.Key, a.Value.Duration())
 		case slog.KindTime:
-			attrs += fmt.Sprintf(" %s=%v", a.Key, a.Value.Time().Format(ISO_8601))
+			attrs += fmt.Sprintf(" %s=%v", a.Key, a.Value.Time().Format(time.RFC3339))
 
 		case slog.KindAny:
 			fallthrough

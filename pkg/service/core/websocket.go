@@ -37,7 +37,7 @@ func (core *ServiceCore) WebsocketReceivedTextMessageHandler(connectedClient *Co
 
 	if err != nil {
 		// Likely just mean user close the website - no need for error
-		slog.Warn("Failed to read message data, likely just mean user close the website", "error", err)
+		slog.Warn("Failed to read message data, invalid JSON", "error", err, "message", string(data))
 		return err
 	}
 
