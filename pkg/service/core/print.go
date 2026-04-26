@@ -3,37 +3,11 @@ package core
 import (
 	"fmt"
 	"io"
-	"log"
 	"strings"
 
 	"interingo/pkg/evaluator"
 	"interingo/pkg/object"
-
-	"github.com/gorilla/websocket"
 )
-
-func (c *ConnectedClient) Print(mes string) {
-	if c.conn == nil {
-		log.Printf("ERROR: Try to print without any client connection")
-		return
-	}
-
-	if c.conn == nil {
-		log.Printf("ERROR: Try to print without any client connection")
-		return
-	}
-
-	err := c.conn.WriteJSON(NewPrintMessageEventData(mes))
-
-	// Clean up c.conn
-	if err != nil {
-		if websocket.IsCloseError(err) {
-			c.conn = nil
-		} else {
-			log.Printf("ERROR: Got err when send print to client: %v", err.Error())
-		}
-	}
-}
 
 type PrintBuiltin struct {
 	env           *object.Environment

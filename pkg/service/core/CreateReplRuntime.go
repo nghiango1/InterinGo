@@ -1,7 +1,7 @@
 package core
 
 import (
-	"log"
+	"log/slog"
 
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
@@ -10,13 +10,16 @@ import (
 )
 
 func (c *ServiceCore) CreateReplRuntime(req CreateReplRuntimeRequest) (*CreateReplRuntimeResponseSuccess, common.ErrorResponse) {
+	slog.Debug("CreateReplRuntime request lock muConnClients")
 	c.muConnClients.Lock()
+	slog.Debug("CreateReplRuntime take lock muConnClients")
 	defer c.muConnClients.Unlock()
+	defer slog.Debug("CreateReplRuntime release lock muConnClients")
 
 	runtimeId := uuid.New().String()
 	_, ok := c.runtimeCores[runtimeId]
 	if ok {
-		log.Printf("[ERROR] ConnId collision, should not be possible")
+		slog.Error("ConnId collision, should not be possible")
 		return nil, common.NewErrorResponse(500)
 	}
 

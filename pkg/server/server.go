@@ -1,10 +1,12 @@
 package server
 
 import (
+	"interingo/pkg/server/middleware"
 	"interingo/pkg/service/core"
 	service_v1 "interingo/pkg/service/v1"
 	service_v2 "interingo/pkg/service/v2"
 	"log"
+	"log/slog"
 	"net/http"
 	"os"
 
@@ -31,8 +33,11 @@ func NewServer() *Server {
 
 	core := core.NewServiceCore(nil)
 
+	ginEngine := gin.New()
+	ginEngine.Use(gin.Recovery())
+	ginEngine.Use(middleware.Logger)
 	return &Server{
-		ginEngine:   gin.Default(),
+		ginEngine:   ginEngine,
 		serviceCore: core,
 		serviceV1:   service_v1.NewInteringoServiceV1(core),
 		serviceV2:   service_v2.NewInteringoServiceV2(core),
@@ -41,7 +46,7 @@ func NewServer() *Server {
 }
 
 func (s *Server) Start(listenAdrr string) {
-	log.Println("Started listening on", listenAdrr)
+	slog.Info("Server started listening", "address", listenAdrr)
 
 	// Create a Gin router with default middleware (logger and recovery)
 	// Now start handing data

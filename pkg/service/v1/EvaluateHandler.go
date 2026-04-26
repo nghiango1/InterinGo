@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"interingo/pkg/service/common"
 	"interingo/pkg/service/core"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -13,14 +14,14 @@ import (
 func (s *interingoServiceV1Impl) EvaluateHandler(c *gin.Context) {
 	req, err := evaluateHandlerRequest(c)
 	if err != nil {
-		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+		slog.Error("API error, can't parse JSON value", "error", err.Error())
 		errorResp := common.NewInvalidParamsErrorResponse(err.Error(), nil)
 		evaluateHandlerErrorResponse(c, errorResp)
 		return
 	}
 
 	if s.serviceCore == nil {
-		fmt.Println("[ERRPO] API error, serviceCore didn't init yet")
+		slog.Error("API error, serviceCore didn't init yet")
 		errorResp := common.NewErrorResponse(500)
 		evaluateHandlerErrorResponse(c, errorResp)
 		return
@@ -41,7 +42,7 @@ func evaluateHandlerRequest(c *gin.Context) (*core.EvaluateRequest, error) {
 	err := c.BindJSON(&userInput)
 
 	if err != nil {
-		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+		slog.Error("API error, can't parse JSON value", "error", err.Error())
 		return nil, fmt.Errorf("Can't parse JSON value")
 	}
 	req := &core.EvaluateRequest{

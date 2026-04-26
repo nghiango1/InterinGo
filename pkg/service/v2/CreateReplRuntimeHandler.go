@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"interingo/pkg/service/common"
 	"interingo/pkg/service/core"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -14,14 +15,14 @@ func (s *interingoServiceV2Impl) CreateReplRuntimeHandler(c *gin.Context) {
 	// Input validate
 	req, err := createReplRuntimeRequest(c)
 	if err != nil {
-		fmt.Println("[ERRPR] API error, can't parse JSON value, got: ", err.Error())
+		slog.Error("API error, can't parse JSON value", "error", err.Error())
 		errorResp := common.NewInvalidParamsErrorResponse(err.Error(), nil)
 		createReplRuntimeErrorResponse(c, errorResp)
 		return
 	}
 
 	if s.serviceCore == nil {
-		fmt.Println("[ERRPR] API error, serviceCore didn't init yet")
+		slog.Error("API error, serviceCore didn't init yet")
 		errorResp := common.NewErrorResponse(500)
 		createReplRuntimeErrorResponse(c, errorResp)
 		return
@@ -43,7 +44,7 @@ func createReplRuntimeRequest(c *gin.Context) (*core.CreateReplRuntimeRequest, e
 	var userInput CreateReplRuntimeRequest
 	err := c.BindJSON(&userInput)
 	if err != nil {
-		fmt.Println("[ERROR] API error, can't parse JSON value, got: ", err.Error())
+		slog.Error("API error, can't parse JSON value", "error", err.Error())
 		return nil, fmt.Errorf("Can't parse JSON value")
 	}
 

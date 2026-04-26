@@ -4,6 +4,7 @@ import (
 	"embed"
 	"io/fs"
 	"log"
+	"log/slog"
 	"mime"
 	"net/http"
 	"path"
@@ -42,10 +43,10 @@ func (s *Server) registerFileServerMiddleware() {
 		if err != nil {
 			// Server content dist may not existed - Making fallback still return 500
 			if filePath == FALLBACK_PAGE {
-				log.Printf("[WARN] Server mode was not packed with embeded WebUI")
+				slog.Warn("Server mode was not packed with embeded WebUI")
 				c.Data(status, "plan/text", []byte("Server is up and running"))
 			} else {
-				log.Printf("[ERROR] Error when reading file, got %s", err.Error())
+				slog.Error("Error when reading file", "error", err)
 				c.AbortWithStatus(http.StatusInternalServerError)
 			}
 			return
@@ -130,7 +131,7 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 	}
 	conn, err := s.upgrader.Upgrade(c.Writer, c.Request, nil)
 	if err != nil {
-		log.Printf("WebSocket upgrade error: %v", err)
+		slog.Error("WebSocket upgrade error", "error", err)
 		return
 	}
 	defer conn.Close()
@@ -162,20 +163,20 @@ func (s *Server) handleWebSocket(c *gin.Context) {
 		messageType, message, err := conn.ReadMessage()
 
 		if err != nil {
-			log.Printf("Read error: %v", err)
+			slog.Warn("Failed to read message data, likely just mean user close the website", "error", err)
 			break
 		}
 		if messageType == websocket.TextMessage {
 			s.serviceCore.WebsocketReceivedTextMessageHandler(client, message)
 		}
-		log.Printf("Received: %s", message)
+		slog.Debug("Websocket received", "message", string(message))
 
 		if messageType == websocket.CloseMessage {
 			s.serviceCore.WebsocketConnectionCleanup(client)
 		}
 
 		if err != nil {
-			log.Printf("Write error: %v", err)
+			slog.Error("Websocket write error", "error", err)
 			break
 		}
 	}
