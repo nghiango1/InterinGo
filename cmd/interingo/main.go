@@ -17,9 +17,6 @@ var verboseMode bool
 // Server mode flag
 var serverMode bool
 
-// Use in Server mode flag
-var hotloadMode bool
-
 // Address we listen on - Use in Server mode flag
 var listenAddress string
 
@@ -33,13 +30,11 @@ func init() {
 	const (
 		defaultServerMode    = false
 		defaultVerboseMode   = false
-		defaultHotloadMode   = false
 		defaultListenAddress = "0.0.0.0:8080"
 		defaultFileLocation  = ""
 		serverUsage          = "Start as server mode"
 		verboseUsage         = "Start as verbose mode, InterinGo will print a lot more dev debug log"
 		listenAdrUsage       = "Listen address"
-		hotloadUsage         = "Using with server mode, allow using os.ReadFile to populate md docs pages in runtime"
 		fileLocationUsage    = "Using a file as input to parse, default as \"\" which mean not using file input"
 	)
 
@@ -84,10 +79,6 @@ func main() {
 		user.Username)
 
 	if serverMode {
-		if hotloadMode {
-			fmt.Println("Hotload mode enable - Pages can now populated in runtimes - Look out for readfile error")
-		}
-
 		s := server.NewServer()
 		s.Start(listenAddress)
 		return
