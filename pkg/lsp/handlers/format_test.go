@@ -76,9 +76,9 @@ add(1, 2*3, 4+5);
 	if output != expectedOutput {
 		jsonData, err := json.Marshal(program)
 		if err != nil {
-			fmt.Printf("[ERROR] Got: %v\n", err)
+			slog.Error("Failed to stringtify (to JSON) AST data", "error", err)
 		} else {
-			fmt.Printf("[INFO] Data: (%v) %v\n", len(jsonData), string(jsonData))
+			slog.Info("AST tree correctly converted to JSON", "data_length", len(jsonData), "data", string(jsonData))
 		}
 
 		t.Fatalf("Format failed, output doesn't match. Got: \n%v", fmtDiffs(Diff(output, expectedOutput)))

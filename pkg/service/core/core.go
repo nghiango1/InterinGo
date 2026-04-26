@@ -3,7 +3,7 @@ package core
 import (
 	"interingo/pkg/runtime"
 	"interingo/pkg/service/common"
-	"log"
+	"log/slog"
 	"sync"
 	"time"
 
@@ -60,11 +60,11 @@ func (core *ServiceCore) EnsureDefaultEvalCode() {
 		"print", &PrintBuiltin{
 			env: evalCore.Env,
 			externalPrint: func(message string) {
-				log.Printf("[INFO] Global PrintBuiltin request lock muConnClients")
+				slog.Debug("Global PrintBuiltin request lock muConnClients")
 				core.muConnClients.Lock()
-				log.Printf("[INFO] Global PrintBuiltin take lock muConnClients")
+				slog.Debug("Global PrintBuiltin take lock muConnClients")
 				defer core.muConnClients.Unlock()
-				defer log.Printf("[INFO] Global PrintBuiltin release lock muConnClients")
+				defer slog.Debug("Global PrintBuiltin release lock muConnClients")
 
 				for _, client := range core.connClients {
 					client.conn.WriteJSON(NewPrintMessageEventData(message))
@@ -94,9 +94,9 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 		ticker := time.NewTicker(alivePeriod)
 		defer ticker.Stop()
 		for range ticker.C {
-			log.Printf("[DEBUG] Service Core Clean up request lock muConnClients")
+			slog.Debug("Service Core Clean up request lock muConnClients")
 			serviceCore.muConnClients.Lock()
-			log.Printf("[DEBUG] Service Core Clean up take lock muConnClients")
+			slog.Debug("Service Core Clean up take lock muConnClients")
 
 			serviceCore.EnsureDefaultEvalCode()
 			// else check if lastUpdate + alivePeriod < current time.
@@ -104,13 +104,13 @@ func NewServiceCore(evalCore *runtime.Core) *ServiceCore {
 			// If so clean up is perform
 			for _, runtime := range serviceCore.runtimeCores {
 				if time.Now().After(runtime.lastUpdate.Add(alivePeriod)) && runtime.connId == "" {
-					log.Printf("[INFO] Core release runtime %s", runtime.id)
+					slog.Debug("Service core release runtime", "runtime_id", runtime.id)
 					delete(serviceCore.runtimeCores, runtime.id)
 				}
 			}
 
 			serviceCore.muConnClients.Unlock()
-			log.Printf("[DEBUG] Service Core Clean up release lock muConnClients")
+			slog.Debug("Service Core Clean up release lock muConnClients")
 		}
 	}()
 

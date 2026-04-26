@@ -1,8 +1,8 @@
 package core
 
 import (
-	"fmt"
 	"interingo/pkg/service/common"
+	"log/slog"
 )
 
 func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) EvaluateResponse {
@@ -15,7 +15,7 @@ func (c *ServiceCore) EvaluateHandlerV2(req EvaluateRequest) EvaluateResponse {
 	}
 
 	if runtimeCore == nil {
-		fmt.Println("[ERROR] API error, evalCore didn't init yet")
+		slog.Error("API error, evalCore didn't init yet")
 		return EvaluateResponse{Success: nil, Error: common.NewErrorResponse(500), Verbose: nil}
 	}
 
