@@ -1,11 +1,14 @@
 export interface DocInfo {
 	slug: string, // Used for recovered
-	title?: string, // Navigator Title
+	label?: string, // Navigator Title
 	session?: string, // Session title
 	index?: number, // Session position
+
+	// Will be build via slug
+	href?: string, 
 }
 
 export interface NavigationRecord {
-	name: string, 
-	docs: DocInfo[]
+	label: string, 
+	items: DocInfo[]
 };

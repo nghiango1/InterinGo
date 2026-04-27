@@ -32,7 +32,7 @@ async function getDocs(): Promise<DocInfo[]> {
 				slug: href,
 				session: session, // Session title
 				index: index, // Session position
-				title: title
+				label: title
 			});
 		}
 	} catch (err) {
