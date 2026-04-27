@@ -1,6 +1,5 @@
 <script lang="ts">
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/Header.svelte';
 
 	let { children } = $props();
@@ -11,10 +10,10 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0" />
 	<meta http-equiv="x-ua-compatible" content="ie=edge" />
 	<title>InterinGo — Interpreter built in Go</title>
-	<link rel="icon" type="image/x-icon" />
-	<link rel="stylesheet" href="/public/prism.css" />
-	<script src="/public/prism.js"></script>
-	<link rel="icon" href={favicon} />
+	<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+	<link rel="manifest" href="/site.webmanifest">
 </svelte:head>
 
 <div
