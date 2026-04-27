@@ -9,11 +9,11 @@
 					>Interin<span class="dark:text-stone-500">Go</span></span
 				>
 				<span
-					class="rounded border border-stone-700 px-1.5 py-0.5 text-[10px] tracking-widest uppercase dark:text-stone-500"
+					class="rounded border border-stone-700 px-1.5 py-0.5 tracking-widest uppercase not-md:hidden dark:text-stone-500"
 					>v0.1</span
 				>
 			</a>
-			<div class="flex items-center gap-6 text-xs dark:text-stone-300">
+			<div class="flex items-center gap-6 dark:text-stone-300">
 				<a href="/docs" class="transition-colors hover:text-blue-300">Docs</a>
 				<a
 					href="/download"
