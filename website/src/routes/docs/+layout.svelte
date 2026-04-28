@@ -13,7 +13,7 @@
 		// @ts-ignore
 		if (window.Prism) {
 			// @ts-ignore
-			let prism = window.Prism
+			let prism = window.Prism;
 			prism.languages.iig = {
 				comment: /\/\/.*/,
 				number: /\b\d+\b/,
@@ -34,14 +34,16 @@
 	<script src="/public/prism.js" onload={primeSetup}></script>
 </svelte:head>
 
-<div class="grid px-8 md:grid-cols-(--docs-grid-cols)">
-	<div class="fixed top-0 left-0 z-20 h-screen overflow-y-auto md:static md:h-auto">
-		<Navigation nav={data.navSessions} />
-	</div>
-	<div class="overflow-auto">
-		<article class="my-6 prose w-full max-w-none dark:prose-invert">
-			{@render children()}
-		</article>
-		<Footer />
+<div class="mx-auto max-w-6xl w-full">
+	<div class="grid xl:grid-cols-(--docs-grid-cols) xl:w-full">
+		<div class="fixed top-0 left-0 z-20 h-screen overflow-y-auto xl:static xl:h-auto">
+			<Navigation nav={data.navSessions} />
+		</div>
+
+		<div class="mx-6 overflow-auto xl:w-full">
+			<article class="my-6 prose max-w-none prose-stone dark:prose-invert ">
+				{@render children()}
+			</article>
+		</div>
 	</div>
 </div>

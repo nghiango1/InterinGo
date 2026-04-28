@@ -1,6 +1,7 @@
 <script lang="ts">
 	import './layout.css';
 	import Header from '$lib/components/Header.svelte';
+	import Footer from '$lib/components/Footer.svelte';
 
 	let { children } = $props();
 </script>
@@ -21,9 +22,9 @@
 	class="min-h-screen dark:bg-stone-950 dark:text-stone-100"
 	style="font-family: 'JetBrains Mono', monospace;"
 >
-	<main>
-		<Header />
-
+	<Header />
+	<main class="flex max-w-3xl flex-col gap-4 p-4 sm:mx-8 md:mx-auto xl:mx-8 xl:max-w-full">
 		{@render children()}
 	</main>
+	<Footer />
 </div>

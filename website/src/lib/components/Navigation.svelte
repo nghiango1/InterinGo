@@ -27,18 +27,18 @@
 </script>
 
 <button
-	class="sticky top-16 mb-6 items-center gap-2 rounded-r-lg border-x border-r border-stone-600 bg-stone-100 p-1 px-3 py-1.5 [writing-mode:vertical-lr] hover:bg-stone-200 md:hidden dark:bg-stone-900 dark:text-stone-400 dark:hover:bg-stone-800"
+	class="sticky top-16 mb-6 items-center gap-2 rounded-r-lg border-x border-r border-stone-600 bg-stone-100 p-1 px-3 py-1.5 [writing-mode:vertical-lr] hover:bg-stone-200 xl:hidden dark:bg-stone-900 dark:text-stone-400 dark:hover:bg-stone-800"
 	onclick={() => (menuOpen = true)}>Show menu</button
 >
 <div>
 	<aside
-		class="fixed top-0 left-0 z-40 h-full w-68 shrink-0 overflow-y-auto border-stone-800 pt-17 pb-8 transition-transform duration-200 not-md:bg-stone-50 md:sticky md:top-13 md:translate-x-0 md:pt-8 dark:bg-stone-950"
+		class="fixed top-0 left-0 z-40 h-full w-68 shrink-0 overflow-y-auto border-stone-800 pt-17 pb-8 transition-transform duration-200 not-xl:bg-stone-50 xl:sticky xl:top-13 xl:translate-x-0 xl:pt-8 dark:bg-stone-950"
 		class:-translate-x-full={!menuOpen}
 		class:translate-x-0={menuOpen}
 	>
 		<!-- mobile close button -->
 		<button
-			class="absolute top-4 right-4 rounded border border-stone-700 px-2.5 py-1 text-stone-500 transition-colors hover:text-stone-300 md:hidden dark:text-stone-300"
+			class="absolute top-4 right-4 rounded border border-stone-700 px-2.5 py-1 text-stone-500 transition-colors hover:text-stone-300 xl:hidden dark:text-stone-300"
 			onclick={() => (menuOpen = false)}>✕ close</button
 		>
 
