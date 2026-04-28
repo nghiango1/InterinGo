@@ -9,9 +9,16 @@
 		type EvalResponseSuccess,
 		type ParserErrorResponse
 	} from '$lib/server/repl';
-	import { CreateReplSessionHelper, commandPromptState as state, WebSocketImpl } from '$lib/components/CommandPromptState.svelte';
+	import {
+		CreateReplSessionHelper,
+		commandPromptState as state,
+		WebSocketImpl
+	} from '$lib/components/CommandPromptState.svelte';
 
-	let { forceNotHide = false }: { forceNotHide?: boolean } = $props();
+	let {
+		forceNotHide = false,
+		hideHeader = false
+	}: { forceNotHide?: boolean; hideHeader?: boolean } = $props();
 	// svelte-ignore non_reactive_update
 	let replOutput: HTMLElement;
 
@@ -39,13 +46,13 @@
 			}
 		} else if (resp.code == 'resource_not_found') {
 			output += `\nCreate new repl runtime`;
-			const runtimeId = await CreateReplSessionHelper()
+			const runtimeId = await CreateReplSessionHelper();
 			if (runtimeId != null) {
-				state.runtimeId = runtimeId
+				state.runtimeId = runtimeId;
 				if (state.ws == null || state.ws?.status() == WebSocket.CLOSED) {
-					state.ws = new WebSocketImpl()
+					state.ws = new WebSocketImpl();
 				}
-				state.lines = []
+				state.lines = [];
 			}
 		}
 		state.lines.push(output);
@@ -81,40 +88,43 @@
 </script>
 
 <div
-	class={'flex flex-1 flex-col overflow-hidden rounded-xl border border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900' +
+	class={'flex flex-1 flex-col overflow-hidden rounded-xl border-stone-700 bg-white shadow-2xl shadow-black/40 dark:bg-stone-900' +
 		' ' +
 		(state.hide && !forceNotHide ? '' : 'h-full min-h-72')}
+	class:border={!hideHeader}
 >
-	<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
-		<div class="flex items-center gap-1.5">
-			<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
-			<div class="h-3 w-3 rounded-full bg-yellow-500/80"></div>
-			<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
-		</div>
+	{#if !hideHeader}
+		<div class="flex items-center gap-3 border-b border-stone-700 px-4 py-2.5 dark:bg-stone-800">
+			<div class="flex items-center gap-1.5">
+				<div class="h-3 w-3 rounded-full bg-red-500/80"></div>
+				<div class="h-3 w-3 rounded-full bg-yellow-500/80"></div>
+				<div class="h-3 w-3 rounded-full bg-green-500/80"></div>
+			</div>
 
-		<span class="flex-1 truncate font-mono text-xs tracking-wide dark:text-stone-400"
-			>interingo — repl v0.1</span
-		>
+			<span class="flex-1 truncate font-mono text-xs tracking-wide dark:text-stone-400"
+				>interingo — repl v0.1</span
+			>
 
-		<div class="flex items-center gap-1">
-			<Control
-				state={state.wrap}
-				label={state.wrap ? 'normal' : 'wrap'}
-				toggle={() => {
-					state.wrap = !state.wrap;
-				}}
-			/>
-			{#if !forceNotHide}
+			<div class="flex items-center gap-1">
 				<Control
-					state={state.hide}
-					label={state.hide ? 'expand' : 'hide'}
+					state={state.wrap}
+					label={state.wrap ? 'normal' : 'wrap'}
 					toggle={() => {
-						state.hide = !state.hide;
+						state.wrap = !state.wrap;
 					}}
 				/>
-			{/if}
+				{#if !forceNotHide}
+					<Control
+						state={state.hide}
+						label={state.hide ? 'expand' : 'hide'}
+						toggle={() => {
+							state.hide = !state.hide;
+						}}
+					/>
+				{/if}
+			</div>
 		</div>
-	</div>
+	{/if}
 
 	{#if state.hide && !forceNotHide}
 		<!-- Minimized: show only last line -->

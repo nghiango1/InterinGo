@@ -32,8 +32,9 @@
 >
 <div>
 	<aside
-		class="fixed top-0 left-0 z-40 h-full w-68 shrink-0 overflow-y-auto border-stone-800 pt-17 pb-8 transition-transform duration-200 not-xl:bg-stone-50 xl:sticky xl:top-13 xl:translate-x-0 xl:pt-8 dark:bg-stone-950"
+		class="xl:not-border-r fixed top-0 left-0 z-40 h-full w-68 shrink-0 overflow-y-auto border-stone-800 border-r-stone-800 pt-17 pb-8 transition-transform duration-200 not-xl:bg-stone-50 xl:sticky xl:top-13 xl:translate-x-0 xl:pt-8 dark:bg-stone-950"
 		class:-translate-x-full={!menuOpen}
+		class:border-r={menuOpen}
 		class:translate-x-0={menuOpen}
 	>
 		<!-- mobile close button -->
