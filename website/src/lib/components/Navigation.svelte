@@ -45,16 +45,17 @@
 		{#each sortedNav as group}
 			<div class="mb-7">
 				<span
-					class="mb-2 block px-5 tracking-[0.2em] text-stone-400 uppercase not-dark:text-stone-600"
+					class="mb-2 block px-5 font-bold tracking-[0.2em] text-stone-600 uppercase not-dark:text-stone-600 dark:text-stone-100"
 				>
 					{group.label}
 				</span>
 				{#each group.items as item}
 					<a
 						href={item.href}
-						class="block border-transparent px-5 py-1.5 text-stone-600 transition-all hover:border-stone-600 hover:bg-stone-200 dark:text-stone-200 dark:hover:bg-stone-600 dark:hover:text-stone-300"
+						class="ml-4 block border-l border-transparent border-l-stone-300 px-5 py-1.5 text-stone-600 transition-all hover:border-stone-600 hover:bg-stone-200 dark:border-l-stone-800 dark:text-stone-400 dark:hover:bg-stone-600 dark:hover:text-stone-300"
 						class:border-blue-500={currentPath === item.href}
-						class:bg-blue-500={currentPath === item.href}
+						class:bg-blue-300={currentPath === item.href}
+						class:dark:bg-blue-800={currentPath === item.href}
 						class:text-stone-100={currentPath === item.href}>{item.label}</a
 					>
 				{/each}
