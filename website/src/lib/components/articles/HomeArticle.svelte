@@ -217,7 +217,7 @@
 					<span class="mb-4 text-xs tracking-[0.2em] text-stone-400 uppercase">Offline use</span>
 					<h3 class="not-prose mb-3 text-lg font-bold text-stone-100">Download the REPL binary</h3>
 					<a
-						href="/download"
+						href="https://github.com/nghiango1/InterinGo/releases"
 						class="flex w-fit items-center gap-2 rounded-lg border border-stone-600 bg-stone-800 px-5 py-2.5 text-stone-200 transition-all hover:border-stone-400 hover:bg-stone-700 hover:text-white active:scale-95"
 					>
 						<span>↓</span>

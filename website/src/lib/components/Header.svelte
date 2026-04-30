@@ -9,14 +9,14 @@
 					>Interin<span class="dark:text-stone-500">Go</span></span
 				>
 				<span
-					class="rounded border border-stone-700 px-1.5 py-0.5 text-[10px] tracking-widest uppercase dark:text-stone-500"
+					class="rounded border border-stone-700 px-1.5 py-0.5 tracking-widest uppercase not-md:hidden dark:text-stone-500"
 					>v0.1</span
 				>
 			</a>
-			<div class="flex items-center gap-6 text-xs dark:text-stone-300">
+			<div class="flex items-center gap-6 dark:text-stone-300">
 				<a href="/docs" class="transition-colors hover:text-blue-300">Docs</a>
 				<a
-					href="/download"
+					href="https://github.com/nghiango1/InterinGo/releases"
 					class="rounded-lg border border-stone-700 px-3 py-1.5 transition-all hover:border-stone-500 hover:bg-stone-700 hover:text-stone-100 dark:bg-stone-800 dark:text-stone-300"
 				>
 					Get <span class="not-sm:hidden"> binary </span> ↓

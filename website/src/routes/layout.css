@@ -1,6 +1,13 @@
 @import 'tailwindcss';
 @plugin '@tailwindcss/typography';
 
+
+html {
+	@media (prefers-color-scheme: dark) {
+		background-color: var(--color-stone-950) /* oklch(14.7% 0.004 49.25) = #0c0a09 */;
+	}
+}
+
 @theme {
 	--docs-grid-cols: 19rem 1fr;
 }

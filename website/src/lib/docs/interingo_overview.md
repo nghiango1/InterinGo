@@ -20,9 +20,7 @@ To challenge my knowledge with `go` language and advanced (interpreter) concept.
 
 Front-end
 
-- `templ` for html template
 - `tailwind.css` for styling
-- `htmx`for server REPL API access
 - `javascript` for some dynamic UI rendering
 
 Back-end:

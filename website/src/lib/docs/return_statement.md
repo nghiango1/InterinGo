@@ -9,7 +9,7 @@ session: Syntax
 
 Return statement can stop the Evaluation process imedietly. Let start with a example, run two command bellow simultaneously
 
-```igg
+```iig
 let x = 1;
 let y = 2;
 return x + y;
@@ -17,7 +17,7 @@ let x = 3;
 let x = 4;
 ```
 
-```igg
+```iig
 return x;
 ```
 
@@ -31,7 +31,7 @@ Return statement start with `return` keyword, and following by an Expression sta
 
 > Expression statements: Everything expect a Return statement or a Let statement is a Expression statement
 
-```igg
+```iig
 return 2;
 ```
 
@@ -39,13 +39,13 @@ return 2;
 
 Return in a Function
 
-```igg
+```iig
 let add = fn (x, y) { return x + y; };
 return add(5, 4);
 ```
 Return in a complex If expression
 
-```igg
+```iig
 let add = fn (x, y) { return x + y; };
 
 let y = if (6 > 3) {
